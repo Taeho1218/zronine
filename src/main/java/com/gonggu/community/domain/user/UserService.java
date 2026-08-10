@@ -8,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gonggu.community.domain.follow.FollowRepository;
 import com.gonggu.community.domain.post.PostRepository;
+import com.gonggu.community.domain.user.dto.AuthResult;
 import com.gonggu.community.domain.user.dto.LoginRequest;
 import com.gonggu.community.domain.user.dto.NicknameCheckResponse;
 import com.gonggu.community.domain.user.dto.SignUpRequest;
-import com.gonggu.community.domain.user.dto.TokenReissueRequest;
 import com.gonggu.community.domain.user.dto.TokenResponse;
 import com.gonggu.community.domain.user.dto.UserProfileResponse;
 import com.gonggu.community.domain.user.dto.UserSummaryResponse;
@@ -77,7 +77,7 @@ public class UserService {
 	 * 이메일이 없는 경우와 비밀번호가 틀린 경우를 같은 에러로 응답한다.
 	 * 응답을 구분하면 어떤 이메일이 가입돼 있는지 외부에서 알아낼 수 있기 때문이다.
 	 */
-	public TokenResponse login(LoginRequest request) {
+	public AuthResult login(LoginRequest request) {
 		User user = userRepository.findByEmail(request.email())
 			.orElseThrow(() -> new UnauthorizedException(ErrorCode.LOGIN_FAILED));
 
@@ -95,9 +95,12 @@ public class UserService {
 	/**
 	 * Access Token 이 만료됐을 때 Refresh Token 으로 새 토큰 쌍을 발급한다.
 	 * Access Token 을 이 API 에 보내도 통하지 않도록 토큰 타입을 검사한다.
+	 *
+	 * refreshToken 은 컨트롤러가 httpOnly 쿠키에서 꺼내 문자열로 넘겨준다.
+	 * (요청 바디로 받지 않는다 — 자바스크립트가 만질 수 없는 값이어야 하므로)
 	 */
-	public TokenResponse reissue(TokenReissueRequest request) {
-		Long userId = jwtTokenProvider.parseUserIdOrThrow(request.refreshToken(), TokenType.REFRESH);
+	public AuthResult reissue(String refreshToken) {
+		Long userId = jwtTokenProvider.parseUserIdOrThrow(refreshToken, TokenType.REFRESH);
 
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN));
@@ -108,13 +111,15 @@ public class UserService {
 		return issueTokens(user);
 	}
 
-	private TokenResponse issueTokens(User user) {
-		return TokenResponse.of(
+	private AuthResult issueTokens(User user) {
+		TokenResponse body = TokenResponse.of(
 			jwtTokenProvider.createAccessToken(user.getId(), user.getEmail()),
-			jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail()),
 			jwtTokenProvider.getAccessTokenValiditySeconds(),
 			UserSummaryResponse.from(user)
 		);
+		String refreshToken = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail());
+
+		return new AuthResult(body, refreshToken, jwtTokenProvider.getRefreshTokenValiditySeconds());
 	}
 
 	public NicknameCheckResponse checkEmailAvailable(String email) {

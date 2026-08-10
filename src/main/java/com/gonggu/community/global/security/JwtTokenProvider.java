@@ -60,6 +60,10 @@ public class JwtTokenProvider {
 		return accessTokenValiditySeconds;
 	}
 
+	public long getRefreshTokenValiditySeconds() {
+		return refreshTokenValiditySeconds;
+	}
+
 	private String createToken(Long userId, String email, TokenType tokenType, long validitySeconds) {
 		Date now = new Date();
 		Date expiry = new Date(now.getTime() + validitySeconds * 1000L);
