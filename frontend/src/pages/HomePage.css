@@ -1,0 +1,73 @@
+.home {
+  padding-top: 32px;
+  padding-bottom: 80px;
+}
+
+.home__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+/* 시안의 필터 칩: 기본은 흰 알약, 선택된 항목만 잉크색으로 채운다 */
+.chip {
+  height: 42px;
+  padding: 0 22px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  background: var(--gray-50);
+}
+
+.chip--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+
+.chip--active:hover {
+  background: var(--ink-2);
+}
+
+.home__searched {
+  margin-bottom: 18px;
+  color: var(--gray-600);
+  font-size: 14px;
+}
+
+.home__searched strong {
+  color: var(--ink);
+}
+
+.home__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.home__sentinel {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+@media (max-width: 1024px) {
+  .home__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .home__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

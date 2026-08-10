@@ -1,0 +1,161 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+
+.header__inner {
+  height: var(--header-h);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: none;
+}
+
+.header__logo-mark {
+  height: 32px;
+  width: auto;
+}
+
+.header__logo-text {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+/* 시안의 검색창: 연회색 배경 + 라운드, 가운데를 넓게 차지한다 */
+.header__search {
+  position: relative;
+  flex: 1;
+  max-width: 720px;
+  display: flex;
+  align-items: center;
+}
+
+.header__search-icon {
+  position: absolute;
+  left: 16px;
+  color: var(--gray-400);
+  pointer-events: none;
+}
+
+.header__search-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--gray-100);
+  padding: 0 16px 0 46px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.header__search-input::placeholder {
+  color: var(--gray-400);
+}
+
+.header__search-input:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--brand);
+  box-shadow: var(--focus);
+}
+
+/* 검색 input 의 브라우저 기본 X 버튼 제거 */
+.header__search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.header__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.header__bell-wrap {
+  position: relative;
+}
+
+.header__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  color: var(--gray-600);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.header__icon-btn:hover,
+.header__icon-btn.is-active {
+  background: var(--gray-100);
+  color: var(--ink);
+}
+
+.header__write {
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.header__write:hover {
+  background: var(--gray-100);
+  color: var(--ink);
+}
+
+.header__cta {
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 20px;
+  margin-left: 6px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  background: var(--white);
+  font-weight: 700;
+  color: var(--ink);
+  transition: background-color 0.15s ease;
+}
+
+.header__cta:hover {
+  background: var(--gray-50);
+}
+
+@media (max-width: 860px) {
+  .header__inner {
+    padding: 0 20px;
+    gap: 12px;
+  }
+  .header__logo-mark {
+    height: 26px;
+  }
+  .header__logo-text {
+    font-size: 22px;
+  }
+  .header__write {
+    display: none;
+  }
+  .header__cta {
+    padding: 0 14px;
+    margin-left: 0;
+  }
+}

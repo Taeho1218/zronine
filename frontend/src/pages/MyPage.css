@@ -1,0 +1,163 @@
+.mypage {
+  padding-top: 40px;
+  padding-bottom: 96px;
+}
+
+.mypage__head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 26px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  flex-wrap: wrap;
+}
+
+.mypage__info {
+  min-width: 0;
+}
+
+.mypage__name {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.mypage__email,
+.mypage__joined {
+  font-size: 13.5px;
+  color: var(--gray-500);
+}
+
+.mypage__stats {
+  display: flex;
+  gap: 28px;
+  margin: 0 0 0 auto;
+}
+
+.mypage__stats div {
+  text-align: center;
+}
+
+.mypage__stats dt {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.mypage__stats dd {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.mypage__logout {
+  height: 40px;
+  padding: 0 16px;
+}
+
+.mypage__tabs {
+  display: flex;
+  gap: 8px;
+  margin: 28px 0 22px;
+  border-bottom: 1px solid var(--gray-150);
+}
+
+.mypage__tab {
+  position: relative;
+  padding: 10px 14px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-500);
+}
+
+.mypage__tab.is-active {
+  color: var(--ink);
+}
+
+.mypage__tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.mypage__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* ── 알림 내역 ────────────────────────────────── */
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alerts__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.alerts__thumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-md);
+  object-fit: cover;
+}
+
+.alerts__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.alerts__name {
+  font-weight: 700;
+}
+
+.alerts__name:hover {
+  text-decoration: underline;
+}
+
+.alerts__period {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.alerts__buy {
+  margin-left: auto;
+  height: 40px;
+  flex: none;
+}
+
+@media (max-width: 1024px) {
+  .mypage__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .mypage__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mypage__stats {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}

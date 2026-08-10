@@ -1,0 +1,219 @@
+.npanel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -40px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  animation: npanel-in 0.14s ease-out;
+}
+
+@keyframes npanel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.npanel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 10px;
+}
+
+.npanel__title {
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.npanel__count {
+  color: var(--brand);
+}
+
+.npanel__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.npanel__read-all {
+  font-size: 13px;
+  color: var(--gray-500);
+  padding: 4px 6px;
+  border-radius: var(--r-sm);
+}
+
+.npanel__read-all:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--gray-100);
+}
+
+.npanel__read-all:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.npanel__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  color: var(--gray-500);
+}
+
+.npanel__close:hover {
+  background: var(--gray-100);
+  color: var(--ink);
+}
+
+.npanel__tabs {
+  display: flex;
+  gap: 18px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--gray-150);
+}
+
+.npanel__tab {
+  position: relative;
+  padding: 8px 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.npanel__tab.is-active {
+  color: var(--brand);
+}
+
+/* 활성 탭 밑줄 */
+.npanel__tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--brand);
+  border-radius: 2px;
+}
+
+.npanel__body {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.npanel__empty {
+  padding: 44px 20px;
+  text-align: center;
+  color: var(--gray-500);
+  font-size: 14px;
+}
+
+.npanel__item {
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.npanel__item:last-child {
+  border-bottom: none;
+}
+
+/* 읽지 않은 알림은 시안처럼 은은한 그린 배경으로 구분한다 */
+.npanel__item.is-unread {
+  background: var(--brand-softer);
+}
+
+.npanel__link {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 22px 14px 16px;
+}
+
+.npanel__link:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.npanel__icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.npanel__icon--clock {
+  background: var(--brand-soft);
+}
+
+.npanel__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.npanel__message {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-700);
+  word-break: break-word;
+}
+
+.npanel__time {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.npanel__thumb {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.npanel__dot {
+  position: absolute;
+  top: 18px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.npanel__buy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -8px 16px 12px 62px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 좁은 화면에서 패널이 뷰포트 밖으로 밀려 가로 스크롤이 생기지 않도록 붙여둔다 */
+@media (max-width: 860px) {
+  .npanel {
+    right: -8px;
+    width: min(340px, calc(100vw - 24px));
+  }
+}

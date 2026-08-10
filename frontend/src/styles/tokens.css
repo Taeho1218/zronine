@@ -1,0 +1,54 @@
+/*
+ * 시안에서 반복적으로 쓰인 값만 토큰으로 뽑았다.
+ * 화면마다 색을 직접 적어두면 브랜드 그린을 조정할 때 전부 뒤져야 해서,
+ * 색/간격/라운드는 여기서만 정의하고 컴포넌트 CSS 는 var() 로만 참조한다.
+ */
+:root {
+  /* brand — 로고(gg_symbol.svg)의 초록 #14AE5C 에 맞춰 통일했다 */
+  --brand: #14ae5c;
+  --brand-hover: #109c51;
+  --brand-press: #0d8845;
+  --brand-soft: #e9f8ef; /* 활성 좋아요 배경, 태그 배경 */
+  --brand-softer: #f2fbf6;
+  --brand-border: #a7e9c3;
+
+  /* neutral */
+  --ink: #111827;
+  --ink-2: #1f2937;
+  --gray-700: #374151;
+  --gray-600: #4b5563;
+  --gray-500: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-300: #d1d5db;
+  --gray-200: #e5e7eb;
+  --gray-150: #ecEEF1;
+  --gray-100: #f3f4f6;
+  --gray-50: #f9fafb;
+  --white: #ffffff;
+
+  --page-bg: #f6f7f9;
+  --line: #eaecef;
+  --danger: #dc2626;
+
+  /* 시안의 플레이스홀더 썸네일 3색 */
+  --ph-peach: #fbdcc6;
+  --ph-mint: #d9ecdf;
+  --ph-lilac: #dcdff0;
+
+  /* radius */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* elevation */
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-pop: 0 12px 32px rgba(16, 24, 40, 0.12);
+
+  /* layout */
+  --header-h: 80px;
+  --page-max: 1200px;
+
+  --focus: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
