@@ -39,11 +39,22 @@ cors:
 
 app:
   upload:
-    # LocalImageUploadService 가 파일을 저장할 물리 경로
+    # local(기본값, 로컬 디스크) 또는 r2(Cloudflare R2). Render 등 배포 환경에서는 반드시 r2로 설정할 것 —
+    # 컨테이너 디스크는 재배포마다 초기화되므로 local로 두면 업로드된 이미지가 전부 사라진다.
+    provider: ${UPLOAD_PROVIDER:local}
+    # LocalImageUploadService 가 파일을 저장할 물리 경로 (provider=local 일 때만 사용)
     location: ${UPLOAD_LOCATION:./uploads}
-    # 저장된 파일을 정적 자원으로 노출할 때 사용할 URL prefix
+    # 저장된 파일을 정적 자원으로 노출할 때 사용할 URL prefix (provider=local 일 때만 사용)
     url-prefix: /images
     max-file-size-bytes: 5242880
+
+# Cloudflare R2 접속 정보. provider=r2 일 때만 실제로 쓰인다.
+r2:
+  endpoint: ${R2_ENDPOINT:}
+  bucket: ${R2_BUCKET:}
+  access-key-id: ${R2_ACCESS_KEY_ID:}
+  secret-access-key: ${R2_SECRET_ACCESS_KEY:}
+  public-base-url: ${R2_PUBLIC_BASE_URL:}
 
 logging:
   level:

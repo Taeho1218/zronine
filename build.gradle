@@ -35,6 +35,9 @@ dependencies {
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
+	// Cloudflare R2 업로드용. R2는 S3 호환 API라 AWS SDK의 S3 모듈을 엔드포인트만 바꿔서 그대로 쓴다.
+	implementation 'software.amazon.awssdk:s3:2.46.7'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 

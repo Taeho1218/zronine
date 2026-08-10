@@ -9,13 +9,13 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gonggu.community.global.exception.BusinessException;
 import com.gonggu.community.global.exception.ErrorCode;
 import com.gonggu.community.global.exception.InvalidRequestException;
 
@@ -24,11 +24,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 로컬 파일시스템 기반 임시 구현체.
+ * 로컬 파일시스템 기반 구현체. 로컬 개발 환경의 기본값이다(app.upload.provider 미설정 시 이 빈이 뜬다).
  *
- * S3/R2 로 교체 예정 — 자격증명 설정이 끝나면 S3ImageUploadService 구현체를 추가하고
- * 이 클래스에서 @Service 를 떼거나 @Primary 로 새 구현체를 우선시키면 된다.
- * 호출부는 ImageUploadService 인터페이스만 보고 있으므로 코드 변경 없이 교체된다.
+ * Render처럼 컨테이너 디스크가 재배포/재시작마다 초기화되는 환경에 그대로 쓰면 업로드된 이미지가
+ * 전부 사라지므로, 운영 배포에서는 반드시 R2ImageUploadService(app.upload.provider=r2)를 써야 한다.
+ * 호출부는 ImageUploadService 인터페이스만 보고 있으므로 프로퍼티 값만 바꾸면 코드 변경 없이 교체된다.
  *
  * 파일명은 클라이언트가 보낸 이름을 그대로 쓰지 않고 UUID 로 새로 만든다.
  * 원본 파일명에는 경로 조작 문자(../)나 중복 이름이 섞일 수 있기 때문이다.
@@ -36,13 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "app.upload", name = "provider", havingValue = "local", matchIfMissing = true)
 public class LocalImageUploadService implements ImageUploadService {
-
-	private static final Set<String> ALLOWED_CONTENT_TYPES =
-		Set.of("image/jpeg", "image/png", "image/gif", "image/webp");
-
-	private static final Set<String> ALLOWED_EXTENSIONS =
-		Set.of("jpg", "jpeg", "png", "gif", "webp");
 
 	private static final DateTimeFormatter DATE_DIR_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
@@ -62,9 +57,9 @@ public class LocalImageUploadService implements ImageUploadService {
 
 	@Override
 	public String upload(MultipartFile file) {
-		validate(file);
+		ImageFileValidator.validate(file, uploadProperties.getMaxFileSizeBytes());
 
-		String extension = resolveExtension(file.getOriginalFilename());
+		String extension = ImageFileValidator.resolveExtension(file.getOriginalFilename());
 		String relativeDir = LocalDate.now().format(DATE_DIR_FORMAT);
 		String storedFileName = UUID.randomUUID().toString().replace("-", "") + "." + extension;
 
@@ -76,7 +71,7 @@ public class LocalImageUploadService implements ImageUploadService {
 			}
 		} catch (IOException e) {
 			log.error("이미지 저장 실패: {}", file.getOriginalFilename(), e);
-			throw new com.gonggu.community.global.exception.BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
+			throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
 		}
 
 		return uploadProperties.getUrlPrefix() + "/" + relativeDir + "/" + storedFileName;
@@ -108,36 +103,5 @@ public class LocalImageUploadService implements ImageUploadService {
 		} catch (IOException e) {
 			log.warn("이미지 삭제 실패: {}", imageUrl, e);
 		}
-	}
-
-	/**
-	 * MIME 타입과 확장자를 모두 본다. Content-Type 헤더는 클라이언트가 자유롭게 조작할 수 있고,
-	 * 확장자만 보면 image/svg+xml 같은 스크립트 실행 가능 포맷을 걸러내지 못하기 때문이다.
-	 */
-	private void validate(MultipartFile file) {
-		if (file == null || file.isEmpty()) {
-			throw new InvalidRequestException(ErrorCode.EMPTY_FILE);
-		}
-		if (file.getSize() > uploadProperties.getMaxFileSizeBytes()) {
-			throw new InvalidRequestException(ErrorCode.FILE_TOO_LARGE);
-		}
-		String contentType = file.getContentType();
-		if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT))) {
-			throw new InvalidRequestException(ErrorCode.UNSUPPORTED_IMAGE_TYPE);
-		}
-		if (!ALLOWED_EXTENSIONS.contains(resolveExtension(file.getOriginalFilename()))) {
-			throw new InvalidRequestException(ErrorCode.UNSUPPORTED_IMAGE_TYPE);
-		}
-	}
-
-	private String resolveExtension(String originalFilename) {
-		if (originalFilename == null) {
-			return "";
-		}
-		int dotIndex = originalFilename.lastIndexOf('.');
-		if (dotIndex < 0 || dotIndex == originalFilename.length() - 1) {
-			return "";
-		}
-		return originalFilename.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
 	}
 }
