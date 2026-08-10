@@ -1,0 +1,91 @@
+.pcard {
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+.pcard:hover {
+  border-color: var(--gray-200);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.07);
+  transform: translateY(-2px);
+}
+
+.pcard__link {
+  display: block;
+}
+
+.pcard__media {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  /* 시안처럼 원본 비율을 유지한 이미지를 회색 판 위에 얹는다 */
+  background: var(--gray-200);
+}
+
+.pcard__img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+}
+
+.pcard__img--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(17, 24, 39, 0.24);
+}
+
+.pcard__title {
+  margin: 18px 2px;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.45;
+  color: var(--ink);
+
+  /* 카드 높이를 맞추기 위해 두 줄로 제한한다 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.45em * 2);
+}
+
+.pcard__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-150);
+}
+
+.pcard__stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pcard__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--gray-600);
+  border-radius: var(--r-sm);
+  padding: 4px 2px;
+  transition: color 0.15s ease;
+}
+
+.pcard__action:hover {
+  color: var(--ink);
+}
+
+.pcard__action.is-on {
+  color: var(--brand);
+}

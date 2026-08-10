@@ -1,0 +1,28 @@
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex: none;
+  object-fit: cover;
+  color: var(--white);
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+
+.avatar--a {
+  background: #34c07a;
+}
+.avatar--b {
+  background: #f4a261;
+}
+.avatar--c {
+  background: #7aa2f7;
+}
+.avatar--d {
+  background: #a78bfa;
+}
+.avatar--e {
+  background: #9ca3af;
+}

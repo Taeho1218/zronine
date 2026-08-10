@@ -1,0 +1,226 @@
+.auth {
+  display: flex;
+  justify-content: center;
+  padding: 56px 24px 96px;
+  background: var(--white);
+  min-height: calc(100vh - var(--header-h));
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-xl);
+  box-shadow: 0 2px 12px rgba(16, 24, 40, 0.05);
+  padding: 44px 40px 40px;
+}
+
+.auth__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+/* 카드 폭이 넉넉해 태그라인까지 있는 전체 로고 락업을 그대로 쓴다 */
+.auth__logo {
+  width: 190px;
+  height: auto;
+}
+
+.auth__title {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 입력 오른쪽의 "사용 가능 / 일치" 배지 */
+.auth__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth__input-wrap .input {
+  padding-right: 108px;
+}
+
+.auth__status {
+  position: absolute;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.auth__status--ok {
+  color: var(--brand);
+}
+
+.auth__status--bad {
+  color: var(--danger);
+}
+
+.auth__status--idle {
+  color: var(--gray-400);
+}
+
+.auth__submit {
+  margin-top: 4px;
+}
+
+.auth__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+.auth__links a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.auth__links-sep {
+  color: var(--gray-300);
+}
+
+.auth__divider {
+  height: 1px;
+  background: var(--gray-150);
+  margin: 24px 0 20px;
+}
+
+.auth__switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+.auth__switch a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 6px;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.auth__switch a:hover {
+  text-decoration: underline;
+}
+
+.auth__error {
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: #fef2f2;
+  color: var(--danger);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* ── 약관 동의 ────────────────────────────────── */
+
+.terms {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.terms__all {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 16px;
+  background: var(--gray-50);
+  font-weight: 800;
+  font-size: 15px;
+  text-align: left;
+}
+
+.terms__list {
+  padding: 6px 16px 14px;
+}
+
+.terms__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.terms__tag {
+  font-weight: 700;
+  color: var(--gray-500);
+  flex: none;
+}
+
+.terms__tag--required {
+  color: var(--ink);
+}
+
+.terms__view {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--gray-400);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.terms__view:hover {
+  color: var(--gray-600);
+}
+
+/* 체크 표시는 실제 체크박스를 숨기고 원형 마크로 대체한다 */
+.terms__check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1.6px solid var(--gray-300);
+  background: var(--white);
+  color: transparent;
+  flex: none;
+  transition: all 0.15s ease;
+}
+
+.terms__check.is-on {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--white);
+}
+
+.terms__check input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .auth__card {
+    padding: 32px 22px 30px;
+    border: none;
+    box-shadow: none;
+  }
+}

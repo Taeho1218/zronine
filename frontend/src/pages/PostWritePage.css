@@ -1,0 +1,323 @@
+.write {
+  padding-top: 40px;
+  padding-bottom: 96px;
+  max-width: 1240px;
+}
+
+/* 유저 글은 시안에서 가운데 한 단으로만 그려진다 */
+.write--narrow {
+  max-width: 1120px;
+}
+
+.write__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.write__title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* ── 셀러 / 유저 토글 ─────────────────────────── */
+
+.segmented {
+  display: inline-flex;
+  padding: 5px;
+  gap: 4px;
+  background: var(--gray-100);
+  border-radius: var(--r-md);
+}
+
+.segmented__btn {
+  min-width: 78px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 9px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--gray-500);
+  transition: all 0.15s ease;
+}
+
+.segmented__btn.is-active {
+  background: var(--white);
+  color: var(--brand);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+}
+
+/* ── 안내 배너 ────────────────────────────────── */
+
+.write__notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border-radius: var(--r-md);
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.write__notice-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.6px solid currentColor;
+  font-size: 12px;
+  font-weight: 800;
+  flex: none;
+}
+
+/* ── 셀러 폼 2단 그리드 ───────────────────────── */
+
+.write__grid {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.write__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.write__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* ── 이미지 업로더 ────────────────────────────── */
+
+.uploader__drop {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--r-lg);
+  background: var(--gray-50);
+  color: var(--ink);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.uploader--square .uploader__drop {
+  aspect-ratio: 1 / 1;
+}
+
+.uploader--wide .uploader__drop {
+  aspect-ratio: 16 / 7;
+}
+
+.uploader__drop:hover {
+  border-color: var(--brand);
+  background: var(--brand-softer);
+}
+
+.uploader__plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  color: var(--brand);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.1);
+  margin-bottom: 8px;
+}
+
+.uploader__title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.uploader__help {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.uploader__status {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.uploader__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.uploader__thumb {
+  position: relative;
+  width: 62px;
+  height: 62px;
+}
+
+.uploader__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--gray-200);
+}
+
+.uploader__thumb button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--white);
+}
+
+/* ── 기간 입력 ────────────────────────────────── */
+
+.daterange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  background: var(--white);
+}
+
+.daterange:focus-within {
+  border-color: var(--brand);
+  box-shadow: var(--focus);
+}
+
+.daterange__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  height: 100%;
+}
+
+.daterange__input:focus {
+  outline: none;
+}
+
+.daterange__sep {
+  color: var(--gray-400);
+  flex: none;
+}
+
+/* ── 가격 입력 ────────────────────────────────── */
+
+.pricefield {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pricefield__input {
+  padding-right: 44px;
+}
+
+.pricefield__unit {
+  position: absolute;
+  right: 16px;
+  color: var(--gray-500);
+  pointer-events: none;
+}
+
+/* ── 카테고리 칩 ──────────────────────────────── */
+
+.write__cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.catchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: all 0.15s ease;
+}
+
+.catchip:hover {
+  background: var(--gray-50);
+}
+
+/* 선택된 카테고리는 시안대로 초록 테두리 + 옅은 초록 배경 */
+.catchip.is-on {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+/* ── 하단 ─────────────────────────────────────── */
+
+.write__content {
+  margin-top: 34px;
+}
+
+.write__error {
+  margin-top: 14px;
+}
+
+.write__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.write__saved {
+  margin-right: auto;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.write__submit {
+  min-width: 132px;
+}
+
+@media (max-width: 900px) {
+  .write__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .write__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .uploader--square .uploader__drop {
+    aspect-ratio: 16 / 9;
+  }
+}
