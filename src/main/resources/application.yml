@@ -1,3 +1,7 @@
+server:
+  # Render 같은 PaaS 는 컨테이너에 PORT 환경변수를 주입하고 그 포트로 바인딩할 것을 요구한다.
+  port: ${PORT:8080}
+
 spring:
   application:
     name: gonggu-community-backend

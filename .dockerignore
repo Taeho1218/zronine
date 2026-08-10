@@ -1,0 +1,9 @@
+.git
+.gradle
+build
+bin
+uploads
+.omc
+*.md
+.idea
+.vscode

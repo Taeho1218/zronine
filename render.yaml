@@ -1,0 +1,31 @@
+# Render Blueprint. Render 대시보드에서 "New +" → "Blueprint" 로 이 저장소를 연결하면
+# 아래 설정을 읽어서 서비스를 자동으로 구성해준다.
+#
+# Render는 관리형 MySQL을 제공하지 않으므로(관리형 DB는 PostgreSQL만 있음),
+# DB_URL / DB_USERNAME / DB_PASSWORD 는 외부 MySQL(PlanetScale, Aiven, Railway 등)의
+# 접속 정보를 대시보드에서 직접 입력해야 한다 (sync: false 항목들).
+services:
+  - type: web
+    name: gonggu-community-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/categories
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: JWT_ACCESS_TTL
+        value: "3600"
+      - key: JWT_REFRESH_TTL
+        value: "1209600"
+      - key: JPA_SHOW_SQL
+        value: "false"
