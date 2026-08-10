@@ -1,0 +1,14 @@
+package com.gonggu.community;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+
+@SpringBootApplication
+@ConfigurationPropertiesScan
+public class GongguCommunityBackendApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(GongguCommunityBackendApplication.class, args);
+	}
+}

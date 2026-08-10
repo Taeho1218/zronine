@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: gonggu-community-backend
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/gonggu_community?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    # db/schema.sql 이 스키마의 단일 원본(Single Source of Truth)이다.
+    # Hibernate 가 테이블을 만들거나 바꾸면 원본과 어긋날 수 있으므로 validate 로 고정한다.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: ${JPA_SHOW_SQL:false}
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+
+jwt:
+  # 운영 환경에서는 반드시 JWT_SECRET 환경변수로 덮어쓸 것. HS256 서명에 쓰이므로 최소 32바이트 이상이어야 한다.
+  secret: ${JWT_SECRET:gonggu-community-local-dev-secret-key-please-override-in-production}
+  access-token-validity-seconds: ${JWT_ACCESS_TTL:3600}
+  refresh-token-validity-seconds: ${JWT_REFRESH_TTL:1209600}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+app:
+  upload:
+    # LocalImageUploadService 가 파일을 저장할 물리 경로
+    location: ${UPLOAD_LOCATION:./uploads}
+    # 저장된 파일을 정적 자원으로 노출할 때 사용할 URL prefix
+    url-prefix: /images
+    max-file-size-bytes: 5242880
+
+logging:
+  level:
+    com.gonggu.community: ${LOG_LEVEL:INFO}
