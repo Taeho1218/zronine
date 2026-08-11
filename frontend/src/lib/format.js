@@ -39,12 +39,17 @@ export function formatDateTime(value) {
   return `${formatDate(d)} · ${meridiem} ${h12}:${pad(d.getMinutes())}`
 }
 
-/** 모집 기간 "08.10 ~ 08.17" */
+/**
+ * 모집 기간 "08.10 ~ 08.17".
+ * 수집 단계에서 마감일을 못 채운 공구가 있어, 끝이 비면 "미정"으로 적어 빈칸으로 보이지 않게 한다.
+ */
 export function formatPeriod(start, end) {
   const s = toDate(start)
   const e = toDate(end)
-  if (!s || !e) return ''
-  return `${pad(s.getMonth() + 1)}.${pad(s.getDate())} ~ ${pad(e.getMonth() + 1)}.${pad(e.getDate())}`
+  if (!s) return ''
+  const from = `${pad(s.getMonth() + 1)}.${pad(s.getDate())}`
+  if (!e) return `${from} ~ 미정`
+  return `${from} ~ ${pad(e.getMonth() + 1)}.${pad(e.getDate())}`
 }
 
 /**
@@ -91,12 +96,4 @@ export const PROGRESS_LABEL = {
 /** 닉네임 첫 글자를 아바타에 쓴다. */
 export function initial(nickname) {
   return (nickname ?? '?').trim().charAt(0) || '?'
-}
-
-/**
- * 이미지가 없는 카드에 시안의 파스텔 3색을 순서대로 물린다.
- * id 기반이라 같은 글은 새로고침해도 같은 색을 유지한다.
- */
-export function placeholderTone(id) {
-  return Math.abs(Number(id) || 0) % 3
 }

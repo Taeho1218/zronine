@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import NotificationPanel from './NotificationPanel'
 import { BellIcon, BookmarkIcon, SearchIcon } from './icons'
-import symbolUrl from '../assets/gg_symbol.svg'
+import symbolUrl from '../assets/brand/gg_symbol.svg'
 import './Header.css'
 
 export default function Header() {

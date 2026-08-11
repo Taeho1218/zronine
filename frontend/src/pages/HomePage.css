@@ -47,17 +47,12 @@
   color: var(--ink);
 }
 
+/* 사진이 없는 글도 마스코트가 같은 자리를 채우므로 카드 높이를 맞춰 하단 줄을 정렬한다 */
 .home__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
   align-items: stretch;
-}
-
-.home__sentinel {
-  display: flex;
-  justify-content: center;
-  padding: 32px 0;
 }
 
 @media (max-width: 1024px) {

@@ -123,9 +123,14 @@
   aspect-ratio: 16 / 7;
 }
 
-.uploader__drop:hover {
+.uploader__drop:hover:not(:disabled) {
   border-color: var(--brand);
   background: var(--brand-softer);
+}
+
+.uploader__drop:disabled {
+  cursor: progress;
+  opacity: 0.7;
 }
 
 .uploader__plus {

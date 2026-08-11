@@ -15,6 +15,7 @@ export const userApi = {
   checkNickname: (nickname) => http.get('/api/users/check-nickname', { nickname }, { auth: false }),
   me: () => http.get('/api/users/me'),
   profile: (userId) => http.get(`/api/users/${userId}`),
+  userPosts: (userId, page = 0) => http.get(`/api/users/${userId}/posts`, { page }),
   updateMe: (payload) => http.patch('/api/users/me', payload),
   myPosts: (page = 0) => http.get('/api/users/me/posts', { page }),
   mySaves: (page = 0) => http.get('/api/users/me/saves', { page }),
@@ -27,8 +28,8 @@ export const categoryApi = {
 
 export const postApi = {
   /** 메인 피드 겸 검색. 파라미터는 전부 선택값이라 빈 값은 buildUrl 에서 걸러진다. */
-  list: ({ page = 0, categoryId, postType, status, keyword } = {}) =>
-    http.get('/api/posts', { page, categoryId, postType, status, keyword }),
+  list: ({ page = 0, size, categoryId, postType, status, keyword } = {}) =>
+    http.get('/api/posts', { page, size, categoryId, postType, status, keyword }),
   detail: (postId) => http.get(`/api/posts/${postId}`),
   create: (payload) => http.post('/api/posts', payload),
   update: (postId, payload) => http.put(`/api/posts/${postId}`, payload),

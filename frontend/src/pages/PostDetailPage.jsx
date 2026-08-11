@@ -4,15 +4,11 @@ import { postApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import Avatar from '../components/Avatar'
 import CommentSection from '../components/CommentSection'
-import { BellIcon, BookmarkIcon, ExternalLinkIcon, ImageIcon, TrashIcon } from '../components/icons'
-import {
-  ddayLabel,
-  formatDateTime,
-  formatPeriod,
-  formatPrice,
-  placeholderTone,
-  PROGRESS_LABEL,
-} from '../lib/format'
+import FollowButton from '../components/FollowButton'
+import ImageFallback from '../components/ImageFallback'
+import { BellIcon, BookmarkIcon, ExternalLinkIcon, TrashIcon } from '../components/icons'
+import { ddayLabel, formatDateTime, formatPeriod, formatPrice, PROGRESS_LABEL } from '../lib/format'
+import { useBusy } from '../lib/useBusy'
 import './PostDetailPage.css'
 
 export default function PostDetailPage() {
@@ -25,6 +21,10 @@ export default function PostDetailPage() {
   const [brokenImages, setBrokenImages] = useState(() => new Set())
   const [activeImage, setActiveImage] = useState(0)
   const [related, setRelated] = useState([])
+  // 응답이 올 때까지 같은 동작을 다시 실행하지 못하게 막는다.
+  const [saveBusy, runSave] = useBusy()
+  const [alertBusy, runAlert] = useBusy()
+  const [deleteBusy, runDelete] = useBusy()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -82,38 +82,44 @@ export default function PostDetailPage() {
     return true
   }
 
-  async function toggleSave() {
+  function toggleSave() {
     if (requireLogin()) return
-    const next = !post.saved
-    setPost((p) => ({ ...p, saved: next }))
-    try {
-      if (next) await postApi.save(post.postId)
-      else await postApi.unsave(post.postId)
-    } catch {
-      setPost((p) => ({ ...p, saved: !next }))
-    }
+    runSave(async () => {
+      const next = !post.saved
+      setPost((p) => ({ ...p, saved: next }))
+      try {
+        if (next) await postApi.save(post.postId)
+        else await postApi.unsave(post.postId)
+      } catch {
+        setPost((p) => ({ ...p, saved: !next }))
+      }
+    })
   }
 
-  async function toggleAlert() {
+  function toggleAlert() {
     if (requireLogin()) return
-    const next = !post.alerted
-    setPost((p) => ({ ...p, alerted: next }))
-    try {
-      if (next) await postApi.alert(post.postId)
-      else await postApi.unalert(post.postId)
-    } catch {
-      setPost((p) => ({ ...p, alerted: !next }))
-    }
+    runAlert(async () => {
+      const next = !post.alerted
+      setPost((p) => ({ ...p, alerted: next }))
+      try {
+        if (next) await postApi.alert(post.postId)
+        else await postApi.unalert(post.postId)
+      } catch {
+        setPost((p) => ({ ...p, alerted: !next }))
+      }
+    })
   }
 
-  async function removePost() {
+  function removePost() {
     if (!window.confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return
-    try {
-      await postApi.remove(post.postId)
-      navigate('/')
-    } catch (err) {
-      window.alert(err.message)
-    }
+    runDelete(async () => {
+      try {
+        await postApi.remove(post.postId)
+        navigate('/')
+      } catch (err) {
+        window.alert(err.message)
+      }
+    })
   }
 
   if (loading) {
@@ -174,12 +180,22 @@ export default function PostDetailPage() {
                 <span className="detail__date">{formatDateTime(post.createdAt)}</span>
               </div>
 
+              {/* 본인 글에는 팔로우 버튼을 두지 않는다 (서버도 자기 자신 팔로우를 막는다) */}
+              {!post.mine && (
+                <FollowButton
+                  userId={post.author.userId}
+                  following={post.followingAuthor}
+                  onChange={({ following }) => setPost((prev) => ({ ...prev, followingAuthor: following }))}
+                />
+              )}
+
               <div className="detail__head-actions">
                 {isSeller && (
                   <button
                     type="button"
                     className={`detail__chip-btn ${post.alerted ? 'is-on' : ''}`}
                     onClick={toggleAlert}
+                    disabled={alertBusy}
                   >
                     <BellIcon width={17} height={17} />
                     {post.alerted ? '알림 신청됨' : '알림받기'}
@@ -189,6 +205,7 @@ export default function PostDetailPage() {
                   type="button"
                   className={`detail__chip-btn ${post.saved ? 'is-on' : ''}`}
                   onClick={toggleSave}
+                  disabled={saveBusy}
                 >
                   <BookmarkIcon width={17} height={17} filled={post.saved} />
                   {post.saved ? '저장됨' : '저장하기'}
@@ -198,9 +215,14 @@ export default function PostDetailPage() {
                     <Link to={`/write?edit=${post.postId}`} className="detail__chip-btn">
                       수정
                     </Link>
-                    <button type="button" className="detail__chip-btn detail__chip-btn--danger" onClick={removePost}>
+                    <button
+                      type="button"
+                      className="detail__chip-btn detail__chip-btn--danger"
+                      onClick={removePost}
+                      disabled={deleteBusy}
+                    >
                       <TrashIcon width={16} height={16} />
-                      삭제
+                      {deleteBusy ? '삭제 중…' : '삭제'}
                     </button>
                   </>
                 )}
@@ -208,9 +230,8 @@ export default function PostDetailPage() {
             </div>
           </header>
 
-          <figure
-            className={`detail__hero ${hero ? 'detail__hero--filled' : `ph--${placeholderTone(post.postId)}`}`}
-          >
+          <figure className="detail__hero">
+            {/* 사진을 안 올린 글에는 마스코트를 대신 띄운다 */}
             {hero ? (
               <img
                 className="detail__hero-img"
@@ -219,10 +240,7 @@ export default function PostDetailPage() {
                 onError={() => markBroken(hero)}
               />
             ) : (
-              <div className="detail__hero-empty">
-                <ImageIcon width={44} height={44} />
-                <span>이미지</span>
-              </div>
+              <ImageFallback className="imgfallback--hero" />
             )}
 
             {isSeller && post.progress !== 'NONE' && (
@@ -265,8 +283,9 @@ export default function PostDetailPage() {
               <div className="detail__meta-row">
                 <dt>기간</dt>
                 <dd>
-                  {formatPeriod(post.startDate, post.endDate)}{' '}
-                  <span className="detail__dday">({ddayLabel(post.endDate)})</span>
+                  {formatPeriod(post.startDate, post.endDate)}
+                  {/* 마감일이 없으면 D-day 를 계산할 수 없으므로 괄호까지 통째로 생략한다 */}
+                  {post.endDate && <span className="detail__dday"> ({ddayLabel(post.endDate)})</span>}
                 </dd>
               </div>
 
@@ -349,7 +368,7 @@ export default function PostDetailPage() {
                     {r.thumbnailUrl ? (
                       <img className="rcard__thumb" src={r.thumbnailUrl} alt="" />
                     ) : (
-                      <span className={`rcard__thumb ph--${placeholderTone(r.postId)}`} />
+                      <ImageFallback size={60} />
                     )}
                     <span className="rcard__body">
                       <span className="rcard__name">{r.productName || r.title}</span>

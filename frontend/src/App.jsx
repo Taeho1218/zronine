@@ -7,6 +7,7 @@ import PostWritePage from './pages/PostWritePage'
 import LoginPage from './pages/LoginPage'
 import SignUpPage from './pages/SignUpPage'
 import MyPage from './pages/MyPage'
+import UserProfilePage from './pages/UserProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
 
 /** 로그인이 필요한 화면. 인증 복원이 끝나기 전에 튕기지 않도록 ready 를 기다린다. */
@@ -34,6 +35,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/posts/:postId" element={<PostDetailPage />} />
+        {/* 다른 사람 프로필은 비로그인도 볼 수 있다 */}
+        <Route path="/users/:userId" element={<UserProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route

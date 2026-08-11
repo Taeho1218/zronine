@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 230" width="440">
+  <defs><clipPath id="czi89ne"><rect x="14" y="75" width="192" height="158"/></clipPath></defs>
+  <g clip-path="url(#czi89ne)">
+    <ellipse cx="110" cy="133" rx="74" ry="67" fill="none"/>
+    <ellipse cx="110" cy="133" rx="74" ry="67" fill="none" stroke="#333333" stroke-width="4"/>
+  </g>
+  <path d="M58,76 C92,92 162,88 186,70 C189,67 186,63 182,65 C158,80 92,80 64,70 C59,68 55,73 58,76 Z" fill="none"/>
+  <path d="M58,76 C92,92 162,88 186,70 C189,67 186,63 182,65 C158,80 92,80 64,70 C59,68 55,73 58,76 Z" fill="none" stroke="#333333" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M66,74 C60,42 84,28 112,29 C140,30 158,48 152,76 Z" fill="none"/>
+  <path d="M65,73 C90,86 136,86 153,74 L152,76 C136,88 90,88 66,76 Z" fill="none"/>
+  <path d="M66,74 C60,42 84,28 112,29 C140,30 158,48 152,76" fill="none" stroke="#333333" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M65,74 C90,86 136,86 153,74" fill="none" stroke="#333333" stroke-width="4" stroke-linecap="round"/>
+  <text x="108" y="57" text-anchor="middle" transform="rotate(3 108 55)" fill="#333333" font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif" font-size="16" font-weight="800" font-style="italic" letter-spacing="0.3">jungle</text>
+  <circle cx="86" cy="120" r="23" fill="none" stroke="#333333" stroke-width="4"/><circle cx="134" cy="120" r="23" fill="none" stroke="#333333" stroke-width="4"/><path fill="none" stroke="#333333" stroke-width="4" stroke-linecap="round" d="M105,117 Q110,110 115,117"/><path fill="none" stroke="#333333" stroke-width="4" stroke-linecap="round" d="M156,124 C161,144 159,162 151,174"/><circle cx="88" cy="123" r="4.5" fill="#333333"/><circle cx="136" cy="123" r="4.5" fill="#333333"/>
+  <path d="M113,132 C121,140 120,152 112,153 C107,153 106,148 110,147" fill="none" stroke="#333333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path fill="none" stroke="#333333" stroke-width="4" stroke-linecap="round" d="M96,166 Q110,175 124,166"/>
+  
+</svg>

@@ -1,0 +1,59 @@
+.imgfallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* 마스코트가 뜨는 자리라는 게 드러나도록 아주 옅은 브랜드 톤을 깐다 */
+  background: var(--brand-softer);
+  overflow: hidden;
+}
+
+.imgfallback__mascot {
+  height: auto;
+  /* 원본 SVG 의 viewBox 는 그림보다 커서 사방에 여백이 있다.
+     작은 칸일수록 그림이 더 작아 보이므로, 아래 변형들이 확대해서 여백을 잘라낸다. */
+  transform: scale(1.42);
+}
+
+/* 피드 카드 — 실제 이미지가 들어갈 자리와 같은 비율 */
+.imgfallback--card {
+  aspect-ratio: 16 / 10;
+  border-radius: var(--r-md);
+}
+
+.imgfallback--card .imgfallback__mascot {
+  width: 40%;
+  max-width: 165px;
+}
+
+/* 상세 대표 이미지 자리 */
+.imgfallback--hero {
+  aspect-ratio: 16 / 7;
+}
+
+.imgfallback--hero .imgfallback__mascot {
+  width: 20%;
+  max-width: 210px;
+}
+
+/*
+ * 알림·저장 목록처럼 40~60px 밖에 안 되는 칸.
+ * 여기서는 여백까지 그리면 마스코트가 뭉개져 보이므로,
+ * 그림이 칸을 꽉 채우도록 키우고 넘치는 여백은 잘라낸다.
+ */
+.imgfallback--fixed {
+  flex: none;
+  border-radius: var(--r-md);
+}
+
+/*
+ * 원본 SVG 는 세로가 더 긴 비율(220x230)이라 가로를 기준으로 맞추면 위아래가 잘린다.
+ * 높이를 기준으로 채운 뒤 1.28배 확대하면 모자 끝부터 발끝까지가 칸에 거의 정확히 들어간다.
+ * (그림이 차지하는 세로 범위가 viewBox 의 약 76% 이므로 0.76 x 1.28 ≈ 0.97)
+ */
+.imgfallback--fixed .imgfallback__mascot {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  transform: scale(1.28);
+}

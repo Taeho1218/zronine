@@ -1,0 +1,72 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 48px;
+  flex-wrap: wrap;
+}
+
+.pagination__list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination__page,
+.pagination__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--gray-600);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.pagination__page:hover:not(.is-current),
+.pagination__arrow:hover:not(:disabled) {
+  background: var(--gray-100);
+  color: var(--ink);
+}
+
+/* 현재 페이지는 카테고리 칩의 선택 상태와 같은 톤으로 맞춘다 */
+.pagination__page.is-current {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+  cursor: default;
+}
+
+.pagination__arrow {
+  border-color: var(--gray-200);
+  background: var(--white);
+}
+
+.pagination__arrow:disabled {
+  color: var(--gray-300);
+  border-color: var(--gray-150);
+  cursor: not-allowed;
+}
+
+.pagination__gap {
+  min-width: 24px;
+  text-align: center;
+  color: var(--gray-400);
+  user-select: none;
+}
+
+@media (max-width: 520px) {
+  .pagination__page,
+  .pagination__arrow {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    font-size: 13.5px;
+  }
+}

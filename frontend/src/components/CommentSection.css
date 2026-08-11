@@ -60,8 +60,12 @@
   color: var(--ink);
 }
 
-.cmt__reaction:hover {
+.cmt__reaction:hover:not(:disabled) {
   background: var(--gray-50);
+}
+
+.cmt__reaction:disabled {
+  cursor: default;
 }
 
 .cmt__reaction.is-on {
@@ -253,8 +257,13 @@
   color: var(--gray-500);
 }
 
-.cmt__action--btn:hover {
+.cmt__action--btn:hover:not(:disabled) {
   color: var(--ink);
+}
+
+.cmt__action--btn:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 /* ── 대댓글 ───────────────────────────────────── */

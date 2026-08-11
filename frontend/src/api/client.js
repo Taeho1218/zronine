@@ -1,5 +1,20 @@
 import { tokenStore } from './tokenStore'
-import { mockRequest, MOCK_ENABLED } from './mock'
+
+/**
+ * 목업 모드 스위치.
+ *
+ * 다른 모듈에서 가져오지 않고 여기서 직접 읽는 게 중요하다. 이렇게 써야 빌드할 때
+ * 이 자리에 true/false 가 그대로 박히고, 목업을 끈 빌드에서는 아래 `if (MOCK_ENABLED)`
+ * 블록이 통째로 죽은 코드가 되어 mock.js 와 거기 딸린 데모 이미지가 번들에서 빠진다.
+ * (상수를 다른 파일에 두면 그 연결이 끊겨 쓰지도 않을 데모 데이터가 사용자에게 전송된다)
+ */
+const MOCK_ENABLED = import.meta.env.VITE_USE_MOCK === 'true'
+
+/** 목업은 필요할 때만 실어온다. */
+async function callMock(path, options) {
+  const { mockRequest } = await import('./mock')
+  return mockRequest(path, options)
+}
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
@@ -48,7 +63,7 @@ export async function reissue() {
     reissuePromise = (async () => {
       try {
         if (MOCK_ENABLED) {
-          const data = await mockRequest('/api/auth/reissue', { method: 'POST' })
+          const data = await callMock('/api/auth/reissue', { method: 'POST' })
           if (!data) return false
           tokenStore.set({ accessToken: data.accessToken, user: data.user })
           return true
@@ -117,7 +132,7 @@ function canRetryWithReissue(err, path) {
 }
 
 export async function request(path, options = {}) {
-  if (MOCK_ENABLED) return mockRequest(path, options)
+  if (MOCK_ENABLED) return callMock(path, options)
 
   try {
     return await rawRequest(path, options)

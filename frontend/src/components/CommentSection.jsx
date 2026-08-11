@@ -5,6 +5,7 @@ import { useAuth } from '../store/AuthContext'
 import Avatar from './Avatar'
 import { CommentIcon, HeartIcon, LockIcon, ThumbsUpIcon, TrashIcon } from './icons'
 import { formatDate, fromNow } from '../lib/format'
+import { useBusy } from '../lib/useBusy'
 import './CommentSection.css'
 
 export default function CommentSection({ post, onCountChange }) {
@@ -18,11 +19,14 @@ export default function CommentSection({ post, onCountChange }) {
 
   const [content, setContent] = useState('')
   const [secret, setSecret] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, runSubmit] = useBusy()
   const [error, setError] = useState(null)
 
   const [replyTo, setReplyTo] = useState(null)
   const listRef = useRef(null)
+  // 응답 전 재클릭 차단
+  const [likeBusy, runLike] = useBusy()
+  const [deleteBusy, runDelete] = useBusy()
 
   useEffect(() => {
     let alive = true
@@ -37,11 +41,8 @@ export default function CommentSection({ post, onCountChange }) {
     }
   }, [post.postId])
 
-  // 대댓글까지 포함한 실제 개수. 서버의 commentCount 와 화면 표시가 어긋나지 않게 여기서 센다.
-  const total = useMemo(
-    () => comments.reduce((sum, c) => sum + 1 + (c.replies?.length ?? 0), 0),
-    [comments],
-  )
+  // 원댓글 개수만 센다. 대댓글은 답변이라 "댓글 N개"에 합치면 실제 이야기 수보다 부풀려 보인다.
+  const total = useMemo(() => comments.length, [comments])
 
   useEffect(() => {
     if (!loading) onCountChange?.(total)
@@ -53,42 +54,43 @@ export default function CommentSection({ post, onCountChange }) {
     return true
   }
 
-  async function toggleLike() {
+  function toggleLike() {
     if (requireLogin()) return
-    const next = !liked
-    setLiked(next)
-    setLikeCount((n) => n + (next ? 1 : -1))
-    try {
-      const res = next ? await postApi.like(post.postId) : await postApi.unlike(post.postId)
-      if (res) {
-        setLiked(res.liked)
-        setLikeCount(res.likeCount)
+    runLike(async () => {
+      const next = !liked
+      setLiked(next)
+      setLikeCount((n) => n + (next ? 1 : -1))
+      try {
+        const res = next ? await postApi.like(post.postId) : await postApi.unlike(post.postId)
+        if (res) {
+          setLiked(res.liked)
+          setLikeCount(res.likeCount)
+        }
+      } catch {
+        setLiked(!next)
+        setLikeCount((n) => n + (next ? -1 : 1))
       }
-    } catch {
-      setLiked(!next)
-      setLikeCount((n) => n + (next ? -1 : 1))
-    }
+    })
   }
 
-  async function submit(e) {
+  function submit(e) {
     e.preventDefault()
     if (requireLogin()) return
     const text = content.trim()
-    if (!text || submitting) return
+    if (!text) return
 
-    setSubmitting(true)
-    setError(null)
-    try {
-      await commentApi.create(post.postId, { content: text, secret })
-      const list = await commentApi.list(post.postId)
-      setComments(list ?? [])
-      setContent('')
-      setSecret(false)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSubmitting(false)
-    }
+    runSubmit(async () => {
+      setError(null)
+      try {
+        await commentApi.create(post.postId, { content: text, secret })
+        const list = await commentApi.list(post.postId)
+        setComments(list ?? [])
+        setContent('')
+        setSecret(false)
+      } catch (err) {
+        setError(err.message)
+      }
+    })
   }
 
   async function submitReply(parentId, text, isSecret) {
@@ -98,15 +100,17 @@ export default function CommentSection({ post, onCountChange }) {
     setReplyTo(null)
   }
 
-  async function remove(commentId) {
+  function remove(commentId) {
     if (!window.confirm('댓글을 삭제할까요?')) return
-    try {
-      await commentApi.remove(commentId)
-      const list = await commentApi.list(post.postId)
-      setComments(list ?? [])
-    } catch (err) {
-      window.alert(err.message)
-    }
+    runDelete(async () => {
+      try {
+        await commentApi.remove(commentId)
+        const list = await commentApi.list(post.postId)
+        setComments(list ?? [])
+      } catch (err) {
+        window.alert(err.message)
+      }
+    })
   }
 
   return (
@@ -122,6 +126,7 @@ export default function CommentSection({ post, onCountChange }) {
           type="button"
           className={`cmt__reaction ${liked ? 'is-on' : ''}`}
           onClick={toggleLike}
+          disabled={likeBusy}
           aria-pressed={liked}
         >
           <ThumbsUpIcon width={20} height={20} filled={liked} />
@@ -187,6 +192,7 @@ export default function CommentSection({ post, onCountChange }) {
               setReplyTo={setReplyTo}
               onReply={submitReply}
               onRemove={remove}
+              deleteBusy={deleteBusy}
               onNeedLogin={requireLogin}
             />
           ))}
@@ -196,7 +202,17 @@ export default function CommentSection({ post, onCountChange }) {
   )
 }
 
-function CommentItem({ comment, postAuthorId, replyTo, setReplyTo, onReply, onRemove, onNeedLogin, isReply = false }) {
+function CommentItem({
+  comment,
+  postAuthorId,
+  replyTo,
+  setReplyTo,
+  onReply,
+  onRemove,
+  deleteBusy,
+  onNeedLogin,
+  isReply = false,
+}) {
   return (
     <li className={`cmt__item ${isReply ? 'cmt__item--reply' : ''}`}>
       <Avatar user={comment.author} size={40} />
@@ -242,6 +258,7 @@ function CommentItem({ comment, postAuthorId, replyTo, setReplyTo, onReply, onRe
               type="button"
               className="cmt__action cmt__action--btn"
               onClick={() => onRemove(comment.commentId)}
+              disabled={deleteBusy}
             >
               <TrashIcon width={14} height={14} />
               삭제
@@ -264,6 +281,7 @@ function CommentItem({ comment, postAuthorId, replyTo, setReplyTo, onReply, onRe
                 setReplyTo={setReplyTo}
                 onReply={onReply}
                 onRemove={onRemove}
+                deleteBusy={deleteBusy}
                 onNeedLogin={onNeedLogin}
                 isReply
               />
@@ -278,20 +296,19 @@ function CommentItem({ comment, postAuthorId, replyTo, setReplyTo, onReply, onRe
 function ReplyForm({ onSubmit, onCancel }) {
   const [text, setText] = useState('')
   const [secret, setSecret] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const [busy, run] = useBusy()
 
-  async function handle(e) {
+  function handle(e) {
     e.preventDefault()
     const value = text.trim()
-    if (!value || busy) return
-    setBusy(true)
-    try {
-      await onSubmit(value, secret)
-    } catch (err) {
-      window.alert(err.message)
-    } finally {
-      setBusy(false)
-    }
+    if (!value) return
+    run(async () => {
+      try {
+        await onSubmit(value, secret)
+      } catch (err) {
+        window.alert(err.message)
+      }
+    })
   }
 
   return (

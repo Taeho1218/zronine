@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi, uploadApi } from '../api'
 import { CheckIcon, CloseIcon, PlusIcon } from '../components/icons'
 import { parsePrice } from '../lib/format'
+import { useBusy } from '../lib/useBusy'
 import './PostWritePage.css'
 
 const MAX_IMAGES = 5
@@ -35,8 +36,8 @@ export default function PostWritePage() {
 
   const [form, setForm] = useState({ ...EMPTY, postType: initialType })
   const [categories, setCategories] = useState([])
-  const [uploading, setUploading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const [uploading, runUpload] = useBusy()
+  const [submitting, runSubmit] = useBusy()
   const [error, setError] = useState(null)
   const [savedDraft, setSavedDraft] = useState(false)
   const fileRef = useRef(null)
@@ -94,16 +95,15 @@ export default function PostWritePage() {
       return
     }
 
-    setUploading(true)
-    setError(null)
-    try {
-      const urls = await uploadApi.images(files.slice(0, room))
-      set({ imageUrls: [...form.imageUrls, ...(Array.isArray(urls) ? urls : [urls])] })
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setUploading(false)
-    }
+    runUpload(async () => {
+      setError(null)
+      try {
+        const urls = await uploadApi.images(files.slice(0, room))
+        set({ imageUrls: [...form.imageUrls, ...(Array.isArray(urls) ? urls : [urls])] })
+      } catch (err) {
+        setError(err.message)
+      }
+    })
   }
 
   function removeImage(url) {
@@ -140,7 +140,7 @@ export default function PostWritePage() {
     return null
   }
 
-  async function submit(e) {
+  function submit(e) {
     e.preventDefault()
     const message = validate()
     if (message) {
@@ -171,22 +171,28 @@ export default function PostWritePage() {
           imageUrls: form.imageUrls,
         }
 
-    setSubmitting(true)
-    setError(null)
-    try {
-      const saved = editId ? await postApi.update(editId, payload) : await postApi.create(payload)
-      localStorage.removeItem(DRAFT_KEY)
-      navigate(`/posts/${saved?.postId ?? editId}`)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSubmitting(false)
-    }
+    // 등록은 누른 만큼 글이 생길 수 있어 중복 차단이 특히 중요하다.
+    runSubmit(async () => {
+      setError(null)
+      try {
+        const saved = editId ? await postApi.update(editId, payload) : await postApi.create(payload)
+        localStorage.removeItem(DRAFT_KEY)
+        navigate(`/posts/${saved?.postId ?? editId}`)
+      } catch (err) {
+        setError(err.message)
+      }
+    })
   }
 
   const uploader = (
     <div className={`uploader ${isSeller ? 'uploader--square' : 'uploader--wide'}`}>
-      <button type="button" className="uploader__drop" onClick={() => fileRef.current?.click()}>
+      {/* 업로드 중에는 파일 선택창을 다시 열지 못하게 막는다 */}
+      <button
+        type="button"
+        className="uploader__drop"
+        onClick={() => fileRef.current?.click()}
+        disabled={uploading}
+      >
         <span className="uploader__plus">
           <PlusIcon width={22} height={22} />
         </span>
@@ -421,7 +427,11 @@ export default function PostWritePage() {
           <button type="button" className="btn btn--ghost" onClick={saveDraft}>
             임시저장
           </button>
-          <button type="submit" className="btn btn--primary write__submit" disabled={submitting}>
+          <button
+            type="submit"
+            className="btn btn--primary write__submit"
+            disabled={submitting || uploading}
+          >
             {submitting ? '등록 중…' : editId ? '수정' : '등록'}
           </button>
         </div>

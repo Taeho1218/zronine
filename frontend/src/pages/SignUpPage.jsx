@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi, userApi } from '../api'
 import { useAuth } from '../store/AuthContext'
+import { useBusy } from '../lib/useBusy'
 import { ArrowRightIcon, CheckIcon } from '../components/icons'
-import logoUrl from '../assets/gg_tagline.png'
+import logoUrl from '../assets/brand/gg_tagline.png'
 import './AuthPages.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -34,7 +35,7 @@ export default function SignUpPage() {
   const [nickname, setNickname] = useState('')
   const [agreed, setAgreed] = useState({ service: false, privacy: false, marketing: false })
   const [error, setError] = useState(null)
-  const [busy, setBusy] = useState(false)
+  const [busy, run] = useBusy()
 
   const [emailState, setEmailState] = useState(null) // null | 'ok' | 'taken' | 'checking'
   const [nickState, setNickState] = useState(null)
@@ -98,27 +99,26 @@ export default function SignUpPage() {
     setAgreed({ service: next, privacy: next, marketing: next })
   }
 
-  async function submit(e) {
+  function submit(e) {
     e.preventDefault()
     if (!canSubmit) return
-    setBusy(true)
-    setError(null)
-    try {
-      await authApi.signUp({
-        email: email.trim(),
-        password,
-        passwordConfirm,
-        nickname: nickname.trim(),
-        agreeToTerms: requiredAgreed,
-      })
-      // 가입 직후 바로 쓸 수 있도록 이어서 로그인까지 해준다.
-      await login(email.trim(), password)
-      navigate('/', { replace: true })
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy(false)
-    }
+    run(async () => {
+      setError(null)
+      try {
+        await authApi.signUp({
+          email: email.trim(),
+          password,
+          passwordConfirm,
+          nickname: nickname.trim(),
+          agreeToTerms: requiredAgreed,
+        })
+        // 가입 직후 바로 쓸 수 있도록 이어서 로그인까지 해준다.
+        await login(email.trim(), password)
+        navigate('/', { replace: true })
+      } catch (err) {
+        setError(err.message)
+      }
+    })
   }
 
   return (

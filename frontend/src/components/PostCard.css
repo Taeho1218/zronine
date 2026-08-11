@@ -32,13 +32,6 @@
   object-fit: contain;
 }
 
-.pcard__img--empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(17, 24, 39, 0.24);
-}
-
 .pcard__title {
   margin: 18px 2px;
   font-size: 17px;
@@ -82,8 +75,16 @@
   transition: color 0.15s ease;
 }
 
-.pcard__action:hover {
+.pcard__action:hover:not(:disabled) {
   color: var(--ink);
+}
+
+/*
+ * 응답 대기 중. 화면은 이미 눌린 상태로 바뀌어 있으므로(낙관적 갱신)
+ * 흐리게 만들지 않고 커서만 바꾼다 — 깜빡임이 오히려 눈에 거슬린다.
+ */
+.pcard__action:disabled {
+  cursor: default;
 }
 
 .pcard__action.is-on {

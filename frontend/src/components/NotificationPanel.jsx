@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import { fetchNotifications, markRead } from '../lib/notifications'
 import { fromNow } from '../lib/format'
+import ImageFallback from './ImageFallback'
 import { CheckIcon, ClockIcon, CloseIcon, ExternalLinkIcon } from './icons'
 import './NotificationPanel.css'
 
@@ -129,7 +130,7 @@ export default function NotificationPanel({ anchorRef, onClose }) {
                   {n.thumbnailUrl ? (
                     <img className="npanel__thumb" src={n.thumbnailUrl} alt="" />
                   ) : (
-                    <span className={`npanel__thumb ph--${n.tone}`} />
+                    <ImageFallback size={38} />
                   )}
 
                   {n.unread && <span className="npanel__dot" aria-label="읽지 않음" />}

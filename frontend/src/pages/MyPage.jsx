@@ -4,8 +4,10 @@ import { userApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import Avatar from '../components/Avatar'
 import PostCard from '../components/PostCard'
+import ImageFallback from '../components/ImageFallback'
 import { ExternalLinkIcon } from '../components/icons'
-import { ddayLabel, formatDate, formatPeriod, placeholderTone } from '../lib/format'
+import { ddayLabel, formatDate, formatPeriod } from '../lib/format'
+import { useBusy } from '../lib/useBusy'
 import './MyPage.css'
 
 const TABS = [
@@ -29,6 +31,7 @@ export default function MyPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [logoutBusy, runLogout] = useBusy()
 
   useEffect(() => {
     userApi
@@ -76,8 +79,13 @@ export default function MyPage() {
           </div>
         </dl>
 
-        <button type="button" className="btn btn--ghost mypage__logout" onClick={logout}>
-          로그아웃
+        <button
+          type="button"
+          className="btn btn--ghost mypage__logout"
+          onClick={() => runLogout(logout)}
+          disabled={logoutBusy}
+        >
+          {logoutBusy ? '로그아웃 중…' : '로그아웃'}
         </button>
       </header>
 
@@ -139,7 +147,7 @@ export default function MyPage() {
               {a.thumbnailUrl ? (
                 <img className="alerts__thumb" src={a.thumbnailUrl} alt="" />
               ) : (
-                <span className={`alerts__thumb ph--${placeholderTone(a.postId)}`} />
+                <ImageFallback size={56} />
               )}
 
               <div className="alerts__body">
@@ -147,7 +155,8 @@ export default function MyPage() {
                   {a.productName || a.title}
                 </Link>
                 <span className="alerts__period">
-                  {formatPeriod(a.startDate, a.endDate)} · {ddayLabel(a.endDate)}
+                  {formatPeriod(a.startDate, a.endDate)}
+                  {a.endDate && ` · ${ddayLabel(a.endDate)}`}
                 </span>
               </div>
 

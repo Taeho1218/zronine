@@ -1,5 +1,5 @@
 import { userApi } from '../api'
-import { ddayLabel, placeholderTone } from './format'
+import { ddayLabel } from './format'
 
 /**
  * 알림 패널에 뿌릴 행 목록을 만든다.
@@ -35,8 +35,11 @@ function alertToNotification(alert) {
     text = `알림 신청한 '${name}' 공구가 곧 열려요.`
   } else if (alert.progress === 'ENDED') {
     text = `'${name}' 공구 모집이 종료되었어요.`
-  } else {
+  } else if (alert.endDate) {
     text = `'${name}' 공구 마감이 ${label} 남았어요. 아직 참여 전이라면 서둘러 주세요.`
+  } else {
+    // 마감일이 아직 안 정해진 공구. D-day 를 말할 수 없으니 진행 중이라는 사실만 알린다.
+    text = `알림 신청한 '${name}' 공구가 진행 중이에요.`
   }
 
   return {
@@ -46,7 +49,6 @@ function alertToNotification(alert) {
     text,
     postId: alert.postId,
     thumbnailUrl: alert.thumbnailUrl,
-    tone: placeholderTone(alert.postId),
     buyUrl: alert.buyUrl,
     createdAt: alert.alertedAt,
   }

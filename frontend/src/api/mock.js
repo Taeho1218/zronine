@@ -7,38 +7,6 @@
  */
 import { sampleSet } from './sampleImages'
 
-export const MOCK_ENABLED = import.meta.env.VITE_USE_MOCK === 'true'
-
-const CATEGORIES = [
-  { categoryId: 1, name: '식품' },
-  { categoryId: 2, name: '리빙' },
-  { categoryId: 3, name: '패션' },
-  { categoryId: 4, name: '뷰티' },
-  { categoryId: 5, name: '디지털' },
-  { categoryId: 6, name: '다이어트' },
-  { categoryId: 7, name: '영양제' },
-  { categoryId: 8, name: '화장품' },
-]
-
-const ME = { userId: 1, nickname: '로스터리 민', profileImageUrl: null }
-const U2 = { userId: 2, nickname: '커피러버', profileImageUrl: null }
-const U3 = { userId: 3, nickname: 'soo****', profileImageUrl: null }
-const U4 = { userId: 4, nickname: '지호아빠', profileImageUrl: null }
-
-/**
- * 인스타 공구를 여는 셀러. 수집 시트의 "인스타 아이디 / 인스타 프로필 URL" 두 칸이 여기에 대응한다.
- *
- * instagramUrl 은 백엔드 UserSummaryResponse 에 아직 없는 필드다.
- * 화면은 값이 있을 때만 링크를 그리므로, 서버가 내려주기 시작하면 그대로 표시되고
- * 없으면 아무것도 그리지 않는다.
- */
-const SELLER_DREAMYAKSA = {
-  userId: 5,
-  nickname: 'dreamyaksa_',
-  profileImageUrl: null,
-  instagramUrl: 'https://www.instagram.com/dreamyaksa_/',
-}
-
 /**
  * 서버의 LocalDateTime 은 타임존이 없는 로컬 시각이다.
  * toISOString() 은 UTC 로 바꿔버려 화면에서 9시간(KST) 어긋나므로 로컬 시각 그대로 문자열을 만든다.
@@ -49,170 +17,238 @@ const iso = (d) => {
     d.getMinutes(),
   )}:${p(d.getSeconds())}`
 }
-const daysFromNow = (n) => {
-  const d = new Date()
-  d.setDate(d.getDate() + n)
-  return iso(d)
+
+const CATEGORIES = [
+  { categoryId: 1, name: '식품' },
+  { categoryId: 2, name: '영양제' },
+  { categoryId: 3, name: '화장품' },
+  { categoryId: 4, name: '반려동물' },
+  { categoryId: 5, name: '기타' },
+]
+
+/**
+ * 시트의 세부 분류를 화면에서 쓰는 카테고리로 묶는다.
+ * 시트는 수집한 그대로 두고(원본 훼손 없음) 여기서만 대응시키므로,
+ * "고양이 간식" 같은 분류가 새로 들어와도 한 줄만 추가하면 된다.
+ */
+const CATEGORY_ALIAS = {
+  '강아지 밥': '반려동물',
+  '강아지 영양제': '반려동물',
 }
+
+const ME = { userId: 1, nickname: '로스터리 민', profileImageUrl: null }
+const U2 = { userId: 2, nickname: '커피러버', profileImageUrl: null }
+const U3 = { userId: 3, nickname: 'soo****', profileImageUrl: null }
+const U4 = { userId: 4, nickname: '지호아빠', profileImageUrl: null }
+
+/**
+ * 공구를 여는 인스타 셀러들. 시트의 "인스타 아이디 / 인스타 프로필 URL" 두 칸이 여기에 대응한다.
+ * 같은 계정이 연 공구는 모두 같은 사람이 쓴 글로 묶인다.
+ *
+ * instagramUrl 은 백엔드 UserSummaryResponse 에 아직 없는 필드다.
+ * 화면은 값이 있을 때만 링크를 그리므로, 서버가 내려주기 시작하면 그대로 표시된다.
+ */
+const SELLERS = {
+  dreamyaksa_: {
+    userId: 5,
+    nickname: 'dreamyaksa_',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/dreamyaksa_/',
+  },
+  dallucas_table: {
+    userId: 6,
+    nickname: 'dallucas_table',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/dallucas_table/',
+  },
+  seoel_mom: {
+    userId: 7,
+    nickname: 'seoel_mom',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/seoel_mom',
+  },
+  auvert__: {
+    userId: 8,
+    nickname: 'auvert__',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/auvert__',
+  },
+  // 시트에 아이디가 asotov / asotov. 로 갈려 적혀 있으나 같은 사람이 맞다(프로필 URL 도 동일).
+  'asotov.kr': {
+    userId: 9,
+    nickname: 'asotov.kr',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/asotov.kr',
+  },
+  niniyagg: {
+    userId: 10,
+    nickname: 'niniyagg',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/niniyagg',
+  },
+  wikiyaksa: {
+    userId: 11,
+    nickname: 'wikiyaksa',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/wikiyaksa',
+  },
+  byak_yaksa: {
+    userId: 12,
+    nickname: 'byak_yaksa',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/byak_yaksa',
+  },
+  lee_pharmacy_: {
+    userId: 13,
+    nickname: 'lee_pharmacy_',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/lee_pharmacy_',
+  },
+  atoi_jihyo: {
+    userId: 14,
+    nickname: 'atoi_jihyo',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/atoi_jihyo',
+  },
+  lovelip_jin: {
+    userId: 15,
+    nickname: 'lovelip_jin',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/lovelip_jin',
+  },
+  lupinus_may21: {
+    userId: 16,
+    nickname: 'lupinus_may21',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/lupinus_may21',
+  },
+  choiquee: {
+    userId: 17,
+    nickname: 'choiquee',
+    profileImageUrl: null,
+    instagramUrl: 'https://www.instagram.com/choiquee',
+  },
+}
+
+/**
+ * 수집 시트를 그대로 옮긴 표. 순서가 곧 게시글 번호(postId)이고, 이미지 파일명도 여기에 맞춘다.
+ * (n 번째 줄 → /posts/n, src/assets/samples/post-n.png)
+ *
+ * 새 공구를 추가하려면 아래에 한 줄만 더 쓰면 된다.
+ * end 를 비워두면 "마감일 미정"으로 표시된다.
+ *
+ * 이미지 파일 이름은 공구 코드(gb-002.png) 또는 글 번호(post-2.png) 아무거나 쓰면 되고,
+ * 둘 다 아닌 이름을 쓰고 싶으면 그 줄에 image: '내가지은이름' 만 덧붙이면 된다.
+ */
+const SHEET = [
+  { code: 'GB-001', category: '화장품', product: '바이오던스 클렌징&겔패드', link: 'https://biodance.co.kr/product/detail.html?product_no=573', start: '2026-08-10T10:00:00', end: '2026-08-13T23:59:00', seller: 'dreamyaksa_' },
+  { code: 'GB-002', category: '영양제', product: '롱비다 커큐민 복합체', link: 'https://m.smartstore.naver.com/nutritionstandard/products/12243129268', start: '2026-08-13T10:00:00', end: '2026-08-19T23:59:00', seller: 'dreamyaksa_' },
+  { code: 'GB-003', category: '영양제', product: '씹어먹는 츄어블 오메가3', link: 'https://smartstore.naver.com/nutritionstandard/products/11818252006', start: '2026-08-17T10:00:00', end: '2026-08-23T23:59:00', seller: 'dreamyaksa_' },
+  { code: 'GB-004', category: '영양제', product: '이노시톨 40:1 배합', start: '2026-08-20T10:00:00', seller: 'dreamyaksa_' },
+  { code: 'GB-005', category: '영양제', product: '리포좀 비타민C', start: '2026-08-24T10:00:00', seller: 'dreamyaksa_' },
+  { code: 'GB-006', category: '영양제', product: '베르베린', start: '2026-08-27T10:00:00', seller: 'dreamyaksa_' },
+  { code: 'GB-007', category: '영양제', product: '액상 마그네슘', start: '2026-08-31T10:00:00', seller: 'dreamyaksa_' },
+  { code: 'GB-008', category: '영양제', product: '고함량 비타민B+활성형 엽산', start: '2026-09-03T10:00:00', seller: 'dreamyaksa_' },
+  { code: 'GB-009', category: '강아지 밥', product: '달루카팩 팡드미 밥꾸드릿 올인원 세트', link: 'https://smartstore.naver.com/paindemie/products/13703232446', start: '2026-08-11T10:00:00', end: '2026-08-15T23:59:00', seller: 'dallucas_table' },
+  { code: 'GB-010', category: '강아지 영양제', product: '룰루파마 오메가3+룰루키치 화식', start: '2026-08-18T10:00:00', end: '2026-08-21T23:59:00', seller: 'dallucas_table' },
+  { code: 'GB-011', category: '강아지 밥', product: '달루카특가! 팡드미 밥꾸트릿 단품', link: 'https://smartstore.naver.com/paindemie/products/13703237603', start: '2026-08-11T10:00:00', end: '2026-08-15T23:59:00', seller: 'dallucas_table' },
+  { code: 'GB-012', category: '식품', product: '베노프 단백질 쉐이크', start: '2026-08-20T10:00:00', seller: 'seoel_mom' },
+  { code: 'GB-013', category: '식품', product: '잼팟', start: '2026-08-21T10:00:00', end: '2026-08-28T23:59:00', seller: 'auvert__' },
+  { code: 'GB-014', category: '식품', product: '코켄 그래놀라', link: 'https://smartstore.naver.com/kokenofficial/products/13709845280', start: '2026-08-11T10:00:00', end: '2026-08-13T23:59:00', seller: 'asotov.kr' },
+  { code: 'GB-015', category: '식품', product: '소소래 바게트&치아바타', start: '2026-08-12T10:00:00', seller: 'asotov.kr' },
+  { code: 'GB-016', category: '식품', product: '글로썸', start: '2026-08-18T10:00:00', end: '2026-08-20T23:59:00', seller: 'asotov.kr' },
+  { code: 'GB-017', category: '식품', product: '임실 수제 스트링치즈', link: 'https://www.idus.com/v2/product/8a35b6b3-2eb9-44a9-aeeb-d0f7d5da4dd5', start: '2026-08-06T10:00:00', end: '2026-08-12T23:59:00', seller: 'niniyagg' },
+  { code: 'GB-018', category: '식품', product: '수입치즈', link: 'https://smartstore.naver.com/neworldakfood/products/10898686887', start: '2026-08-10T10:00:00', end: '2026-08-12T23:59:00', seller: 'auvert__' },
+  { code: 'GB-019', category: '영양제', product: '트루엔 오엠비', link: 'https://brand.naver.com/truen/products/10248346357', start: '2026-08-10T10:00:00', seller: 'wikiyaksa' },
+  { code: 'GB-020', category: '영양제', product: '닥터체크 이노시톨', start: '2026-08-12T10:00:00', end: '2026-08-14T23:59:00', seller: 'byak_yaksa' },
+  { code: 'GB-021', category: '영양제', product: '나프라우드 칼마디', start: '2026-08-18T10:00:00', end: '2026-08-24T23:59:00', seller: 'byak_yaksa' },
+  { code: 'GB-022', category: '영양제', product: '닥터체크 눈 영양제', start: '2026-08-20T10:00:00', end: '2026-08-26T23:59:00', seller: 'byak_yaksa' },
+  { code: 'GB-023', category: '영양제', product: '테라큐민 프라임&부스터', start: '2026-08-25T10:00:00', end: '2026-08-31T23:59:00', seller: 'byak_yaksa' },
+  // 시트에는 종료가 2026-08-02 로 적혀 있었으나 시작(08-27)보다 앞서는 오타여서 09-02 로 바로잡았다.
+  { code: 'GB-024', category: '영양제', product: '트루엔 오메가3 이지', start: '2026-08-27T10:00:00', end: '2026-09-02T23:59:00', seller: 'byak_yaksa' },
+  { code: 'GB-025', category: '영양제', product: '엘레나 질유산균', link: 'https://smartstore.naver.com/starpharm/products/12632950047', start: '2026-08-07T10:00:00', end: '2026-08-13T23:59:00', seller: 'byak_yaksa' },
+  { code: 'GB-026', category: '영양제', product: '탑헬스 크랜베리', link: 'https://smartstore.naver.com/tophealth2/products/12148174718', start: '2026-08-11T10:00:00', end: '2026-08-17T23:59:00', seller: 'byak_yaksa' },
+  { code: 'GB-027', category: '식품', product: '프랑스 페이장 버터', start: '2026-08-13T10:00:00', seller: 'lee_pharmacy_' },
+  { code: 'GB-028', category: '식품', product: '그리스 크리티다 유기농 올리브 오일', start: '2026-08-27T10:00:00', seller: 'lee_pharmacy_' },
+  { code: 'GB-029', category: '영양제', product: '고품질 오메가3', start: '2026-08-24T10:00:00', seller: 'lee_pharmacy_' },
+  { code: 'GB-030', category: '영양제', product: '항산화 글루타치온', link: 'https://selectionkorea.com/product/detail.html?product_no=1279', start: '2026-08-10T10:00:00', end: '2026-08-16T23:59:00', seller: 'lee_pharmacy_' },
+  { code: 'GB-031', category: '식품', product: '이야이야앤프렌즈 오일/피타브레드', start: '2026-08-20T10:00:00', end: '2026-08-22T23:59:00', seller: 'atoi_jihyo' },
+  { code: 'GB-032', category: '식품', product: '비에날씬', start: '2026-08-24T10:00:00', end: '2026-08-26T23:59:00', seller: 'atoi_jihyo' },
+  { code: 'GB-033', category: '식품', product: '자떙 닭발', start: '2026-08-27T10:00:00', end: '2026-08-30T23:59:00', seller: 'atoi_jihyo' },
+  { code: 'GB-034', category: '화장품', product: '셀제르 모공쿠션(비비쿠션)', link: 'https://lovelipjin.shop.blogpay.co.kr/good/product_view?goodNum=205708834', start: '2026-08-10T10:00:00', end: '2026-08-13T23:59:00', seller: 'lovelip_jin' },
+  { code: 'GB-035', category: '화장품', product: '콜라겐히알볼 눈눈', start: '2026-08-13T10:00:00', end: '2026-08-16T23:59:00', seller: 'lovelip_jin' },
+  { code: 'GB-036', category: '화장품', product: '러뷰 민낯앰플', start: '2026-08-17T10:00:00', end: '2026-08-20T23:59:00', seller: 'lovelip_jin' },
+  { code: 'GB-037', category: '화장품', product: '민낯 딥톡스팩', start: '2026-08-20T10:00:00', end: '2026-08-23T23:59:00', seller: 'lovelip_jin' },
+  { code: 'GB-038', category: '화장품', product: '톤업선크림', start: '2026-08-31T10:00:00', end: '2026-09-03T23:59:00', seller: 'lovelip_jin' },
+  { code: 'GB-039', category: '화장품', product: '리메스카 흉터스틱&아이백크림', link: 'https://lupi.co.kr/product/%EB%A6%AC%EB%A9%94%EC%8A%A4%EC%B9%B4-%ED%9D%89%ED%84%B0%EC%8A%A4%ED%8B%B1-%EC%95%84%EC%9D%B4%EB%B0%B1%ED%81%AC%EB%A6%BC/272/category/1/display/2/?icid=ETC.product_listmain_1', start: '2026-08-10T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-040', category: '화장품', product: '가쉬 에어버블 CDS 마스크 5종', link: 'https://lupi.co.kr/product/%EA%B0%80%EC%89%AC-%EC%97%90%EC%96%B4%EB%B2%84%EB%B8%94-cds-%EB%A7%88%EC%8A%A4%ED%81%AC/299/category/1/display/2/', start: '2026-08-12T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-041', category: '기타', product: '키머즈 쉘위고 풀가드링 캐리어', link: 'https://lupi.co.kr/product/%ED%82%A4%EB%A8%B8%EC%A6%88-%EC%89%98%EC%9C%84%EA%B3%A0-%ED%92%80%EA%B0%80%EB%93%9C%EB%A7%81-%EC%BA%90%EB%A6%AC%EC%96%B4/334/category/1/display/2/', start: '2026-08-13T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-042', category: '기타', product: '락앤락 데켓 쿡플레이트', start: '2026-08-20T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-043', category: '영양제', product: '엘레나 캡슐', start: '2026-08-26T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-044', category: '화장품', product: '젬소 속눈썹 영양제', start: '2026-08-24T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-045', category: '화장품', product: '케이스키니 바디앰플', start: '2026-08-22T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-046', category: '화장품', product: '포리추얼 율무팩', start: '2026-08-21T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-047', category: '기타', product: '블루벤트 음식물처리기', start: '2026-08-21T10:00:00', seller: 'lupinus_may21' },
+  { code: 'GB-048', category: '식품', product: '바인허브 여리차', start: '2026-08-10T10:00:00', end: '2026-08-13T23:59:00', seller: 'choiquee' },
+  { code: 'GB-049', category: '기타', product: '화이트랩스', start: '2026-08-23T10:00:00', end: '2026-08-27T23:59:00', seller: 'choiquee' },
+  { code: 'GB-050', category: '기타', product: '근막테라피 너클랙스', start: '2026-08-31T10:00:00', end: '2026-09-02T23:59:00', seller: 'choiquee' },
+]
+
 const hoursAgo = (n) => {
   const d = new Date()
   d.setHours(d.getHours() - n)
   return iso(d)
 }
 
-let posts = [
-  // 수집 시트 GB-001. 시트에 없는 값(가격, 이벤트)은 채우지 않고 비워둔다.
-  {
-    postId: 1,
+/**
+ * 서버 PostProgress.of 와 같은 규칙. 기간이 비어 있으면 진행 상태를 판단할 수 없어 NONE 이다.
+ * 목록/상세가 매번 같은 기준으로 상태를 그리도록 여기서 한 번만 계산한다.
+ */
+function progressOf(start, end) {
+  if (!start || !end) return 'NONE'
+  const now = Date.now()
+  if (now < new Date(start).getTime()) return 'UPCOMING'
+  if (now > new Date(end).getTime()) return 'ENDED'
+  return 'ONGOING'
+}
+
+const categoryByName = (name) => CATEGORIES.find((c) => c.name === (CATEGORY_ALIAS[name] ?? name))
+
+/** 알림 패널 / 저장 목록 화면을 비어 보이지 않게 하려고 몇 건만 미리 눌러둔 상태로 둔다. */
+const PRESET_SAVED = new Set([1])
+const PRESET_ALERTED = new Set([1, 9])
+
+let posts = SHEET.map((row, index) => {
+  const postId = index + 1
+  return {
+    postId,
     postType: 'SELLER',
-    author: SELLER_DREAMYAKSA,
-    title: '바이오던스 클렌징&겔패드 공동구매',
+    author: SELLERS[row.seller],
+    title: `${row.product} 공동구매`,
+    // 시트의 "상품 설명" 칸이 아직 전부 이 문구다. 채워지면 그대로 상세 설명에 들어간다.
     content: '상품 링크 확인 요망',
-    // post-1.* 부터 post-1-2.*, post-1-3.* ... 순서로 있는 만큼 자동으로 붙는다.
-    imageUrls: sampleSet('post-1'),
-    productName: '바이오던스 클렌징&겔패드',
+    // 파일 이름을 공구 코드(gb-002.png)로 하든 글 번호(post-2.png)로 하든 알아서 붙는다.
+    // row.image 를 적어두면 그 이름이 가장 먼저다. 파일이 없으면 화면이 마스코트로 채운다.
+    imageUrls: sampleSet(row.image, row.code.toLowerCase(), `post-${postId}`),
+    productName: row.product,
     price: null,
-    buyUrl: 'https://biodance.co.kr/product/detail.html?product_no=573',
-    startDate: '2026-08-10T10:00:00',
-    endDate: '2026-08-13T23:59:00',
+    buyUrl: row.link ?? null,
+    startDate: row.start,
+    endDate: row.end ?? null,
     eventNote: null,
-    progress: 'ONGOING',
-    categories: [CATEGORIES[7]],
-    likeCount: 100,
-    commentCount: 24,
-    liked: false,
-    saved: true,
-    alerted: true,
-    followingAuthor: false,
-    mine: false,
-    createdAt: hoursAgo(3),
-  },
-  {
-    postId: 2,
-    postType: 'SELLER',
-    author: ME,
-    title: '콜롬비아 수프리모 핸드드립 원두 1kg',
-    content: '균형 잡힌 바디감과 초콜릿 뉘앙스가 좋은 데일리 원두입니다.',
-    imageUrls: sampleSet('post-2'),
-    productName: '콜롬비아 수프리모 1kg',
-    price: 17500,
-    buyUrl: 'https://example.com/products/supremo',
-    startDate: daysFromNow(-1),
-    endDate: daysFromNow(4),
-    eventNote: null,
-    progress: 'ONGOING',
-    categories: [CATEGORIES[0]],
-    likeCount: 12,
-    commentCount: 3,
-    liked: false,
-    saved: false,
-    alerted: false,
-    followingAuthor: false,
-    mine: false,
-    participantCount: 38,
-    createdAt: hoursAgo(20),
-  },
-  {
-    postId: 3,
-    postType: 'SELLER',
-    author: U2,
-    title: '디카페인 스위스워터 원두 1kg',
-    content: '화학 용매 없이 물로만 카페인을 제거한 스위스워터 공정 원두예요.',
-    imageUrls: sampleSet('post-3'),
-    productName: '디카페인 스위스워터 1kg',
-    price: 21000,
-    buyUrl: 'https://example.com/products/decaf',
-    startDate: daysFromNow(-2),
-    endDate: daysFromNow(9),
-    eventNote: '30명 달성 시 무료배송',
-    progress: 'ONGOING',
-    categories: [CATEGORIES[0]],
-    likeCount: 8,
-    commentCount: 1,
-    liked: false,
-    saved: false,
-    alerted: false,
-    followingAuthor: false,
-    mine: false,
-    participantCount: 12,
-    createdAt: hoursAgo(30),
-  },
-  {
-    postId: 4,
-    postType: 'SELLER',
-    author: U3,
-    title: '브라질 산토스 블렌드 홀빈 1kg',
-    content: '고소한 견과류 향이 도는 입문용 블렌드입니다.',
-    imageUrls: sampleSet('post-4'),
-    productName: '브라질 산토스 블렌드 1kg',
-    price: 15900,
-    buyUrl: 'https://example.com/products/santos',
-    startDate: daysFromNow(-5),
-    endDate: daysFromNow(2),
-    eventNote: null,
-    progress: 'ONGOING',
-    categories: [CATEGORIES[0]],
-    likeCount: 21,
-    commentCount: 5,
-    liked: false,
-    saved: false,
-    alerted: true,
-    followingAuthor: false,
-    mine: false,
-    participantCount: 56,
-    createdAt: hoursAgo(50),
-  },
-  {
-    postId: 5,
-    postType: 'SELLER',
-    author: U4,
-    title: '저당 그래놀라 500g x 3팩 공동구매',
-    content: '설탕 대신 알룰로스를 쓴 저당 그래놀라입니다. 아침 대용으로 좋아요.',
-    imageUrls: sampleSet('post-5'),
-    productName: '저당 그래놀라 500g',
-    price: 12900,
-    buyUrl: 'https://example.com/products/granola',
-    startDate: daysFromNow(1),
-    endDate: daysFromNow(11),
-    eventNote: null,
-    progress: 'UPCOMING',
-    categories: [CATEGORIES[0], CATEGORIES[5]],
-    likeCount: 4,
+    progress: progressOf(row.start, row.end),
+    categories: [categoryByName(row.category)].filter(Boolean),
+    likeCount: 0,
     commentCount: 0,
     liked: false,
-    saved: false,
-    alerted: false,
+    saved: PRESET_SAVED.has(postId),
+    alerted: PRESET_ALERTED.has(postId),
     followingAuthor: false,
     mine: false,
-    participantCount: 6,
-    createdAt: hoursAgo(70),
-  },
-  {
-    postId: 6,
-    postType: 'GENERAL',
-    author: U2,
-    title: '공구 처음 참여해봤는데 후기 남겨요',
-    content: '배송도 빠르고 포장도 꼼꼼했어요. 다음에도 참여할 예정입니다!',
-    imageUrls: sampleSet('post-6'),
-    productName: null,
-    price: null,
-    buyUrl: null,
-    startDate: null,
-    endDate: null,
-    eventNote: null,
-    progress: 'NONE',
-    categories: [],
-    likeCount: 17,
-    commentCount: 2,
-    liked: false,
-    saved: false,
-    alerted: false,
-    followingAuthor: false,
-    mine: false,
-    participantCount: 0,
-    createdAt: hoursAgo(90),
-  },
-]
+    // 시트에 등록 시각이 없어 모집 시작일을 작성 시각으로 쓴다.
+    createdAt: row.start,
+  }
+})
 
 let comments = [
   {
@@ -231,7 +267,7 @@ let comments = [
     commentId: 2,
     postId: 1,
     parentId: null,
-    author: SELLER_DREAMYAKSA,
+    author: SELLERS.dreamyaksa_,
     content: '2박스(각 60매) 기준으로 진행돼요. 옵션은 참여 폼에서 선택하실 수 있어요 🙌',
     secret: false,
     visible: true,
@@ -267,6 +303,36 @@ let comments = [
 
 let nextPostId = 100
 let nextCommentId = 100
+
+/** 내가 팔로우 중인 사람들. 실제로는 서버가 들고 있는 상태다. */
+const following = new Set()
+const followerCounts = new Map([[SELLERS.dreamyaksa_.userId, 1280]])
+
+/** 프로필 화면에 필요한 사람 정보. 글 작성자들에서 모아 만든다. */
+const ALL_USERS = [ME, U2, U3, U4, ...Object.values(SELLERS)]
+
+function profileOf(userId, viewerIsMe) {
+  const user = ALL_USERS.find((u) => u.userId === Number(userId))
+  if (!user) {
+    const err = new Error('존재하지 않는 회원입니다.')
+    err.status = 404
+    throw err
+  }
+  const me = viewerIsMe && user.userId === ME.userId
+  return {
+    userId: user.userId,
+    email: me ? 'me@example.com' : null,
+    nickname: user.nickname,
+    profileImageUrl: user.profileImageUrl,
+    instagramUrl: user.instagramUrl ?? null,
+    followerCount: followerCounts.get(user.userId) ?? 12,
+    followingCount: 34,
+    postCount: posts.filter((p) => p.author.userId === user.userId).length,
+    joinedAt: hoursAgo(24 * 200),
+    following: following.has(user.userId),
+    me,
+  }
+}
 
 const delay = (ms = 180) => new Promise((r) => setTimeout(r, ms))
 
@@ -378,23 +444,31 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
           })),
       )
     }
-    if (p(1) === 'me') {
-      return {
-        userId: ME.userId,
-        email: 'me@example.com',
-        nickname: ME.nickname,
-        profileImageUrl: null,
-        followerCount: 128,
-        followingCount: 34,
-        postCount: posts.filter((x) => x.author.userId === ME.userId).length,
-        joinedAt: hoursAgo(24 * 200),
-        following: false,
-        me: true,
-      }
-    }
+    if (p(1) === 'me') return profileOf(ME.userId, true)
+
     if (p(2) === 'posts') {
       return paginate(posts.filter((x) => x.author.userId === Number(p(1))).map(toFeed))
     }
+
+    // 팔로우 / 언팔로우
+    if (p(2) === 'follow') {
+      const targetId = Number(p(1))
+      const isFollow = method === 'POST'
+      if (isFollow) following.add(targetId)
+      else following.delete(targetId)
+
+      const count = (followerCounts.get(targetId) ?? 12) + (isFollow ? 1 : -1)
+      followerCounts.set(targetId, count)
+      // 목록/상세의 followingAuthor 도 같이 맞춰준다.
+      posts.forEach((post) => {
+        if (post.author.userId === targetId) post.followingAuthor = isFollow
+      })
+      return { targetUserId: targetId, following: isFollow, followerCount: count }
+    }
+
+    // 다른 사람 프로필
+    if (seg.length === 2) return profileOf(p(1), true)
+
     return null
   }
 

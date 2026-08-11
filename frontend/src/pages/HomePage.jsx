@@ -1,19 +1,27 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi } from '../api'
 import PostCard from '../components/PostCard'
+import Pagination from '../components/Pagination'
 import './HomePage.css'
+
+/** 서버 한 페이지 크기와 같다 (PostService.MAX_PAGE_SIZE). */
+const PAGE_SIZE = 15
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const keyword = searchParams.get('keyword') ?? ''
   const categoryId = searchParams.get('categoryId') ?? ''
 
+  // 주소에는 사람이 읽는 1부터의 번호를 쓰고, 서버에는 0부터의 번호를 보낸다.
+  // 페이지를 주소에 담아둬야 새로고침·뒤로가기·링크 공유가 모두 같은 화면을 가리킨다.
+  const page = Math.max(0, Number(searchParams.get('page') ?? 1) - 1)
+
   const [categories, setCategories] = useState([])
   const [posts, setPosts] = useState([])
-  const [nextPage, setNextPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -23,62 +31,58 @@ export default function HomePage() {
       .catch(() => setCategories([]))
   }, [])
 
-  // 필터가 바뀌면 목록을 처음부터 다시 받는다.
   useEffect(() => {
     let alive = true
     setLoading(true)
     setError(null)
     postApi
-      .list({ page: 0, keyword: keyword || undefined, categoryId: categoryId || undefined })
-      .then((page) => {
+      .list({
+        page,
+        size: PAGE_SIZE,
+        keyword: keyword || undefined,
+        categoryId: categoryId || undefined,
+      })
+      .then((res) => {
         if (!alive) return
-        setPosts(page?.content ?? [])
-        setNextPage(page?.nextPage ?? null)
+        const pages = res?.totalPages ?? 1
+        // 주소창에 범위를 넘는 번호가 찍혀 있으면(글이 지워졌거나 링크를 손댄 경우)
+        // 빈 화면 대신 마지막 페이지로 되돌린다.
+        if (pages > 0 && page >= pages) {
+          goToPage(pages - 1)
+          return
+        }
+        setPosts(res?.content ?? [])
+        setTotalPages(pages)
+        setTotalElements(res?.totalElements ?? 0)
       })
       .catch((err) => alive && setError(err.message))
       .finally(() => alive && setLoading(false))
     return () => {
       alive = false
     }
-  }, [keyword, categoryId])
+  }, [keyword, categoryId, page])
 
-  const loadMore = useCallback(async () => {
-    if (nextPage == null || loadingMore) return
-    setLoadingMore(true)
-    try {
-      const page = await postApi.list({
-        page: nextPage,
-        keyword: keyword || undefined,
-        categoryId: categoryId || undefined,
-      })
-      setPosts((prev) => [...prev, ...(page?.content ?? [])])
-      setNextPage(page?.nextPage ?? null)
-    } catch {
-      // 더 불러오기 실패는 목록 전체를 지우지 않고 조용히 멈춘다.
-      setNextPage(null)
-    } finally {
-      setLoadingMore(false)
-    }
-  }, [nextPage, loadingMore, keyword, categoryId])
-
-  // 목록 끝의 감시 요소가 보이면 다음 페이지를 이어 붙인다.
-  const sentinelRef = useRef(null)
-  useEffect(() => {
-    const el = sentinelRef.current
-    if (!el || nextPage == null) return undefined
-    const io = new IntersectionObserver(
-      (entries) => entries[0]?.isIntersecting && loadMore(),
-      { rootMargin: '240px' },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [loadMore, nextPage])
+  /** 필터를 바꾸면 보던 페이지 번호는 의미가 없어지므로 함께 지운다. */
+  function updateParams(mutate) {
+    const next = new URLSearchParams(searchParams)
+    mutate(next)
+    next.delete('page')
+    setSearchParams(next)
+  }
 
   function selectCategory(id) {
+    updateParams((next) => {
+      if (id == null) next.delete('categoryId')
+      else next.set('categoryId', String(id))
+    })
+  }
+
+  function goToPage(nextPage) {
     const next = new URLSearchParams(searchParams)
-    if (id == null) next.delete('categoryId')
-    else next.set('categoryId', String(id))
+    if (nextPage <= 0) next.delete('page')
+    else next.set('page', String(nextPage + 1))
     setSearchParams(next)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -109,7 +113,7 @@ export default function HomePage() {
 
       {keyword && (
         <p className="home__searched">
-          <strong>‘{keyword}’</strong> 검색 결과
+          <strong>‘{keyword}’</strong> 검색 결과 {totalElements}건
         </p>
       )}
 
@@ -141,9 +145,8 @@ export default function HomePage() {
               <PostCard key={post.postId} post={post} />
             ))}
           </div>
-          <div ref={sentinelRef} className="home__sentinel">
-            {loadingMore && <span className="spinner" />}
-          </div>
+
+          <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
         </>
       )}
     </div>

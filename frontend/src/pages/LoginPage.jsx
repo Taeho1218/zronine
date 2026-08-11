@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
+import { useBusy } from '../lib/useBusy'
 import { ArrowRightIcon } from '../components/icons'
-import logoUrl from '../assets/gg_tagline.png'
+import logoUrl from '../assets/brand/gg_tagline.png'
 import './AuthPages.css'
 
 export default function LoginPage() {
@@ -13,22 +14,20 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
-  const [busy, setBusy] = useState(false)
+  const [busy, run] = useBusy()
 
-  async function submit(e) {
+  function submit(e) {
     e.preventDefault()
-    if (busy) return
-    setBusy(true)
-    setError(null)
-    try {
-      await login(email.trim(), password)
-      // 보호된 페이지에서 넘어온 경우 원래 가려던 곳으로 되돌려준다.
-      navigate(location.state?.from ?? '/', { replace: true })
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy(false)
-    }
+    run(async () => {
+      setError(null)
+      try {
+        await login(email.trim(), password)
+        // 보호된 페이지에서 넘어온 경우 원래 가려던 곳으로 되돌려준다.
+        navigate(location.state?.from ?? '/', { replace: true })
+      } catch (err) {
+        setError(err.message)
+      }
+    })
   }
 
   return (

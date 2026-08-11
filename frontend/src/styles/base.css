@@ -146,6 +146,45 @@ img {
   font-size: 16px;
 }
 
+/* 팔로우 토글 (상세/프로필 공용) */
+.followbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: var(--white);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.followbtn:hover:not(:disabled) {
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
+}
+
+/* 이미 팔로우 중이면 눌러서 끊는 동작이라 톤을 낮춘다 */
+.followbtn.is-on {
+  background: var(--white);
+  border-color: var(--gray-200);
+  color: var(--gray-600);
+}
+
+.followbtn.is-on:hover:not(:disabled) {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+  color: var(--ink);
+}
+
+.followbtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ── 입력 ──────────────────────────────────────── */
 
 .field {
@@ -247,16 +286,3 @@ img {
   }
 }
 
-/* 이미지가 없을 때 시안처럼 은은한 3색 플레이스홀더로 채운다 */
-.ph {
-  background: var(--ph-peach);
-}
-.ph--0 {
-  background: var(--ph-peach);
-}
-.ph--1 {
-  background: var(--ph-mint);
-}
-.ph--2 {
-  background: var(--ph-lilac);
-}
