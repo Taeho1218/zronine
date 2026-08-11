@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 240" role="img" aria-label="공구 마스코트">
+  <style>
+  .bob{animation:bob 3.2s ease-in-out infinite; transform-origin:110px 205px;}
+  .hat{animation:hat 2.8s ease-in-out infinite; transform-origin:110px 74px;}
+  .pupils{animation:look 6s ease-in-out infinite;}
+  .cheek{animation:breathe 3.2s ease-in-out infinite;}
+  .lid{transform-box:fill-box; transform-origin:top; animation:blink 4.6s ease-in-out infinite;}
+  .spark{animation:floaty 4.2s ease-in-out infinite; transform-box:fill-box;}
+  .sp2{animation-delay:1.4s;} .sp3{animation-delay:2.7s;} .sp4{animation-delay:.7s;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1.6deg)}50%{transform:translateY(-7px) rotate(1.6deg)}}
+  @keyframes hat{0%,100%{transform:rotate(-1.3deg)}50%{transform:rotate(1.7deg)}}
+  @keyframes look{0%,16%{transform:translate(0,0)}28%,44%{transform:translate(-4px,1px)}56%,72%{transform:translate(4px,1px)}84%,100%{transform:translate(0,0)}}
+  @keyframes breathe{0%,100%{opacity:.5}50%{opacity:.9}}
+  @keyframes blink{0%,88%,100%{transform:scaleY(0)}92%,96%{transform:scaleY(1)}}
+  @keyframes floaty{0%{transform:translateY(2px) scale(.6);opacity:0}25%{opacity:1}100%{transform:translateY(-30px) scale(1);opacity:0}}
+</style>
+  <defs>
+    <clipPath id="hd"><rect x="14" y="75" width="192" height="170"/></clipPath>
+    <clipPath id="ll"><circle cx="86"  cy="120" r="21"/></clipPath>
+    <clipPath id="lr"><circle cx="134" cy="120" r="21"/></clipPath>
+  </defs>
+  <g fill="#FFC93C">
+    <circle class="spark"     cx="42"  cy="150" r="3"/>
+    <circle class="spark sp2" cx="184" cy="138" r="2.6"/>
+    <circle class="spark sp3" cx="176" cy="186" r="3.2"/>
+    <circle class="spark sp4" cx="34"  cy="196" r="2.4"/>
+  </g>
+
+  <g class="bob">
+    <g clip-path="url(#hd)">
+      <ellipse cx="110" cy="133" rx="74" ry="67" fill="#FFE3C4"/>
+      <ellipse cx="110" cy="133" rx="74" ry="67" fill="none" stroke="#2B2B2B" stroke-width="4"/>
+    </g>
+
+    <circle class="cheek" cx="66"  cy="150" r="9" fill="#FF9E9E"/>
+    <circle class="cheek" cx="154" cy="150" r="9" fill="#FF9E9E"/>
+
+    <g class="hat">
+      <path d="M58,76 C92,92 162,88 186,70 C189,67 186,63 182,65 C158,80 92,80 64,70 C59,68 55,73 58,76 Z" fill="#3EA575"/>
+      <path d="M58,76 C92,92 162,88 186,70 C189,67 186,63 182,65 C158,80 92,80 64,70 C59,68 55,73 58,76 Z" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M66,74 C60,42 84,28 112,29 C140,30 158,48 152,76 Z" fill="#3EA575"/>
+      <path d="M65,73 C90,86 136,86 153,74 L152,76 C136,88 90,88 66,76 Z" fill="#2C7A54"/>
+      <path d="M66,74 C60,42 84,28 112,29 C140,30 158,48 152,76" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M65,74 C90,86 136,86 153,74" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+      <text x="108" y="57" text-anchor="middle" transform="rotate(3 108 55)" fill="#5A3620" font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif" font-size="16" font-weight="800" font-style="italic" letter-spacing="0.3">jungle</text>
+    </g>
+
+    <circle cx="86"  cy="120" r="23" fill="#ffffff"/>
+    <circle cx="134" cy="120" r="23" fill="#ffffff"/>
+
+    <g class="pupils" fill="#2B2B2B">
+      <circle cx="88"  cy="123" r="4.5"/>
+      <circle cx="136" cy="123" r="4.5"/>
+    </g>
+
+    <g clip-path="url(#ll)"><rect class="lid" x="63"  y="97" width="46" height="46" fill="#FFE3C4"/></g>
+    <g clip-path="url(#lr)"><rect class="lid" x="111" y="97" width="46" height="46" fill="#FFE3C4"/></g>
+
+    <circle cx="86"  cy="120" r="23" fill="none" stroke="#2B2B2B" stroke-width="4"/>
+    <circle cx="134" cy="120" r="23" fill="none" stroke="#2B2B2B" stroke-width="4"/>
+    <path d="M105,117 Q110,110 115,117" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+    <path d="M156,124 C161,144 159,162 151,174" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+
+    <path d="M113,132 C121,140 120,152 112,153 C107,153 106,148 110,147" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M96,166 Q110,175 124,166" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+</svg>

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { userApi } from '../api'
 import FollowButton from '../components/FollowButton'
 import FollowListModal from '../components/FollowListModal'
+import Loading from '../components/Loading'
 import ProfileAlertButton from '../components/ProfileAlertButton'
 import ProfileHeader from '../components/ProfileHeader'
 import PostCard from '../components/PostCard'
@@ -65,10 +66,7 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="state">
-        <span className="spinner" />
-        <span>불러오는 중…</span>
-      </div>
+      <Loading />
     )
   }
 

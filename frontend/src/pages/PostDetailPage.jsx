@@ -6,6 +6,7 @@ import Avatar from '../components/Avatar'
 import CommentSection from '../components/CommentSection'
 import FollowButton from '../components/FollowButton'
 import ImageFallback from '../components/ImageFallback'
+import Loading from '../components/Loading'
 import {
   BellIcon,
   BookmarkIcon,
@@ -231,10 +232,7 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="state">
-        <span className="spinner" />
-        <span>불러오는 중…</span>
-      </div>
+      <Loading />
     )
   }
 

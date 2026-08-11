@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi } from '../api'
 import PostCard from '../components/PostCard'
+import Loading from '../components/Loading'
 import Pagination from '../components/Pagination'
 import HomeHero from '../components/HomeHero'
 import FeedFilter from '../components/FeedFilter'
@@ -148,12 +149,7 @@ export default function HomePage() {
         </p>
       )}
 
-      {loading && (
-        <div className="state">
-          <span className="spinner" />
-          <span>공구를 불러오는 중…</span>
-        </div>
-      )}
+      {loading && <Loading message="공구를 불러오는 중…" />}
 
       {!loading && error && (
         <div className="state">

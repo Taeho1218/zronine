@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { commentApi, postApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import Avatar from './Avatar'
+import Loading from './Loading'
 import { CommentIcon, HeartIcon, LockIcon, ThumbsUpIcon, TrashIcon } from './icons'
 import { formatDate, fromNow } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
@@ -176,9 +177,7 @@ export default function CommentSection({ post, onCountChange }) {
       </form>
 
       {loading ? (
-        <div className="state">
-          <span className="spinner" />
-        </div>
+        <Loading size={64} message="댓글을 불러오는 중…" />
       ) : comments.length === 0 ? (
         <p className="cmt__empty">첫 댓글을 남겨보세요.</p>
       ) : (

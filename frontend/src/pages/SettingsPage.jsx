@@ -6,6 +6,7 @@ import { useBusy } from '../lib/useBusy'
 import { downscaleImage } from '../lib/imageResize'
 import { getLocalCover, setLocalCover } from '../lib/localCover'
 import Avatar from '../components/Avatar'
+import Loading from '../components/Loading'
 import WithdrawDialog from '../components/WithdrawDialog'
 import { CheckIcon } from '../components/icons'
 import './SettingsPage.css'
@@ -173,7 +174,7 @@ export default function SettingsPage() {
             <p>{message.text}</p>
           </>
         ) : (
-          <span className="spinner" />
+          <Loading size={96} />
         )}
       </div>
     )

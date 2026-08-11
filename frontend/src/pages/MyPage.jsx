@@ -4,6 +4,7 @@ import { userApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import PostCard from '../components/PostCard'
 import ImageFallback from '../components/ImageFallback'
+import Loading from '../components/Loading'
 import ProfileHeader from '../components/ProfileHeader'
 import FollowListModal from '../components/FollowListModal'
 import { ExternalLinkIcon, SettingsIcon } from '../components/icons'
@@ -111,9 +112,7 @@ export default function MyPage() {
         </nav>
 
         {loading && (
-          <div className="state">
-            <span className="spinner" />
-          </div>
+          <Loading size={96} />
         )}
 
         {!loading && error && (
