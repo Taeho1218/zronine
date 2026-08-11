@@ -481,7 +481,9 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
       return { value: params?.email ?? '', available: params?.email !== 'taken@example.com' }
     }
     if (p(1) === 'check-nickname') {
-      return { value: params?.nickname ?? '', available: params?.nickname !== '로스터리 민' }
+      // 실제 서버처럼 이미 있는 사람 이름과 대조한다.
+      const value = params?.nickname ?? ''
+      return { value, available: !ALL_USERS.some((u) => u.nickname === value) }
     }
     if (p(1) === 'me' && p(2) === 'posts') return paginate(posts.filter((x) => x.author.userId === ME.userId).map(toFeed))
     if (p(1) === 'me' && p(2) === 'saves') return paginate(posts.filter((x) => x.saved).map(toFeed))
@@ -503,6 +505,21 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
           })),
       )
     }
+    if (p(1) === 'me' && method === 'PATCH') {
+      // 서버와 같은 규칙: null 이면 그대로 두고, 빈 문자열이면 지운다.
+      if (body?.nickname != null) ME.nickname = body.nickname
+      if (body?.profileImageUrl != null) ME.profileImageUrl = body.profileImageUrl || null
+      if (body?.instagramUrl != null) ME.instagramUrl = body.instagramUrl || null
+      return profileOf(ME.userId, true)
+    }
+
+    if (p(1) === 'me' && method === 'DELETE') {
+      const now = new Date()
+      const purge = new Date(now)
+      purge.setDate(purge.getDate() + 30)
+      return { deletedAt: iso(now), purgeScheduledAt: iso(purge), retentionDays: 30 }
+    }
+
     if (p(1) === 'me') return profileOf(ME.userId, true)
 
     if (p(2) === 'posts') {

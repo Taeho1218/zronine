@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { userApi } from '../api'
 import { useAuth } from '../store/AuthContext'
-import Avatar from '../components/Avatar'
 import PostCard from '../components/PostCard'
 import ImageFallback from '../components/ImageFallback'
+import ProfileHeader from '../components/ProfileHeader'
 import FollowListModal from '../components/FollowListModal'
-import { ExternalLinkIcon } from '../components/icons'
-import { ddayLabel, formatDate, formatPeriod } from '../lib/format'
-import { useBusy } from '../lib/useBusy'
+import { ExternalLinkIcon, SettingsIcon } from '../components/icons'
+import { ddayLabel, formatPeriod } from '../lib/format'
 import './MyPage.css'
 
 const TABS = [
@@ -24,7 +23,7 @@ const LOADERS = {
 }
 
 export default function MyPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = TABS.some((t) => t.key === searchParams.get('tab')) ? searchParams.get('tab') : 'posts'
 
@@ -32,7 +31,6 @@ export default function MyPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [logoutBusy, runLogout] = useBusy()
   // null 이면 닫힌 상태, 'followers' | 'followings' 면 그 탭으로 열린다.
   const [followTab, setFollowTab] = useState(null)
 
@@ -64,40 +62,17 @@ export default function MyPage() {
 
   return (
     <div className="mypage page">
-      <header className="mypage__head">
-        <Avatar user={profile ?? user} size={72} />
-
-        <div className="mypage__info">
-          <h1 className="mypage__name">{profile?.nickname ?? user?.nickname ?? '회원'}</h1>
-          {profile?.email && <p className="mypage__email">{profile.email}</p>}
-          {profile?.joinedAt && <p className="mypage__joined">{formatDate(profile.joinedAt)} 가입</p>}
-        </div>
-
-        <dl className="mypage__stats">
-          <div>
-            <dt>게시물</dt>
-            <dd>{profile?.postCount ?? 0}</dd>
-          </div>
-          {/* 팔로워/팔로잉은 눌러서 목록을 볼 수 있다 */}
-          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followers')}>
-            <dt>팔로워</dt>
-            <dd>{profile?.followerCount ?? 0}</dd>
-          </button>
-          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followings')}>
-            <dt>팔로잉</dt>
-            <dd>{profile?.followingCount ?? 0}</dd>
-          </button>
-        </dl>
-
-        <button
-          type="button"
-          className="btn btn--ghost mypage__logout"
-          onClick={() => runLogout(logout)}
-          disabled={logoutBusy}
-        >
-          {logoutBusy ? '로그아웃 중…' : '로그아웃'}
-        </button>
-      </header>
+      <ProfileHeader
+        profile={profile ?? { nickname: user?.nickname ?? '회원', userId: user?.userId }}
+        onOpenFollowers={() => setFollowTab('followers')}
+        onOpenFollowings={() => setFollowTab('followings')}
+        topRight={
+          <Link to="/settings" aria-label="환경설정">
+            <SettingsIcon width={16} height={16} />
+            환경설정
+          </Link>
+        }
+      />
 
       {followTab && profile && (
         <FollowListModal

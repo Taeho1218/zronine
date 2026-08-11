@@ -39,6 +39,22 @@ export function formatDateTime(value) {
   return `${formatDate(d)} · ${meridiem} ${h12}:${pad(d.getMinutes())}`
 }
 
+const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
+
+/** "08.13 (수)" — 마감처럼 무슨 요일인지가 중요한 자리에 쓴다. */
+export function formatDateDay(value) {
+  const d = toDate(value)
+  if (!d) return ''
+  return `${pad(d.getMonth() + 1)}.${pad(d.getDate())} (${WEEKDAY[d.getDay()]})`
+}
+
+/** "08.10 (일) ~ 08.13 (수)" */
+export function formatPeriodDay(start, end) {
+  const from = formatDateDay(start)
+  if (!from) return ''
+  return `${from} ~ ${formatDateDay(end) || '미정'}`
+}
+
 /**
  * 모집 기간 "08.10 ~ 08.17".
  * 수집 단계에서 마감일을 못 채운 공구가 있어, 끝이 비면 "미정"으로 적어 빈칸으로 보이지 않게 한다.

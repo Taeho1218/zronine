@@ -4,38 +4,25 @@
   max-width: 1320px;
 }
 
-/* 본문 + "비슷한 상품" 사이드바 2단 구성 */
+/* 왼쪽은 사진·설명·댓글, 오른쪽은 "이 공구가 뭔지"를 요약한 카드 */
 .detail__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 48px;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 40px;
   align-items: start;
-}
-
-/* 사이드바 없이 한 단일 때. 본문이 너무 넓어지지 않게 2단일 때의 본문 폭에 맞춘다. */
-.detail__layout--single {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 952px;
 }
 
 .detail__main {
   min-width: 0;
 }
 
-/* ── 헤더 ─────────────────────────────────────── */
-
-.detail__title {
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1.35;
-  letter-spacing: -0.6px;
-}
+/* ── 글쓴이 줄 ────────────────────────────────── */
 
 .detail__author-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 20px 0 22px;
+  margin-bottom: 18px;
 }
 
 .detail__author {
@@ -158,7 +145,7 @@
   object-fit: contain;
 }
 
-/* "실시간 N명 참여 중" 배지 */
+/* "진행중 · D-2" / "실시간 N명 참여 중" 배지 */
 .detail__badge {
   position: absolute;
   top: 16px;
@@ -184,7 +171,35 @@
   box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.25);
 }
 
-/* 여러 장일 때 우측 하단의 "2 / 5" 표시 */
+/* 좌우 넘김 버튼 */
+.detail__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--gray-700);
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.14);
+  transition: background-color 0.15s ease;
+}
+
+.detail__nav:hover {
+  background: var(--white);
+}
+
+.detail__nav--prev {
+  left: 16px;
+}
+
+.detail__nav--next {
+  right: 16px;
+}
+
+/* 여러 장일 때 우측 하단의 "3 / 5" 표시 */
 .detail__hero-count {
   position: absolute;
   right: 16px;
@@ -211,7 +226,7 @@
 .detail__thumb {
   display: block;
   width: 82px;
-  height: 62px;
+  height: 82px;
   border-radius: var(--r-md);
   overflow: hidden;
   border: 2px solid transparent;
@@ -235,101 +250,10 @@
   opacity: 1;
 }
 
-/* ── 메타 정보 표 ─────────────────────────────── */
-
-.detail__meta {
-  margin: 34px 0 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 56px;
-}
-
-.detail__meta-row {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  align-items: baseline;
-  gap: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--gray-150);
-}
-
-.detail__meta-row--wide {
-  grid-column: 1 / -1;
-}
-
-.detail__meta dt {
-  color: var(--gray-500);
-  font-size: 14.5px;
-}
-
-.detail__meta dd {
-  margin: 0;
-  font-weight: 700;
-  font-size: 15px;
-  word-break: break-word;
-}
-
-.detail__dday {
-  color: var(--gray-500);
-  font-weight: 700;
-}
-
-.detail__price {
-  color: var(--brand);
-  font-size: 16px;
-}
-
-.detail__price-was {
-  margin-left: 8px;
-  color: var(--gray-400);
-  font-weight: 500;
-  text-decoration: line-through;
-}
-
-.detail__price-empty {
-  color: var(--gray-400);
-  font-weight: 500;
-}
-
-.detail__buy {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--brand);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* ── 태그 ─────────────────────────────────────── */
-
-.detail__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 26px;
-}
-
-.detail__tag {
-  height: 38px;
-  padding: 0 18px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--r-pill);
-  background: var(--gray-100);
-  color: var(--gray-600);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.detail__tag--brand {
-  background: var(--brand-soft);
-  color: var(--brand);
-}
-
-/* ── 상세 설명 ────────────────────────────────── */
+/* ── 공구 이벤트 ──────────────────────────────── */
 
 .detail__section {
-  margin-top: 36px;
+  margin-top: 34px;
 }
 
 .detail__section-title {
@@ -337,6 +261,93 @@
   font-weight: 800;
   margin-bottom: 14px;
 }
+
+/* 이벤트는 보통 1~2개라 두 칸으로 나란히 눕히고, 더 많으면 다음 줄로 흐른다 */
+.devent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.devent__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 22px;
+  border-radius: var(--r-lg);
+  border: 1px solid transparent;
+}
+
+/* 순서대로 색을 번갈아 줘 두 개가 붙어 있어도 서로 구분된다 */
+.devent__card--a {
+  background: #fdf2f4;
+  border-color: #f7dbe1;
+}
+
+.devent__card--b {
+  background: var(--brand-soft);
+  border-color: var(--brand-border);
+}
+
+.devent__no {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.devent__card--a .devent__no {
+  background: #e14b6a;
+}
+
+.devent__card--b .devent__no {
+  background: var(--brand);
+}
+
+.devent__body {
+  min-width: 0;
+}
+
+.devent__label {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.devent__card--a .devent__label {
+  color: #e14b6a;
+}
+
+.devent__card--b .devent__label {
+  color: var(--brand);
+}
+
+.devent__title {
+  font-size: 15.5px;
+  font-weight: 800;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.devent__desc {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--gray-500);
+  word-break: break-word;
+}
+
+/* ── 상세 설명 ────────────────────────────────── */
 
 .detail__content {
   border: 1px solid var(--gray-150);
@@ -351,102 +362,283 @@
 
 /* ── 사이드바 ─────────────────────────────────── */
 
+/*
+ * 스크롤을 따라 내려오게 두면 왼쪽 사진과 따로 움직여 눈이 어지럽다.
+ * 사진 옆에 붙박이로 두고 본문과 같이 올라가게 한다.
+ */
 .detail__side {
-  position: sticky;
-  top: calc(var(--header-h) + 24px);
-}
-
-.detail__side-title {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 14px;
-}
-
-.detail__side-empty {
-  color: var(--gray-500);
-  font-size: 14px;
-}
-
-.detail__side-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 28px;
+  min-width: 0;
 }
 
-.rcard {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  padding: 14px;
+/* 요약 카드 */
+.dbuy {
+  padding: 26px 26px 22px;
   background: var(--white);
   border: 1px solid var(--gray-150);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-card);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.rcard:hover {
-  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
-  transform: translateY(-1px);
+.dbuy__title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
+  word-break: break-word;
 }
 
-.rcard__thumb {
+.dbuy__chip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.dbuy__rows {
+  margin-top: 20px;
+}
+
+.dbuy__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+}
+
+.dbuy__row dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex: none;
-  width: 60px;
-  height: 60px;
-  border-radius: var(--r-md);
-  object-fit: cover;
+  font-size: 14px;
+  color: var(--gray-500);
 }
 
-.rcard__body {
+/* 아이콘은 글자 기준선에 맞춰 살짝 내린다 */
+.dbuy__row dt svg {
+  position: relative;
+  top: 3px;
+  color: var(--gray-400);
+}
+
+.dbuy__row dd {
+  margin: 0;
+  text-align: right;
+  font-size: 14.5px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.dbuy__due {
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.dbuy__due.is-over {
+  color: var(--gray-400);
+}
+
+.dbuy__host:hover {
+  text-decoration: underline;
+}
+
+.dbuy__price {
+  color: var(--brand);
+  font-size: 16px;
+}
+
+.dbuy__was {
+  margin-left: 8px;
+  color: var(--gray-400);
+  font-weight: 500;
+  text-decoration: line-through;
+}
+
+.dbuy__muted {
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+/* 카테고리·출처는 성격이 달라 선 하나로 구분한다 */
+.dbuy__sub {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-150);
+}
+
+.dbuy__src {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--brand);
+}
+
+.dbuy__src:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dbuy__cta {
+  margin-top: 20px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--r-md);
+  background: var(--brand);
+  color: var(--white);
+  font-size: 17px;
+  font-weight: 800;
+  transition: background-color 0.15s ease;
+}
+
+.dbuy__cta:hover {
+  background: var(--brand-hover);
+}
+
+.dbuy__note {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--gray-400);
+}
+
+/* ── 비슷한 상품 ──────────────────────────────── */
+
+.dsim__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.dsim__title {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.dsim__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.dsim__more:hover {
+  color: var(--ink);
+}
+
+.dsim__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 18px 14px;
+}
+
+.rcard {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
 }
 
+.rcard__thumb {
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--gray-100);
+}
+
+.rcard__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.rcard:hover .rcard__thumb img {
+  transform: scale(1.04);
+}
+
 .rcard__name {
-  font-weight: 700;
-  font-size: 14.5px;
-  line-height: 1.35;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.rcard__price {
-  color: var(--brand);
-  font-weight: 800;
-  font-size: 15px;
+.rcard__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.rcard__meta {
-  font-size: 12.5px;
+.rcard__price {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.rcard__price.is-empty {
+  color: var(--gray-400);
+  font-weight: 600;
+}
+
+.rcard__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
   color: var(--gray-400);
 }
 
+/*
+ * 한 단으로 접히면 제목이 든 요약 카드가 맨 아래로 밀려 글이 뭔지 모르게 된다.
+ * display:contents 로 사이드바 껍데기를 지워 두 카드를 직접 배치하고,
+ * 요약 → 본문 → 비슷한 상품 순으로 다시 세운다.
+ */
 @media (max-width: 1080px) {
   .detail__layout {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
   }
   .detail__side {
-    position: static;
+    display: contents;
   }
-  .detail__side-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  .dbuy {
+    order: -1;
+  }
+  .dsim {
+    order: 1;
+  }
+  .dsim__grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
 
 @media (max-width: 720px) {
-  .detail__title {
-    font-size: 24px;
-  }
-  .detail__meta {
-    grid-template-columns: minmax(0, 1fr);
-    column-gap: 0;
+  .dbuy__title {
+    font-size: 19px;
   }
   .detail__head-actions {
     width: 100%;

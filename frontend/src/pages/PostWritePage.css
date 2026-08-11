@@ -326,3 +326,19 @@
     aspect-ratio: 16 / 9;
   }
 }
+
+/* 이벤트는 한 줄에 하나씩 적는 칸이라 여러 줄을 받되 본문만큼 크지는 않게 둔다 */
+.write__event {
+  min-height: 92px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.write__event + .field__help code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--gray-100);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gray-700);
+}

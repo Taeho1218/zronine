@@ -3,17 +3,24 @@ import { useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi } from '../api'
 import PostCard from '../components/PostCard'
 import Pagination from '../components/Pagination'
+import HomeHero from '../components/HomeHero'
+import FeedFilter from '../components/FeedFilter'
 import { normalizeKeyword } from '../lib/search'
 import './HomePage.css'
 
-/** 서버 한 페이지 크기와 같다 (PostService.MAX_PAGE_SIZE). */
-const PAGE_SIZE = 15
+/**
+ * 한 화면에 보여줄 카드 수. 3열 그리드라 4줄이 딱 떨어진다.
+ * 서버는 PostService.MAX_PAGE_SIZE(15) 이하만 받으므로 이 값을 그대로 존중해준다.
+ */
+const PAGE_SIZE = 12
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   // 주소를 직접 고쳐 한 글자로 들어오는 경우가 있어 입력창과 같은 기준으로 한 번 더 거른다.
   const keyword = normalizeKeyword(searchParams.get('keyword'))
   const categoryId = searchParams.get('categoryId') ?? ''
+  const postType = searchParams.get('postType') ?? ''
+  const status = searchParams.get('status') ?? ''
 
   // 주소에는 사람이 읽는 1부터의 번호를 쓰고, 서버에는 0부터의 번호를 보낸다.
   // 페이지를 주소에 담아둬야 새로고침·뒤로가기·링크 공유가 모두 같은 화면을 가리킨다.
@@ -43,6 +50,8 @@ export default function HomePage() {
         size: PAGE_SIZE,
         keyword: keyword || undefined,
         categoryId: categoryId || undefined,
+        postType: postType || undefined,
+        status: status || undefined,
       })
       .then((res) => {
         if (!alive) return
@@ -62,7 +71,7 @@ export default function HomePage() {
     return () => {
       alive = false
     }
-  }, [keyword, categoryId, page])
+  }, [keyword, categoryId, postType, status, page])
 
   /** 필터를 바꾸면 보던 페이지 번호는 의미가 없어지므로 함께 지운다. */
   function updateParams(mutate) {
@@ -79,6 +88,19 @@ export default function HomePage() {
     })
   }
 
+  /** 글 종류 / 모집 상태 필터. key 가 'reset' 이면 둘 다 지운다. */
+  function changeFilter(key, value) {
+    updateParams((next) => {
+      if (key === 'reset') {
+        next.delete('postType')
+        next.delete('status')
+        return
+      }
+      if (value) next.set(key, value)
+      else next.delete(key)
+    })
+  }
+
   function goToPage(nextPage) {
     const next = new URLSearchParams(searchParams)
     if (nextPage <= 0) next.delete('page')
@@ -89,7 +111,14 @@ export default function HomePage() {
 
   return (
     <div className="home page">
+      {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
+      <HomeHero />
+
       <div className="home__chips" role="tablist" aria-label="카테고리">
+        {/* 카테고리와 성격이 다른 필터라 칩 줄 왼쪽에 따로 세운다 */}
+        <FeedFilter postType={postType} status={status} onChange={changeFilter} />
+        <span className="home__chips-divider" aria-hidden="true" />
+
         <button
           type="button"
           role="tab"

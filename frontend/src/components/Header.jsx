@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import NotificationPanel from './NotificationPanel'
 import { MIN_KEYWORD_LENGTH } from '../lib/search'
+import { fetchNotifications } from '../lib/notifications'
 import { BellIcon, BookmarkIcon, SearchIcon } from './icons'
 import symbolUrl from '../assets/brand/gg_symbol.svg'
 import './Header.css'
@@ -14,7 +15,26 @@ export default function Header() {
   const [keyword, setKeyword] = useState(searchParams.get('keyword') ?? '')
   const [hint, setHint] = useState(null)
   const [alertOpen, setAlertOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const bellRef = useRef(null)
+
+  /**
+   * 종 아이콘의 빨간 점 표시용.
+   * 패널을 열고 닫을 때마다 다시 세어, 안에서 읽음 처리한 결과가 바로 반영되게 한다.
+   */
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setUnreadCount(0)
+      return undefined
+    }
+    let alive = true
+    fetchNotifications()
+      .then((list) => alive && setUnreadCount(list.filter((n) => n.unread).length))
+      .catch(() => alive && setUnreadCount(0))
+    return () => {
+      alive = false
+    }
+  }, [isLoggedIn, alertOpen])
 
   // 홈에서 검색어가 지워지면(칩 클릭 등) 입력창도 같이 비운다.
   useEffect(() => {
@@ -76,10 +96,12 @@ export default function Header() {
               type="button"
               className={`header__icon-btn ${alertOpen ? 'is-active' : ''}`}
               onClick={() => setAlertOpen((v) => !v)}
-              aria-label="알림"
+              aria-label={unreadCount > 0 ? `알림 ${unreadCount}건` : '알림'}
               aria-expanded={alertOpen}
             >
               <BellIcon width={22} height={22} />
+              {/* 읽지 않은 알림이 있을 때만 찍히는 빨간 점 */}
+              {unreadCount > 0 && <span className="header__badge" />}
             </button>
             {alertOpen && <NotificationPanel anchorRef={bellRef} onClose={() => setAlertOpen(false)} />}
           </div>

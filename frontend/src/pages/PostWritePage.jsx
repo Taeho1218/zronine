@@ -350,14 +350,20 @@ export default function PostWritePage() {
               </div>
 
               <label className="field">
-                <span className="field__label">이벤트</span>
-                <input
-                  className="input"
+                <span className="field__label">공구 이벤트</span>
+                <textarea
+                  className="textarea write__event"
+                  rows={3}
                   value={form.eventNote}
                   onChange={(e) => set({ eventNote: e.target.value })}
-                  placeholder="예) 50명 달성 시 드립백 10개 증정"
+                  placeholder={'선착순 혜택 | 선착순 20명 스틱 30포 증정 | 결제 완료 순서 기준\n구매인증 이벤트 | 10명 추첨을 통해 스틱 30포 증정'}
                   maxLength={255}
                 />
+                {/* 상세 페이지에서 이 규칙대로 카드를 쪼갠다. 비워 두면 이벤트 칸 자체가 안 나온다. */}
+                <span className="field__help">
+                  한 줄에 하나씩 · <code>라벨 | 제목 | 설명</code> 순서로 적으면 카드로 나뉘어요. 안 적으면 상세
+                  페이지에 이벤트 칸이 표시되지 않습니다.
+                </span>
               </label>
 
               <div className="field">

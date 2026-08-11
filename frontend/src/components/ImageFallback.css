@@ -57,3 +57,12 @@
   max-width: none;
   transform: scale(1.28);
 }
+
+/* 부모가 이미 크기를 정해준 칸(비슷한 상품 썸네일처럼)을 그대로 채운다 */
+.imgfallback--fill {
+  height: 100%;
+}
+
+.imgfallback--fill .imgfallback__mascot {
+  width: 62%;
+}

@@ -17,6 +17,11 @@ export const userApi = {
   profile: (userId) => http.get(`/api/users/${userId}`),
   userPosts: (userId, page = 0) => http.get(`/api/users/${userId}/posts`, { page }),
   updateMe: (payload) => http.patch('/api/users/me', payload),
+  /**
+   * 회원 탈퇴. 즉시 삭제가 아니라 30일 보관(Soft Delete)이며,
+   * 응답의 purgeScheduledAt 으로 실제 삭제 예정일을 안내할 수 있다.
+   */
+  withdraw: () => http.delete('/api/users/me'),
   myPosts: (page = 0) => http.get('/api/users/me/posts', { page }),
   mySaves: (page = 0) => http.get('/api/users/me/saves', { page }),
   myAlerts: (page = 0) => http.get('/api/users/me/alerts', { page }),

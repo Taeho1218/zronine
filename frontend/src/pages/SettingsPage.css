@@ -1,0 +1,173 @@
+.settings {
+  padding-top: 40px;
+  padding-bottom: 96px;
+  max-width: 720px;
+}
+
+.settings__title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 22px;
+}
+
+.settings__card {
+  padding: 26px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.settings__card + .settings__card {
+  margin-top: 20px;
+}
+
+.settings__section {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+/* ── 프로필 사진 ──────────────────────────────── */
+
+.settings__photo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--gray-150);
+}
+
+.settings__photo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* label 로 파일 선택을 감싸므로 버튼처럼 보이게만 맞춘다 */
+.settings__file {
+  height: 40px;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.settings__plain {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.settings__plain:hover {
+  color: var(--ink);
+}
+
+/* ── 입력 ─────────────────────────────────────── */
+
+.settings__field + .settings__field {
+  margin-top: 20px;
+}
+
+.settings__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.settings__input-wrap .input {
+  padding-right: 108px;
+}
+
+.settings__status {
+  position: absolute;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gray-400);
+  pointer-events: none;
+}
+
+.settings__status--ok {
+  color: var(--brand);
+}
+
+.settings__status--bad {
+  color: var(--danger);
+}
+
+.settings__ok {
+  margin-top: 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.settings__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.settings__actions .btn {
+  min-width: 120px;
+}
+
+/* ── 계정 ─────────────────────────────────────── */
+
+.settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.settings__row + .settings__row {
+  border-top: 1px solid var(--gray-150);
+}
+
+.settings__row-title {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.settings__row-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--gray-500);
+}
+
+.settings__row-btn {
+  flex: none;
+  height: 40px;
+  padding: 0 18px;
+}
+
+.settings__row--danger .settings__row-title {
+  color: var(--danger);
+}
+
+.settings__withdraw {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--r-md);
+  border: 1px solid #f3c6c6;
+  background: var(--white);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background-color 0.15s ease;
+  flex: none;
+}
+
+.settings__withdraw:hover {
+  background: #fef2f2;
+}

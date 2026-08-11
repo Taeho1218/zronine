@@ -5,6 +5,7 @@ import { useAuth } from '../store/AuthContext'
 import { formatPeriod, formatPrice } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import PostCardGallery from './PostCardGallery'
+import PostCardMenu from './PostCardMenu'
 import { BookmarkIcon, CommentIcon, HeartIcon } from './icons'
 import './PostCard.css'
 
@@ -73,6 +74,9 @@ export default function PostCard({ post }) {
 
   return (
     <article className="pcard">
+      {/* 카드 링크 바깥에 두어야 눌렀을 때 상세로 이동하지 않는다 */}
+      <PostCardMenu postId={post.postId} />
+
       {/* 사진이 여러 장이면 넘겨볼 수 있고, 없으면 마스코트가 자리를 채운다 */}
       <PostCardGallery postId={post.postId} images={images} title={post.title} />
 

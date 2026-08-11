@@ -6,10 +6,82 @@ import Avatar from '../components/Avatar'
 import CommentSection from '../components/CommentSection'
 import FollowButton from '../components/FollowButton'
 import ImageFallback from '../components/ImageFallback'
-import { BellIcon, BookmarkIcon, ExternalLinkIcon, TrashIcon } from '../components/icons'
-import { ddayLabel, formatDateTime, formatPeriod, formatPrice, PROGRESS_LABEL } from '../lib/format'
+import {
+  BellIcon,
+  BookmarkIcon,
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExternalLinkIcon,
+  HeartIcon,
+  TagIcon,
+  TrashIcon,
+  UserIcon,
+  WarningIcon,
+} from '../components/icons'
+import {
+  ddayLabel,
+  formatDateDay,
+  formatDateTime,
+  formatPeriodDay,
+  formatPrice,
+  PROGRESS_LABEL,
+} from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import './PostDetailPage.css'
+
+/** 사이드바의 "비슷한 상품"은 좁은 칸에 2줄로 놓아 4개까지만 보여준다. */
+const SIMILAR_SHOWN = 4
+
+/**
+ * 이벤트는 서버에서 자유 문장 한 덩어리(eventNote)로 내려온다.
+ * 한 줄에 하나씩 `라벨 | 제목 | 설명` 으로 적으면 카드로 쪼개고,
+ * 구분자 없이 그냥 쓴 줄은 통째로 제목이 되어 예전에 적어둔 글도 그대로 나온다.
+ * 아무것도 안 적었으면 빈 배열이라 "공구 이벤트" 칸 자체가 사라진다.
+ */
+function parseEvents(note) {
+  if (!note) return []
+  return note
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const parts = line.split('|').map((s) => s.trim())
+      if (parts.length === 1) return { label: null, title: parts[0], desc: null }
+      if (parts.length === 2) return { label: parts[0], title: parts[1], desc: null }
+      return { label: parts[0], title: parts[1], desc: parts.slice(2).join(' · ') }
+    })
+}
+
+/**
+ * 남은 시간을 1초마다 다시 그린다.
+ * 페이지 전체를 매초 리렌더하면 댓글까지 같이 흔들리므로 이 조각만 따로 떼어 뒀다.
+ */
+function Countdown({ target }) {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!target) return undefined
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [target])
+
+  if (!target) return null
+
+  const left = new Date(target).getTime() - now
+  if (!Number.isFinite(left) || left <= 0) return <span className="dbuy__due is-over">마감</span>
+
+  const total = Math.floor(left / 1000)
+  const pad = (n) => String(n).padStart(2, '0')
+  // 하루가 넘게 남으면 시간 자리가 24를 넘어간다 (D-2 라면 47:xx:xx).
+  const clock = `${pad(Math.floor(total / 3600))}:${pad(Math.floor(total / 60) % 60)}:${pad(total % 60)}`
+
+  return (
+    <span className="dbuy__due">
+      {formatDateDay(target)} <strong>{clock}</strong> 남음
+    </span>
+  )
+}
 
 export default function PostDetailPage() {
   const { postId } = useParams()
@@ -46,7 +118,7 @@ export default function PostDetailPage() {
     }
   }, [postId])
 
-  // 사이드바 "비슷한 상품": 같은 카테고리 글에서 현재 글만 빼고 3개.
+  // 사이드바 "비슷한 상품": 같은 카테고리 글에서 현재 글만 빼고 몇 개.
   // post 객체 전체를 의존성에 두면 좋아요/저장으로 post 가 갱신될 때마다 다시 부르게 되어
   // 실제로 다시 받아야 하는 값(글 id)만 본다.
   const currentPostId = post?.postId
@@ -149,43 +221,50 @@ export default function PostDetailPage() {
   }
 
   const isSeller = post.postType === 'SELLER'
+  const events = parseEvents(post.eventNote)
+  const statusText =
+    isSeller && post.progress !== 'NONE'
+      ? [PROGRESS_LABEL[post.progress], ddayLabel(post.endDate)].filter(Boolean).join(' · ')
+      : null
+  // 아직 시작 전이면 마감이 아니라 개시까지를 세는 게 맞다.
+  const countdownTarget = post.progress === 'UPCOMING' ? post.startDate : post.endDate
+  const countdownLabel = post.progress === 'UPCOMING' ? '시작까지' : '마감까지'
 
   // 못 불러온 이미지는 빼고 남은 것만 보여준다. 전부 죽었으면 자리표시자로 돌아간다.
   const images = (post.imageUrls ?? []).filter((url) => !brokenImages.has(url))
   const heroIndex = Math.min(activeImage, Math.max(0, images.length - 1))
   const hero = images[heroIndex] ?? null
   const markBroken = (url) => setBrokenImages((prev) => new Set(prev).add(url))
+  // 끝에서 한 번 더 누르면 처음으로 돌아온다.
+  const step = (delta) => setActiveImage((images.length + heroIndex + delta) % images.length)
 
   return (
     <div className="detail page">
-      {/* 사이드바가 없으면 본문이 화면 끝까지 늘어나 읽기 불편해지므로 한 단 레이아웃으로 좁힌다 */}
-      <div className={`detail__layout ${canShowRelated ? '' : 'detail__layout--single'}`}>
+      <div className="detail__layout">
         <main className="detail__main">
-          <header className="detail__head">
-            <h1 className="detail__title">{post.title}</h1>
+          <header className="detail__author-row">
+            <Avatar user={post.author} size={44} />
+            <div className="detail__author">
+              <span className="detail__author-line">
+                <Link to={`/users/${post.author.userId}`} className="detail__author-name">
+                  {post.author.nickname}
+                </Link>
+                {/* 인스타 공구는 주최자 계정으로 확인하는 경우가 많아, 주소가 있으면 바로 열어준다. */}
+                {post.author.instagramUrl && (
+                  <a
+                    className="detail__insta"
+                    href={post.author.instagramUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    인스타그램 <ExternalLinkIcon width={12} height={12} />
+                  </a>
+                )}
+              </span>
+              <span className="detail__date">{formatDateTime(post.createdAt)}</span>
+            </div>
 
-            <div className="detail__author-row">
-              <Avatar user={post.author} size={44} />
-              <div className="detail__author">
-                <span className="detail__author-line">
-                  <Link to={`/users/${post.author.userId}`} className="detail__author-name">
-                    {post.author.nickname}
-                  </Link>
-                  {/* 인스타 공구는 주최자 계정으로 확인하는 경우가 많아, 주소가 있으면 바로 열어준다. */}
-                  {post.author.instagramUrl && (
-                    <a
-                      className="detail__insta"
-                      href={post.author.instagramUrl}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      인스타그램 <ExternalLinkIcon width={12} height={12} />
-                    </a>
-                  )}
-                </span>
-                <span className="detail__date">{formatDateTime(post.createdAt)}</span>
-              </div>
-
+            <div className="detail__head-actions">
               {/* 본인 글에는 팔로우 버튼을 두지 않는다 (서버도 자기 자신 팔로우를 막는다) */}
               {!post.mine && (
                 <FollowButton
@@ -194,45 +273,42 @@ export default function PostDetailPage() {
                   onChange={({ following }) => setPost((prev) => ({ ...prev, followingAuthor: following }))}
                 />
               )}
-
-              <div className="detail__head-actions">
-                {isSeller && (
-                  <button
-                    type="button"
-                    className={`detail__chip-btn ${post.alerted ? 'is-on' : ''}`}
-                    onClick={toggleAlert}
-                    disabled={alertBusy}
-                  >
-                    <BellIcon width={17} height={17} />
-                    {post.alerted ? '알림 신청됨' : '알림받기'}
-                  </button>
-                )}
+              {isSeller && (
                 <button
                   type="button"
-                  className={`detail__chip-btn ${post.saved ? 'is-on' : ''}`}
-                  onClick={toggleSave}
-                  disabled={saveBusy}
+                  className={`detail__chip-btn ${post.alerted ? 'is-on' : ''}`}
+                  onClick={toggleAlert}
+                  disabled={alertBusy}
                 >
-                  <BookmarkIcon width={17} height={17} filled={post.saved} />
-                  {post.saved ? '저장됨' : '저장하기'}
+                  <BellIcon width={17} height={17} />
+                  {post.alerted ? '알림 신청됨' : '알림받기'}
                 </button>
-                {post.mine && (
-                  <>
-                    <Link to={`/write?edit=${post.postId}`} className="detail__chip-btn">
-                      수정
-                    </Link>
-                    <button
-                      type="button"
-                      className="detail__chip-btn detail__chip-btn--danger"
-                      onClick={removePost}
-                      disabled={deleteBusy}
-                    >
-                      <TrashIcon width={16} height={16} />
-                      {deleteBusy ? '삭제 중…' : '삭제'}
-                    </button>
-                  </>
-                )}
-              </div>
+              )}
+              <button
+                type="button"
+                className={`detail__chip-btn ${post.saved ? 'is-on' : ''}`}
+                onClick={toggleSave}
+                disabled={saveBusy}
+              >
+                <BookmarkIcon width={17} height={17} filled={post.saved} />
+                {post.saved ? '저장됨' : '저장하기'}
+              </button>
+              {post.mine && (
+                <>
+                  <Link to={`/write?edit=${post.postId}`} className="detail__chip-btn">
+                    수정
+                  </Link>
+                  <button
+                    type="button"
+                    className="detail__chip-btn detail__chip-btn--danger"
+                    onClick={removePost}
+                    disabled={deleteBusy}
+                  >
+                    <TrashIcon width={16} height={16} />
+                    {deleteBusy ? '삭제 중…' : '삭제'}
+                  </button>
+                </>
+              )}
             </div>
           </header>
 
@@ -249,20 +325,36 @@ export default function PostDetailPage() {
               <ImageFallback className="imgfallback--hero" />
             )}
 
-            {isSeller && post.progress !== 'NONE' && (
+            {statusText && (
               <figcaption className="detail__badge">
                 <span className="detail__badge-dot" />
-                {post.participantCount != null
-                  ? `실시간 ${post.participantCount}명 참여 중`
-                  : `${PROGRESS_LABEL[post.progress]} · ${ddayLabel(post.endDate)}`}
+                {post.participantCount != null ? `실시간 ${post.participantCount}명 참여 중` : statusText}
               </figcaption>
             )}
 
-            {/* 여러 장일 때만 현재 위치를 알려준다 */}
+            {/* 여러 장일 때만 좌우로 넘기고 현재 위치를 알려준다 */}
             {images.length > 1 && (
-              <span className="detail__hero-count">
-                {heroIndex + 1} / {images.length}
-              </span>
+              <>
+                <button
+                  type="button"
+                  className="detail__nav detail__nav--prev"
+                  onClick={() => step(-1)}
+                  aria-label="이전 이미지"
+                >
+                  <ChevronLeftIcon width={20} height={20} />
+                </button>
+                <button
+                  type="button"
+                  className="detail__nav detail__nav--next"
+                  onClick={() => step(1)}
+                  aria-label="다음 이미지"
+                >
+                  <ChevronRightIcon width={20} height={20} />
+                </button>
+                <span className="detail__hero-count">
+                  {heroIndex + 1} / {images.length}
+                </span>
+              </>
             )}
           </figure>
 
@@ -284,74 +376,23 @@ export default function PostDetailPage() {
             </ul>
           )}
 
-          {isSeller && (
-            <dl className="detail__meta">
-              <div className="detail__meta-row">
-                <dt>기간</dt>
-                <dd>
-                  {formatPeriod(post.startDate, post.endDate)}
-                  {/* 마감일이 없으면 D-day 를 계산할 수 없으므로 괄호까지 통째로 생략한다 */}
-                  {post.endDate && <span className="detail__dday"> ({ddayLabel(post.endDate)})</span>}
-                </dd>
-              </div>
-
-              <div className="detail__meta-row">
-                <dt>물건이름</dt>
-                <dd>{post.productName || '—'}</dd>
-              </div>
-
-              <div className="detail__meta-row">
-                <dt>가격</dt>
-                <dd>
-                  {/* 수집 단계에서 가격을 못 채운 공구가 있어, 값이 없으면 빈칸 대신 상태를 적어준다. */}
-                  {post.price == null ? (
-                    <span className="detail__price-empty">가격 미정</span>
-                  ) : (
-                    <>
-                      <strong className="detail__price">{formatPrice(post.price)}</strong>
-                      {post.listPrice != null && (
-                        <span className="detail__price-was">{formatPrice(post.listPrice)}</span>
-                      )}
-                    </>
-                  )}
-                </dd>
-              </div>
-
-              <div className="detail__meta-row">
-                <dt>구매링크</dt>
-                <dd>
-                  {post.buyUrl ? (
-                    <a
-                      className="detail__buy"
-                      href={post.buyUrl}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      원본 상품 페이지 바로가기 <ExternalLinkIcon width={14} height={14} />
-                    </a>
-                  ) : (
-                    '—'
-                  )}
-                </dd>
-              </div>
-
-              {post.eventNote && (
-                <div className="detail__meta-row detail__meta-row--wide">
-                  <dt>이벤트</dt>
-                  <dd>{post.eventNote}</dd>
-                </div>
-              )}
-            </dl>
-          )}
-
-          {post.categories?.length > 0 && (
-            <ul className="detail__tags">
-              {post.categories.map((c, i) => (
-                <li key={c.categoryId} className={`detail__tag ${i === 0 ? 'detail__tag--brand' : ''}`}>
-                  {c.name}
-                </li>
-              ))}
-            </ul>
+          {/* 이벤트를 적어둔 글에만 이 칸이 생긴다 */}
+          {events.length > 0 && (
+            <section className="detail__section">
+              <h2 className="detail__section-title">공구 이벤트</h2>
+              <ul className="devent">
+                {events.map((ev, i) => (
+                  <li key={`${ev.title}-${i}`} className={`devent__card devent__card--${i % 2 === 0 ? 'a' : 'b'}`}>
+                    <span className="devent__no">{String(i + 1).padStart(2, '0')}</span>
+                    <div className="devent__body">
+                      {ev.label && <span className="devent__label">{ev.label}</span>}
+                      <p className="devent__title">{ev.title}</p>
+                      {ev.desc && <p className="devent__desc">{ev.desc}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           <section className="detail__section">
@@ -362,33 +403,139 @@ export default function PostDetailPage() {
           <CommentSection post={post} onCountChange={handleCommentCountChange} />
         </main>
 
-        {/* 서버가 골라준 결과가 있을 때만 이 자리를 만든다 */}
-        {canShowRelated && (
-          <aside className="detail__side">
-            <h2 className="detail__side-title">비슷한 상품</h2>
-            <ul className="detail__side-list">
-              {related.map((r) => (
-                <li key={r.postId}>
-                  <Link to={`/posts/${r.postId}`} className="rcard">
-                    {r.thumbnailUrl ? (
-                      <img className="rcard__thumb" src={r.thumbnailUrl} alt="" />
-                    ) : (
-                      <ImageFallback size={60} />
-                    )}
-                    <span className="rcard__body">
-                      <span className="rcard__name">{r.productName || r.title}</span>
-                      <span className="rcard__price">{formatPrice(r.price)}</span>
-                      <span className="rcard__meta">
-                        {r.participantCount != null ? `${r.participantCount}명 참여 · ` : ''}
-                        {ddayLabel(r.endDate)}
-                      </span>
-                    </span>
+        <aside className="detail__side">
+          <div className="dbuy">
+            <h1 className="dbuy__title">{post.title}</h1>
+            {statusText && <span className="dbuy__chip">{statusText}</span>}
+
+            <dl className="dbuy__rows">
+              {isSeller && countdownTarget && post.progress !== 'ENDED' && (
+                <div className="dbuy__row">
+                  <dt>
+                    <CalendarIcon width={17} height={17} /> {countdownLabel}
+                  </dt>
+                  <dd>
+                    <Countdown target={countdownTarget} />
+                  </dd>
+                </div>
+              )}
+
+              {isSeller && post.startDate && (
+                <div className="dbuy__row">
+                  <dt>
+                    <CalendarIcon width={17} height={17} /> 진행기간
+                  </dt>
+                  <dd>{formatPeriodDay(post.startDate, post.endDate)}</dd>
+                </div>
+              )}
+
+              <div className="dbuy__row">
+                <dt>
+                  <UserIcon width={17} height={17} /> 주최자
+                </dt>
+                <dd>
+                  <Link to={`/users/${post.author.userId}`} className="dbuy__host">
+                    {post.author.nickname}
                   </Link>
-                </li>
-              ))}
-            </ul>
-          </aside>
-        )}
+                </dd>
+              </div>
+
+              {isSeller && (
+                <div className="dbuy__row">
+                  <dt>
+                    <TagIcon width={17} height={17} /> 현재 가격
+                  </dt>
+                  <dd>
+                    {/* 수집 단계에서 가격을 못 채운 공구가 있어, 값이 없으면 빈칸 대신 상태를 적어준다. */}
+                    {post.price == null ? (
+                      <span className="dbuy__muted">가격 미정</span>
+                    ) : (
+                      <>
+                        <strong className="dbuy__price">{formatPrice(post.price)}</strong>
+                        {post.listPrice != null && (
+                          <span className="dbuy__was">{formatPrice(post.listPrice)}</span>
+                        )}
+                      </>
+                    )}
+                  </dd>
+                </div>
+              )}
+            </dl>
+
+            {(post.categories?.length > 0 || post.buyUrl) && (
+              <dl className="dbuy__sub">
+                {post.categories?.length > 0 && (
+                  <div className="dbuy__row">
+                    <dt>카테고리</dt>
+                    <dd>{post.categories.map((c) => c.name).join(' > ')}</dd>
+                  </div>
+                )}
+                {post.buyUrl && (
+                  <div className="dbuy__row">
+                    <dt>상품 출처</dt>
+                    <dd>
+                      <a className="dbuy__src" href={post.buyUrl} target="_blank" rel="noreferrer noopener">
+                        원본 상품 페이지 바로가기 <ExternalLinkIcon width={13} height={13} />
+                      </a>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            )}
+
+            {post.buyUrl && (
+              <>
+                <a className="dbuy__cta" href={post.buyUrl} target="_blank" rel="noreferrer noopener">
+                  공구 상품 보러가기
+                  <ChevronRightIcon width={18} height={18} />
+                </a>
+                <p className="dbuy__note">
+                  <WarningIcon width={14} height={14} /> 결제 및 배송은 원본 판매 페이지에서 진행됩니다.
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* 서버가 골라준 결과가 있을 때만 이 자리를 만든다 */}
+          {canShowRelated && (
+            <section className="dsim">
+              <div className="dsim__head">
+                <h2 className="dsim__title">비슷한 상품</h2>
+                {post.categories?.length > 0 && (
+                  <Link to={`/?categoryId=${post.categories[0].categoryId}`} className="dsim__more">
+                    더보기 <ChevronRightIcon width={14} height={14} />
+                  </Link>
+                )}
+              </div>
+
+              <ul className="dsim__grid">
+                {related.slice(0, SIMILAR_SHOWN).map((r) => (
+                  <li key={r.postId}>
+                    <Link to={`/posts/${r.postId}`} className="rcard">
+                      <span className="rcard__thumb">
+                        {r.thumbnailUrl ? (
+                          <img src={r.thumbnailUrl} alt="" loading="lazy" />
+                        ) : (
+                          <ImageFallback className="imgfallback--fill" />
+                        )}
+                      </span>
+                      <span className="rcard__name">{r.productName || r.title}</span>
+                      <span className="rcard__foot">
+                        <span className={`rcard__price ${r.price == null ? 'is-empty' : ''}`}>
+                          {r.price == null ? '가격 미정' : formatPrice(r.price)}
+                        </span>
+                        <span className="rcard__like">
+                          <HeartIcon width={15} height={15} filled={r.liked} />
+                          {r.likeCount > 0 && r.likeCount}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </aside>
       </div>
     </div>
   )

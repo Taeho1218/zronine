@@ -1,0 +1,111 @@
+.footer {
+  margin-top: 80px;
+  border-top: 1px solid var(--line);
+  background: var(--white);
+}
+
+.footer__inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 48px;
+  padding-top: 44px;
+  padding-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+/* ── 왼쪽 브랜드 ──────────────────────────────── */
+
+.footer__brand {
+  max-width: 360px;
+}
+
+.footer__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+.footer__logo img {
+  height: 24px;
+  width: auto;
+}
+
+.footer__tagline {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.footer__desc {
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--gray-500);
+}
+
+/* ── 오른쪽 메뉴 ──────────────────────────────── */
+
+.footer__nav {
+  display: flex;
+  gap: 64px;
+}
+
+.footer__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer__group-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.footer__group a {
+  font-size: 13.5px;
+  color: var(--gray-500);
+  transition: color 0.15s ease;
+}
+
+.footer__group a:hover {
+  color: var(--ink);
+}
+
+/* ── 아래 줄 ─────────────────────────────────── */
+
+.footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  padding-bottom: 28px;
+  border-top: 1px solid var(--gray-150);
+  font-size: 12.5px;
+  color: var(--gray-400);
+}
+
+.footer__note {
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .footer__inner {
+    flex-direction: column;
+    gap: 32px;
+  }
+  .footer__nav {
+    gap: 48px;
+  }
+  .footer__note {
+    text-align: left;
+  }
+}

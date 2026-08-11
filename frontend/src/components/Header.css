@@ -56,7 +56,8 @@
   width: 100%;
   height: 48px;
   border: 1px solid transparent;
-  border-radius: var(--r-md);
+  /* 높이의 50% 만큼 모서리를 깎는다 (48 x 0.5 = 24px → 양 끝이 완전한 반원) */
+  border-radius: calc(48px * 0.5);
   background: var(--gray-100);
   padding: 0 16px 0 46px;
   transition: background-color 0.15s ease, border-color 0.15s ease;
@@ -112,6 +113,7 @@
 }
 
 .header__icon-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -126,6 +128,19 @@
 .header__icon-btn.is-active {
   background: var(--gray-100);
   color: var(--ink);
+}
+
+/* 종 아이콘 오른쪽 위의 안 읽음 표시. 흰 테두리로 아이콘과 겹쳐도 또렷하게 보인다. */
+.header__badge {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid var(--white);
+  box-sizing: content-box;
 }
 
 .header__write {

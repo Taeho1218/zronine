@@ -1,4 +1,6 @@
 .pcard {
+  /* 오른쪽 위 점 3개 메뉴가 이 카드를 기준으로 자리잡는다 */
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--white);

@@ -1,0 +1,120 @@
+.feedfilter {
+  position: relative;
+  flex: none;
+}
+
+/* 카테고리 칩과 같은 알약 모양을 쓰되, 선택 상태는 초록으로 구분한다 */
+.feedfilter__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 16px 0 20px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--gray-600);
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.feedfilter__trigger:hover,
+.feedfilter__trigger.is-open {
+  background: var(--gray-50);
+  color: var(--ink);
+}
+
+.feedfilter__trigger.is-active {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.feedfilter__caret {
+  transition: transform 0.15s ease;
+}
+
+.feedfilter__trigger.is-open .feedfilter__caret {
+  transform: rotate(180deg);
+}
+
+/* ── 펼침 패널 ────────────────────────────────── */
+
+.feedfilter__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  animation: feedfilter-in 0.12s ease-out;
+}
+
+@keyframes feedfilter-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.feedfilter__group + .feedfilter__group {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-150);
+}
+
+.feedfilter__group-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gray-400);
+  margin-bottom: 8px;
+}
+
+.feedfilter__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.feedfilter__option {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gray-600);
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.feedfilter__option:hover {
+  background: var(--gray-50);
+}
+
+.feedfilter__option.is-on {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.feedfilter__reset {
+  width: 100%;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-150);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-500);
+}
+
+.feedfilter__reset:hover {
+  color: var(--ink);
+}

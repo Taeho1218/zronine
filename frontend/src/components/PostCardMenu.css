@@ -1,0 +1,103 @@
+.pcardmenu {
+  position: absolute;
+  top: 26px;
+  right: 26px;
+  z-index: 2;
+}
+
+.pcardmenu__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--gray-600);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.18);
+
+  /* 사진 위에 늘 떠 있으면 지저분해서, 카드에 마우스를 올렸을 때만 보인다 */
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.pcard:hover .pcardmenu__trigger,
+.pcardmenu__trigger.is-open {
+  opacity: 1;
+}
+
+.pcardmenu__trigger:hover,
+.pcardmenu__trigger.is-open {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.pcardmenu__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 132px;
+  padding: 6px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  animation: pcardmenu-in 0.12s ease-out;
+}
+
+@keyframes pcardmenu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.pcardmenu__item {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.pcardmenu__item:hover:not(:disabled) {
+  background: var(--gray-100);
+}
+
+.pcardmenu__item--danger {
+  color: var(--danger);
+}
+
+.pcardmenu__item--danger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.pcardmenu__item:disabled {
+  color: var(--gray-400);
+  cursor: default;
+}
+
+/* 신고한 뒤 카드에 남는 표시 */
+.pcardmenu__flag {
+  position: absolute;
+  top: 4px;
+  right: 36px;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(31, 41, 55, 0.86);
+  color: var(--white);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* 손가락으로 쓰는 화면에는 hover 가 없으므로 항상 보여준다 */
+@media (hover: none) {
+  .pcardmenu__trigger {
+    opacity: 1;
+  }
+}

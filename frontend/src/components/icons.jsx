@@ -106,9 +106,64 @@ export const ArrowRightIcon = (props) => (
   </svg>
 )
 
+export const SettingsIcon = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" />
+  </svg>
+)
+
 export const TrashIcon = (props) => (
   <svg {...base} {...props}>
     <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
     <path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
+  </svg>
+)
+
+export const CalendarIcon = (props) => (
+  <svg {...base} {...props}>
+    <rect x="3" y="5" width="18" height="16" rx="3" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </svg>
+)
+
+export const UserIcon = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="12" cy="8" r="3.6" />
+    <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+  </svg>
+)
+
+export const TagIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M3 12.4V5a2 2 0 0 1 2-2h7.4a2 2 0 0 1 1.4.6l6.6 6.6a2 2 0 0 1 0 2.8l-7.4 7.4a2 2 0 0 1-2.8 0L3.6 13.8a2 2 0 0 1-.6-1.4Z" />
+    <circle cx="8" cy="8" r="1.4" />
+  </svg>
+)
+
+export const ChevronLeftIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="m14.5 5-7 7 7 7" />
+  </svg>
+)
+
+export const ChevronRightIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="m9.5 5 7 7-7 7" />
+  </svg>
+)
+
+export const WarningIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 4.5 2.8 20h18.4L12 4.5Z" />
+    <path d="M12 10v4M12 17.2v.1" />
+  </svg>
+)
+
+export const GiftIcon = (props) => (
+  <svg {...base} {...props}>
+    <rect x="3" y="9" width="18" height="11" rx="2" />
+    <path d="M3 13h18M12 9v11" />
+    <path d="M12 9S10.6 4.5 8.2 4.5a2.2 2.2 0 0 0 0 4.5H12Zm0 0s1.4-4.5 3.8-4.5a2.2 2.2 0 0 1 0 4.5H12Z" />
   </svg>
 )

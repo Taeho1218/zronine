@@ -59,6 +59,16 @@ export function AuthProvider({ children }) {
     return token.user
   }, [])
 
+  /**
+   * 프로필을 고쳤을 때 화면에 남아 있는 내 정보(헤더 아바타·닉네임)를 함께 갱신한다.
+   * 이걸 안 하면 닉네임을 바꿔도 다시 로그인하기 전까지 옛 이름이 그대로 보인다.
+   */
+  const updateUser = useCallback((patch) => {
+    const current = tokenStore.getUser()
+    if (!current) return
+    tokenStore.set({ accessToken: tokenStore.getAccessToken(), user: { ...current, ...patch } })
+  }, [])
+
   const logout = useCallback(async () => {
     try {
       // 리프레시 쿠키는 httpOnly 라 자바스크립트로 못 지운다.
@@ -71,8 +81,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, isLoggedIn: !!user, ready, login, logout }),
-    [user, ready, login, logout],
+    () => ({ user, isLoggedIn: !!user, ready, login, logout, updateUser }),
+    [user, ready, login, logout, updateUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

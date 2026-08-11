@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { userApi } from '../api'
-import Avatar from '../components/Avatar'
 import FollowButton from '../components/FollowButton'
 import FollowListModal from '../components/FollowListModal'
+import ProfileHeader from '../components/ProfileHeader'
 import PostCard from '../components/PostCard'
-import { ExternalLinkIcon } from '../components/icons'
-import { formatDate } from '../lib/format'
 import './MyPage.css'
 
 /**
@@ -72,59 +70,30 @@ export default function UserProfilePage() {
 
   return (
     <div className="mypage page">
-      <header className="mypage__head">
-        <Avatar user={profile} size={72} />
-
-        <div className="mypage__info">
-          <h1 className="mypage__name">{profile.nickname}</h1>
-          {/* 서버가 UserProfileResponse 에 담아주는 값. 등록해둔 사람만 링크가 보인다. */}
-          {profile.instagramUrl && (
-            <a
-              className="mypage__insta"
-              href={profile.instagramUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              인스타그램 <ExternalLinkIcon width={13} height={13} />
-            </a>
-          )}
-          {profile.joinedAt && <p className="mypage__joined">{formatDate(profile.joinedAt)} 가입</p>}
-        </div>
-
-        <dl className="mypage__stats">
-          <div>
-            <dt>게시물</dt>
-            <dd>{profile.postCount ?? 0}</dd>
-          </div>
-          {/* 팔로워/팔로잉은 눌러서 목록을 볼 수 있다 */}
-          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followers')}>
-            <dt>팔로워</dt>
-            <dd>{profile.followerCount ?? 0}</dd>
-          </button>
-          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followings')}>
-            <dt>팔로잉</dt>
-            <dd>{profile.followingCount ?? 0}</dd>
-          </button>
-        </dl>
-
-        {profile.me ? (
-          <Link to="/mypage" className="btn btn--ghost mypage__logout">
-            내 프로필 관리
-          </Link>
-        ) : (
-          <FollowButton
-            userId={profile.userId}
-            following={profile.following}
-            onChange={({ following, followerCount }) =>
-              setProfile((prev) => ({
-                ...prev,
-                following,
-                followerCount: followerCount ?? prev.followerCount,
-              }))
-            }
-          />
-        )}
-      </header>
+      <ProfileHeader
+        profile={profile}
+        onOpenFollowers={() => setFollowTab('followers')}
+        onOpenFollowings={() => setFollowTab('followings')}
+        besideName={
+          profile.me ? (
+            <Link to="/mypage" className="phead__mine">
+              내 프로필 관리
+            </Link>
+          ) : (
+            <FollowButton
+              userId={profile.userId}
+              following={profile.following}
+              onChange={({ following, followerCount }) =>
+                setProfile((prev) => ({
+                  ...prev,
+                  following,
+                  followerCount: followerCount ?? prev.followerCount,
+                }))
+              }
+            />
+          )
+        }
+      />
 
       {followTab && (
         <FollowListModal

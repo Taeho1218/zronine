@@ -1,0 +1,145 @@
+.hero {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.hero__viewport {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+}
+
+.hero__track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* 몇 장을 보여줄지는 JS(usePerView)가 flexBasis 로 넣어준다. 여기서 폭을 정하지 않는다. */
+.hero__slide {
+  position: relative;
+  flex-grow: 0;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--gray-200);
+}
+
+.hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.hero__img--empty {
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.hero__slide:hover .hero__img {
+  transform: scale(1.03);
+}
+
+/*
+ * 제목 / 기간 / 가격 / 아이디를 배너 아래쪽에 쌓는다.
+ * 네 줄이 들어가므로 그라데이션을 더 높이 올려 사진 위에서도 글씨가 묻히지 않게 한다.
+ */
+.hero__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 60px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  color: var(--white);
+  background: linear-gradient(
+    to top,
+    rgba(17, 24, 39, 0.88) 0%,
+    rgba(17, 24, 39, 0.62) 45%,
+    rgba(17, 24, 39, 0) 100%
+  );
+}
+
+/* 이름은 왼쪽, 기간은 오른쪽 끝. 이름이 길면 말줄임되고 기간을 밀지 않는다. */
+.hero__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.hero__title {
+  min-width: 0;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.4px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero__period {
+  flex: none;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0.82;
+}
+
+.hero__seller {
+  min-width: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.78;
+}
+
+/* ── 좌우 화살표 ──────────────────────────────── */
+
+.hero__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 3px 14px rgba(16, 24, 40, 0.22);
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.hero__nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero__nav--prev {
+  left: -16px;
+}
+
+.hero__nav--next {
+  right: -16px;
+}
+
+@media (max-width: 1024px) {
+  .hero__title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero__nav--prev {
+    left: 8px;
+  }
+  .hero__nav--next {
+    right: 8px;
+  }
+}
