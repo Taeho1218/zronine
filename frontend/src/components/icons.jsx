@@ -167,3 +167,19 @@ export const GiftIcon = (props) => (
     <path d="M12 9S10.6 4.5 8.2 4.5a2.2 2.2 0 0 0 0 4.5H12Zm0 0s1.4-4.5 3.8-4.5a2.2 2.2 0 0 1 0 4.5H12Z" />
   </svg>
 )
+
+export const GridIcon = (props) => (
+  <svg {...base} {...props}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.6" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.6" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.6" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.6" />
+  </svg>
+)
+
+export const ListIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M8 6h12M8 12h12M8 18h12" />
+    <path d="M4 6h.01M4 12h.01M4 18h.01" />
+  </svg>
+)
