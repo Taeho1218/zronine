@@ -29,6 +29,8 @@ export default function MyPage() {
 
   const [profile, setProfile] = useState(null)
   const [items, setItems] = useState([])
+  // 커버를 안 올렸을 때 대신 깔 사진. 탭을 옮겨도 커버가 바뀌지 않도록 "내 글"에서만 갱신한다.
+  const [coverFallback, setCoverFallback] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   // null 이면 닫힌 상태, 'followers' | 'followings' 면 그 탭으로 열린다.
@@ -52,7 +54,12 @@ export default function MyPage() {
     setLoading(true)
     setError(null)
     LOADERS[tab]()
-      .then((page) => alive && setItems(page?.content ?? []))
+      .then((page) => {
+        if (!alive) return
+        const list = page?.content ?? []
+        setItems(list)
+        if (tab === 'posts') setCoverFallback(list.find((p) => p.thumbnailUrl)?.thumbnailUrl ?? null)
+      })
       .catch((err) => alive && setError(err.message))
       .finally(() => alive && setLoading(false))
     return () => {
@@ -67,6 +74,7 @@ export default function MyPage() {
         profile={profile ?? { nickname: user?.nickname ?? '회원', userId: user?.userId }}
         onOpenFollowers={() => setFollowTab('followers')}
         onOpenFollowings={() => setFollowTab('followings')}
+        fallbackCover={coverFallback}
         topRight={
           <Link to="/settings" aria-label="환경설정">
             <SettingsIcon width={16} height={16} />

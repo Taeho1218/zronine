@@ -11,8 +11,15 @@ import './ProfileHeader.css'
  * 두 화면이 같은 모양을 유지하도록 markup 을 한곳에 모았고,
  * 화면마다 다른 것(환경설정·팔로우 버튼)은 topRight / besideName 으로 받는다.
  *
- * 커버 사진은 서버가 coverImageUrl 을 주면 그걸 쓰고, 없으면 환경설정에서 내가 고른 사진을,
- * 그것도 없으면 assets/cover 의 기본 사진을, 마지막으로 브랜드 색 그라데이션을 깐다.
+ * 커버 사진은 이 순서로 고른다.
+ *   1. 서버가 준 coverImageUrl
+ *   2. (내 프로필일 때) 환경설정에서 내가 고른 사진
+ *   3. 그 사람이 올린 글의 첫 사진 — 남의 프로필도 초록 단색으로 비어 보이지 않게 한다
+ *   4. assets/cover 에 넣어둔 공통 기본 사진
+ *   5. 브랜드 색 그라데이션
+ *
+ * 3번은 커버로 찍은 사진이 아니라 상품 사진이라 크게 확대되면 어색하다.
+ * 그래서 이 경우에만 배경을 흐리게 깔아(ambient) 인물/글씨가 앞에 서도록 한다.
  */
 export default function ProfileHeader({
   profile,
@@ -20,17 +27,25 @@ export default function ProfileHeader({
   onOpenFollowings,
   topRight,
   besideName,
+  fallbackCover,
 }) {
   if (!profile) return null
 
   // 내가 고른 커버는 내 프로필에서만 되살린다 (남의 프로필에 내 사진이 깔리면 안 된다).
-  const cover = profile.coverImageUrl ?? (profile.me ? getLocalCover(profile.userId) : null) ?? coverImage
+  const chosen = profile.coverImageUrl ?? (profile.me ? getLocalCover(profile.userId) : null)
+  const cover = chosen ?? fallbackCover ?? coverImage
+  const ambient = !chosen && !!fallbackCover
 
   return (
-    <header
-      className={`phead ${cover ? 'phead--photo' : ''}`}
-      style={cover ? { backgroundImage: `url(${cover})` } : undefined}
-    >
+    <header className={`phead ${cover ? 'phead--photo' : ''}`}>
+      {cover && (
+        <span
+          className={`phead__bg ${ambient ? 'phead__bg--ambient' : ''}`}
+          style={{ backgroundImage: `url(${cover})` }}
+          aria-hidden="true"
+        />
+      )}
+
       <div className="phead__inner">
         {topRight && <div className="phead__corner">{topRight}</div>}
 

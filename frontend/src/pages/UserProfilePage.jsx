@@ -71,10 +71,12 @@ export default function UserProfilePage() {
   return (
     /* 커버가 화면 끝까지 깔려야 해서 헤더만 .page 바깥에 둔다 */
     <>
+      {/* 커버를 따로 올린 적 없는 사람은 자기가 올린 첫 공구 사진으로 커버를 채운다 */}
       <ProfileHeader
         profile={profile}
         onOpenFollowers={() => setFollowTab('followers')}
         onOpenFollowings={() => setFollowTab('followings')}
+        fallbackCover={posts.find((p) => p.thumbnailUrl)?.thumbnailUrl ?? null}
         besideName={
           profile.me ? (
             <Link to="/mypage" className="phead__mine">

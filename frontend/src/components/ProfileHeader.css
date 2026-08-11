@@ -4,17 +4,36 @@
  */
 .phead {
   position: relative;
+  overflow: hidden;
+  /* 아래 두 모서리만 둥글려 헤더에는 붙고 본문과는 떨어져 보이게 한다 */
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
   background: linear-gradient(150deg, #1f9d5b 0%, #14ae5c 42%, #0d8845 100%);
+  color: var(--white);
+}
+
+/* 사진은 따로 깔아야 흐림 효과를 글씨에까지 먹이지 않는다 */
+.phead__bg {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
-  color: var(--white);
+}
+
+/*
+ * 커버용으로 찍은 사진이 아니라 상품 사진을 빌려 쓴 경우.
+ * 크게 확대되어 거칠어 보이므로 흐리게 깔고, 흐림 때문에 생기는 가장자리 여백은 살짝 키워 덮는다.
+ */
+.phead__bg--ambient {
+  /* 상품 사진은 배경이 흰 경우가 많아 그대로 두면 흰 글씨가 안 보인다. 함께 어둡게 낮춘다. */
+  filter: blur(22px) saturate(1.2) brightness(0.62);
+  transform: scale(1.15);
 }
 
 /*
  * 사진 커버는 어떤 사진이 오든 글씨가 읽혀야 하므로 아래쪽에 어두운 그라데이션을 얹는다.
  * (그라데이션 커버일 때는 이미 충분히 어두워 필요 없다)
  */
-.phead--photo::before {
+.phead--photo::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -24,6 +43,8 @@
 
 .phead__inner {
   position: relative;
+  /* 사진·어둠막(::after) 위로 올린다 — 안 그러면 글씨까지 같이 어두워진다 */
+  z-index: 1;
   width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
