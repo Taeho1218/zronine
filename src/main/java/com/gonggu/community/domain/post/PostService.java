@@ -12,6 +12,7 @@ import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,9 @@ public class PostService {
 
 	/** 이보다 짧은 검색어는 검색을 수행하지 않는다. */
 	public static final int MIN_KEYWORD_LENGTH = 2;
+
+	/** 상세페이지 "비슷한 상품"에 내려줄 최대 개수 */
+	public static final int SIMILAR_LIMIT = 6;
 
 	private final PostRepository postRepository;
 	private final PostCategoryRepository postCategoryRepository;
@@ -177,6 +181,47 @@ public class PostService {
 	}
 
 	/**
+	 * 상세페이지의 "비슷한 상품" 목록. 셀러글에서만 의미가 있어 일반글이면 빈 목록을 돌려준다
+	 * (일반글 상세페이지는 애초에 이 API를 호출하지 않을 것이므로 에러 대신 빈 목록으로 방어적으로 처리).
+	 *
+	 * 1순위: 같은 물건 이름(product_name)을 가진 다른 셀러글.
+	 * 2순위(폴백): 1순위가 하나도 없으면, 이 글의 카테고리와 하나라도 겹치는 셀러글.
+	 * 두 경우 다 최신순으로 SIMILAR_LIMIT 개까지만 내려준다.
+	 */
+	public List<PostFeedResponse> getSimilarPosts(Long postId, Long viewerId) {
+		Post post = getPostOrThrow(postId);
+		if (!post.isSeller()) {
+			return List.of();
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+		Pageable limit = PageRequest.of(0, SIMILAR_LIMIT, Sort.by(Sort.Direction.DESC, "id"));
+
+		Specification<Post> byProductName = combine(
+			PostSpecifications.hasType(PostType.SELLER),
+			PostSpecifications.excludingId(postId),
+			PostSpecifications.sameProductName(post.getProductName())
+		);
+		List<Post> candidates = postRepository.findAll(byProductName, limit).getContent();
+
+		if (candidates.isEmpty()) {
+			List<Integer> categoryIds = postCategoryRepository.findAllByPostId(postId).stream()
+				.map(mapping -> mapping.getCategory().getId())
+				.toList();
+			if (!categoryIds.isEmpty()) {
+				Specification<Post> byCategory = combine(
+					PostSpecifications.hasType(PostType.SELLER),
+					PostSpecifications.excludingId(postId),
+					PostSpecifications.hasAnyCategory(categoryIds)
+				);
+				candidates = postRepository.findAll(byCategory, limit).getContent();
+			}
+		}
+
+		return mapToFeedResponses(candidates, viewerId, now);
+	}
+
+	/**
 	 * 공백만 있는 검색어는 "검색 안 함"으로 보고 전체 목록을 돌려주지만,
 	 * 한 글자짜리 검색어는 검색 의도가 있는 요청이라 최소 길이 미달로 처리한다.
 	 */
@@ -200,7 +245,26 @@ public class PostService {
 	 * 페이지에 실린 id 들을 모아 한 번씩만 조회한 뒤 메모리에서 조립한다.
 	 */
 	public PageResponse<PostFeedResponse> toFeedPage(Page<Post> page, Long viewerId, LocalDateTime now) {
-		List<Post> posts = page.getContent();
+		boolean hasNext = page.hasNext();
+		return new PageResponse<>(
+			mapToFeedResponses(page.getContent(), viewerId, now),
+			page.getNumber(),
+			page.getSize(),
+			page.getTotalElements(),
+			page.getTotalPages(),
+			page.isFirst(),
+			page.isLast(),
+			hasNext,
+			hasNext ? page.getNumber() + 1 : null
+		);
+	}
+
+	/**
+	 * toFeedPage 와 getSimilarPosts 가 공유하는 배치 조회 로직.
+	 * 목록이 페이지로 묶여있든(무한 스크롤) 그냥 리스트든(비슷한 상품) 상관없이,
+	 * 카테고리/좋아요/저장/팔로우 여부를 id 목록 기준으로 한 번씩만 조회해 N+1 을 피한다.
+	 */
+	private List<PostFeedResponse> mapToFeedResponses(List<Post> posts, Long viewerId, LocalDateTime now) {
 		List<Long> postIds = posts.stream().map(Post::getId).toList();
 
 		Map<Long, List<CategoryResponse>> categoryMap = findCategoryMap(postIds);
@@ -209,15 +273,17 @@ public class PostService {
 		Set<Long> followingIds = followService.findFollowingIds(viewerId,
 			posts.stream().map(post -> post.getUser().getId()).distinct().toList());
 
-		return PageResponse.from(page, post -> PostFeedResponse.of(
-			post,
-			categoryMap.getOrDefault(post.getId(), List.of()),
-			now,
-			likedIds.contains(post.getId()),
-			savedIds.contains(post.getId()),
-			followingIds.contains(post.getUser().getId()),
-			viewerId
-		));
+		return posts.stream()
+			.map(post -> PostFeedResponse.of(
+				post,
+				categoryMap.getOrDefault(post.getId(), List.of()),
+				now,
+				likedIds.contains(post.getId()),
+				savedIds.contains(post.getId()),
+				followingIds.contains(post.getUser().getId()),
+				viewerId
+			))
+			.toList();
 	}
 
 	@SafeVarargs

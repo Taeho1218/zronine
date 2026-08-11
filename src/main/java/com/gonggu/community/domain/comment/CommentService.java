@@ -33,6 +33,8 @@ public class CommentService {
 	/**
 	 * 댓글 생성 시 posts.comment_count 를 같은 트랜잭션에서 함께 올린다.
 	 * 카운터는 조회 성능을 위한 비정규화 값이라, 댓글 행과 따로 커밋되면 화면의 댓글 수가 실제와 어긋난다.
+	 *
+	 * 대댓글은 세지 않는다 — 피드/상세 페이지에 노출되는 "댓글 수"는 원댓글 개수만을 의미하기로 했다.
 	 */
 	@Transactional
 	public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
@@ -43,7 +45,9 @@ public class CommentService {
 
 		Comment comment = commentRepository.save(
 			new Comment(post, writer, parent, request.content(), request.secret()));
-		post.increaseCommentCount();
+		if (parent == null) {
+			post.increaseCommentCount();
+		}
 
 		return CommentResponse.of(comment, true, userId, List.of());
 	}
@@ -119,7 +123,8 @@ public class CommentService {
 
 	/**
 	 * 원댓글을 지우면 거기 달린 대댓글도 함께 사라진다.
-	 * 지운 개수만큼 posts.comment_count 를 한 번에 내려 카운터가 실제 댓글 수와 맞도록 유지한다.
+	 * comment_count 는 원댓글 개수만 세므로, 원댓글을 지울 때만 1 내리고 대댓글은 애초에 세지 않았으니
+	 * 몇 개가 딸려 지워지든 카운터에는 손대지 않는다.
 	 */
 	@Transactional
 	public void delete(Long userId, Long commentId) {
@@ -131,11 +136,14 @@ public class CommentService {
 		}
 
 		Post post = comment.getPost();
+		boolean wasReply = comment.isReply();
 
-		List<Comment> replies = comment.isReply() ? List.of() : commentRepository.findAllByParentId(commentId);
+		List<Comment> replies = wasReply ? List.of() : commentRepository.findAllByParentId(commentId);
 		commentRepository.deleteAll(replies);
 		commentRepository.delete(comment);
 
-		post.decreaseCommentCount(replies.size() + 1);
+		if (!wasReply) {
+			post.decreaseCommentCount(1);
+		}
 	}
 }

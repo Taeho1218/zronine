@@ -1,6 +1,7 @@
 package com.gonggu.community.domain.post;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -75,6 +76,41 @@ public final class PostSpecifications {
 			return null;
 		}
 		return (root, query, cb) -> cb.equal(root.get("user").get("id"), userId);
+	}
+
+	public static Specification<Post> excludingId(Long postId) {
+		if (postId == null) {
+			return null;
+		}
+		return (root, query, cb) -> cb.notEqual(root.get("id"), postId);
+	}
+
+	/** "비슷한 상품" 1순위 조건 — 같은 물건 이름을 가진 다른 셀러글. */
+	public static Specification<Post> sameProductName(String productName) {
+		if (productName == null || productName.isBlank()) {
+			return null;
+		}
+		return (root, query, cb) -> cb.equal(root.get("productName"), productName);
+	}
+
+	/**
+	 * "비슷한 상품" 2순위(폴백) 조건 — 주어진 카테고리 중 하나라도 겹치는 글.
+	 * hasCategory 와 같은 EXISTS 서브쿼리 방식이되, 카테고리 하나가 아니라 목록 중 하나만 겹쳐도 매칭시킨다.
+	 */
+	public static Specification<Post> hasAnyCategory(Collection<Integer> categoryIds) {
+		if (categoryIds == null || categoryIds.isEmpty()) {
+			return null;
+		}
+		return (root, query, cb) -> {
+			Subquery<Long> subquery = query.subquery(Long.class);
+			Root<PostCategory> mapping = subquery.from(PostCategory.class);
+			subquery.select(cb.literal(1L))
+				.where(
+					cb.equal(mapping.get("post").get("id"), root.get("id")),
+					mapping.get("category").get("id").in(categoryIds)
+				);
+			return cb.exists(subquery);
+		};
 	}
 
 	/**
