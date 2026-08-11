@@ -173,6 +173,11 @@ public class UserService {
 			user.changeInstagramUrl(request.instagramUrl().isBlank() ? null : request.instagramUrl());
 		}
 
+		if (request.coverImageUrl() != null) {
+			// 빈 문자열은 "기본 배경으로 되돌리기" 요청으로 해석한다.
+			user.changeCoverImageUrl(request.coverImageUrl().isBlank() ? null : request.coverImageUrl());
+		}
+
 		return getProfile(userId, userId);
 	}
 

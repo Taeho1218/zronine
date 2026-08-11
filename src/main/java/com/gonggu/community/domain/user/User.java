@@ -52,6 +52,9 @@ public class User {
 	@Column(name = "instagram_url", length = 255)
 	private String instagramUrl;
 
+	@Column(name = "cover_image_url", length = 512)
+	private String coverImageUrl;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
 	private UserStatus status;
@@ -96,6 +99,10 @@ public class User {
 
 	public void changeInstagramUrl(String instagramUrl) {
 		this.instagramUrl = instagramUrl;
+	}
+
+	public void changeCoverImageUrl(String coverImageUrl) {
+		this.coverImageUrl = coverImageUrl;
 	}
 
 	public void changePassword(String encodedPassword) {
