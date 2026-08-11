@@ -403,6 +403,30 @@ function threadComments(postId) {
   }))
 }
 
+/**
+ * 서버 PostService.getSimilarPosts 와 같은 규칙.
+ * 1순위: 물건 이름이 같은 다른 셀러글 / 2순위: 카테고리가 하나라도 겹치는 셀러글.
+ * 일반글에는 빈 배열을 준다.
+ */
+const SIMILAR_LIMIT = 3
+
+function similarPosts(post) {
+  if (post.postType !== 'SELLER') return []
+
+  const others = posts.filter((p) => p.postType === 'SELLER' && p.postId !== post.postId)
+
+  const sameProduct = others.filter((p) => p.productName && p.productName === post.productName)
+  if (sameProduct.length > 0) return sameProduct.slice(0, SIMILAR_LIMIT).map(toFeed)
+
+  const categoryIds = (post.categories ?? []).map((c) => c.categoryId)
+  if (categoryIds.length === 0) return []
+
+  return others
+    .filter((p) => (p.categories ?? []).some((c) => categoryIds.includes(c.categoryId)))
+    .slice(0, SIMILAR_LIMIT)
+    .map(toFeed)
+}
+
 function findPost(id) {
   const post = posts.find((p) => p.postId === Number(id))
   if (!post) {
@@ -569,6 +593,8 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
       posts = posts.filter((x) => x.postId !== post.postId)
       return null
     }
+
+    if (p(2) === 'similar') return similarPosts(post)
 
     if (p(2) === 'comments') {
       if (method === 'GET') return threadComments(post.postId)

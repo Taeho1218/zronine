@@ -48,36 +48,29 @@ export default function PostDetailPage() {
 
   // 사이드바 "비슷한 상품": 같은 카테고리 글에서 현재 글만 빼고 3개.
   // post 객체 전체를 의존성에 두면 좋아요/저장으로 post 가 갱신될 때마다 다시 부르게 되어
-  // 실제로 목록을 다시 받아야 하는 값(글 id, 첫 카테고리)만 본다.
-  const relatedCategoryId = post?.categories?.[0]?.categoryId
+  // 실제로 다시 받아야 하는 값(글 id)만 본다.
   const currentPostId = post?.postId
 
   /**
-   * "비슷한 상품"은 같은 카테고리의 공구를 뽑아 보여주는 자리다.
-   * 그래서 기준 삼을 카테고리가 있을 때만 의미가 있다.
-   *
-   * 유저가 쓴 일반글은 상품도 카테고리도 없어서 예전에는 categoryId 없이 목록을 불렀고,
-   * 그 결과 아무 관계 없는 공구 3개가 "비슷한 상품"으로 붙었다. 이제 아예 부르지 않는다.
+   * "비슷한 상품"은 서버가 골라준다 (같은 물건 이름 → 없으면 같은 카테고리).
+   * 일반글에는 빈 배열이 오므로, 결과가 있을 때만 자리를 만든다.
    */
-  const canShowRelated = post?.postType === 'SELLER' && relatedCategoryId != null
-
   useEffect(() => {
-    if (!currentPostId || !canShowRelated) {
+    if (!currentPostId) {
       setRelated([])
       return undefined
     }
     let alive = true
     postApi
-      .list({ page: 0, categoryId: relatedCategoryId, postType: 'SELLER' })
-      .then((page) => {
-        if (!alive) return
-        setRelated((page?.content ?? []).filter((p) => p.postId !== currentPostId).slice(0, 3))
-      })
+      .similar(currentPostId)
+      .then((list) => alive && setRelated(list ?? []))
       .catch(() => alive && setRelated([]))
     return () => {
       alive = false
     }
-  }, [currentPostId, relatedCategoryId, canShowRelated])
+  }, [currentPostId])
+
+  const canShowRelated = related.length > 0
 
   /**
    * 댓글 개수는 CommentSection 이 실제 목록을 세어 알려준다.
@@ -369,35 +362,31 @@ export default function PostDetailPage() {
           <CommentSection post={post} onCountChange={handleCommentCountChange} />
         </main>
 
-        {/* 공구글이면서 카테고리가 있을 때만 이 자리가 의미를 가진다 */}
+        {/* 서버가 골라준 결과가 있을 때만 이 자리를 만든다 */}
         {canShowRelated && (
           <aside className="detail__side">
             <h2 className="detail__side-title">비슷한 상품</h2>
-            {related.length === 0 ? (
-              <p className="detail__side-empty">아직 비슷한 공구가 없어요.</p>
-            ) : (
-              <ul className="detail__side-list">
-                {related.map((r) => (
-                  <li key={r.postId}>
-                    <Link to={`/posts/${r.postId}`} className="rcard">
-                      {r.thumbnailUrl ? (
-                        <img className="rcard__thumb" src={r.thumbnailUrl} alt="" />
-                      ) : (
-                        <ImageFallback size={60} />
-                      )}
-                      <span className="rcard__body">
-                        <span className="rcard__name">{r.productName || r.title}</span>
-                        <span className="rcard__price">{formatPrice(r.price)}</span>
-                        <span className="rcard__meta">
-                          {r.participantCount != null ? `${r.participantCount}명 참여 · ` : ''}
-                          {ddayLabel(r.endDate)}
-                        </span>
+            <ul className="detail__side-list">
+              {related.map((r) => (
+                <li key={r.postId}>
+                  <Link to={`/posts/${r.postId}`} className="rcard">
+                    {r.thumbnailUrl ? (
+                      <img className="rcard__thumb" src={r.thumbnailUrl} alt="" />
+                    ) : (
+                      <ImageFallback size={60} />
+                    )}
+                    <span className="rcard__body">
+                      <span className="rcard__name">{r.productName || r.title}</span>
+                      <span className="rcard__price">{formatPrice(r.price)}</span>
+                      <span className="rcard__meta">
+                        {r.participantCount != null ? `${r.participantCount}명 참여 · ` : ''}
+                        {ddayLabel(r.endDate)}
                       </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </aside>
         )}
       </div>

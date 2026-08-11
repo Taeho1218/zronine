@@ -31,6 +31,12 @@ export const postApi = {
   list: ({ page = 0, size, categoryId, postType, status, keyword } = {}) =>
     http.get('/api/posts', { page, size, categoryId, postType, status, keyword }),
   detail: (postId) => http.get(`/api/posts/${postId}`),
+  /**
+   * 상세 페이지의 "비슷한 상품".
+   * 어떤 글이 비슷한지는 서버가 정한다(같은 물건 이름 → 없으면 같은 카테고리).
+   * 일반글이면 빈 배열이 오므로 프론트에서 글 종류를 따로 가릴 필요가 없다.
+   */
+  similar: (postId) => http.get(`/api/posts/${postId}/similar`),
   create: (payload) => http.post('/api/posts', payload),
   update: (postId, payload) => http.put(`/api/posts/${postId}`, payload),
   remove: (postId) => http.delete(`/api/posts/${postId}`),
