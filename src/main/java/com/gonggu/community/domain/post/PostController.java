@@ -1,5 +1,7 @@
 package com.gonggu.community.domain.post;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -65,6 +67,16 @@ public class PostController {
 	public ApiResponse<PostDetailResponse> getPost(@PathVariable Long postId,
 		@AuthenticationPrincipal CustomUserDetails principal) {
 		return ApiResponse.success(postService.getDetail(postId, AuthUtils.optionalUserId(principal)));
+	}
+
+	/**
+	 * 상세페이지의 "비슷한 상품" 목록. 셀러글에서만 의미가 있고, 일반글이면 빈 배열이 내려간다.
+	 * 무한 스크롤이 아니라 고정 개수(PostService.SIMILAR_LIMIT)만 내려주는 단순 목록이라 페이지네이션이 없다.
+	 */
+	@GetMapping("/posts/{postId}/similar")
+	public ApiResponse<List<PostFeedResponse>> getSimilarPosts(@PathVariable Long postId,
+		@AuthenticationPrincipal CustomUserDetails principal) {
+		return ApiResponse.success(postService.getSimilarPosts(postId, AuthUtils.optionalUserId(principal)));
 	}
 
 	@PostMapping("/posts")

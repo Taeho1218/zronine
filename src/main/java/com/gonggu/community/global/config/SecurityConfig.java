@@ -58,7 +58,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/check-nickname").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/*").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/posts/*/comments", "/api/posts/*/similar").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/users/*", "/api/users/*/posts",
 					"/api/users/*/followers", "/api/users/*/followings").permitAll()
 				.requestMatchers("/images/**", "/error").permitAll()
