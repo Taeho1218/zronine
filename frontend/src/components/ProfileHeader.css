@@ -104,6 +104,13 @@
   min-width: 0;
 }
 
+.phead__nameline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .phead__name {
   font-size: 27px;
   font-weight: 800;
@@ -154,45 +161,72 @@
   opacity: 0.6;
 }
 
-/* ── 오른쪽에 붙는 것들 ──────────────────────── */
+/* ── 이름 옆 동작 버튼 ───────────────────────── */
 
-.phead__beside {
-  margin-left: auto;
-}
-
-/* 커버 위에서 묻히지 않도록 흰 버튼으로 뒤집는다.
-   자손 선택자라 FollowButton 자신의 규칙보다 우선순위가 높아 순서에 기대지 않는다. */
-.phead__beside .followbtn,
+/*
+ * 커버 사진 위라 두 버튼 다 배경을 꽉 채워야 읽힌다.
+ * 자손 선택자라 FollowButton 자신의 규칙보다 우선순위가 높아 순서에 기대지 않는다.
+ */
+.phead__nameline .followbtn,
+.phead__alert,
 .phead__mine {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 38px;
-  padding: 0 18px;
+  height: 36px;
+  padding: 0 16px;
   border-radius: var(--r-pill);
-  border: 1px solid var(--white);
-  background: var(--white);
-  color: var(--brand-hover);
-  font-size: 14px;
+  border: 1px solid transparent;
+  font-size: 13.5px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.phead__beside .followbtn:hover:not(:disabled),
-.phead__mine:hover {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: transparent;
+/* 가장 중요한 동작이라 브랜드 색을 그대로 쓴다 */
+.phead__nameline .followbtn {
+  background: var(--brand);
+  color: var(--white);
+}
+
+.phead__nameline .followbtn:hover:not(:disabled) {
+  background: var(--brand-hover);
 }
 
 /* 이미 팔로우 중이면 눌러서 끊는 동작이라 톤을 낮춘다 */
-.phead__beside .followbtn.is-on {
+.phead__nameline .followbtn.is-on {
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.6);
   color: var(--white);
 }
 
-.phead__beside .followbtn.is-on:hover:not(:disabled) {
+.phead__nameline .followbtn.is-on:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.34);
+}
+
+.phead__alert,
+.phead__mine {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.phead__alert:hover:not(:disabled),
+.phead__mine:hover {
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.phead__alert.is-on {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.6);
   color: var(--white);
+}
+
+.phead__alert.is-on:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.phead__alert:disabled {
+  cursor: default;
+  opacity: 0.75;
 }
 
 /* 팔로우 버튼이 없으면 인스타 링크가 오른쪽 끝을 맡는다 */
@@ -210,11 +244,6 @@
   white-space: nowrap;
   backdrop-filter: blur(2px);
   transition: background-color 0.15s ease;
-}
-
-/* 둘 다 있으면 팔로우 버튼이 오른쪽 끝을 잡고 인스타가 그 왼쪽에 붙는다 */
-.phead__beside + .phead__insta {
-  margin-left: 10px;
 }
 
 .phead__insta:hover {
@@ -237,7 +266,6 @@
     flex-wrap: wrap;
     gap: 14px;
   }
-  .phead__beside,
   .phead__insta {
     margin-left: 0;
   }

@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { userApi } from '../api'
 import FollowButton from '../components/FollowButton'
 import FollowListModal from '../components/FollowListModal'
+import ProfileAlertButton from '../components/ProfileAlertButton'
 import ProfileHeader from '../components/ProfileHeader'
 import PostCard from '../components/PostCard'
+import { GridIcon, ListIcon } from '../components/icons'
 import './MyPage.css'
 
 /**
@@ -20,6 +22,8 @@ export default function UserProfilePage() {
   const [error, setError] = useState(null)
   // null 이면 닫힌 상태, 'followers' | 'followings' 면 그 탭으로 열린다.
   const [followTab, setFollowTab] = useState(null)
+  const [sort, setSort] = useState('latest') // 'latest' | 'popular'
+  const [view, setView] = useState('grid') // 'grid' | 'list'
 
   /** 목록 창에서 팔로우를 눌렀으면 프로필의 숫자도 다시 읽어 맞춘다. */
   function closeFollowList(changed) {
@@ -46,6 +50,18 @@ export default function UserProfilePage() {
       alive = false
     }
   }, [userId])
+
+  /*
+   * 서버는 이 목록을 최신순(id 내림차순)으로만 내려준다.
+   * "인기순"은 받아온 목록 안에서 다시 세우는 것이라, 글이 한 페이지를 넘으면
+   * 그 페이지 안에서의 인기순이다. (서버에 정렬 파라미터가 생기면 그때 넘기면 된다)
+   */
+  const shown = useMemo(() => {
+    if (sort !== 'popular') return posts
+    return [...posts].sort(
+      (a, b) => b.likeCount - a.likeCount || b.commentCount - a.commentCount || b.postId - a.postId,
+    )
+  }, [posts, sort])
 
   if (loading) {
     return (
@@ -83,17 +99,20 @@ export default function UserProfilePage() {
               내 프로필 관리
             </Link>
           ) : (
-            <FollowButton
-              userId={profile.userId}
-              following={profile.following}
-              onChange={({ following, followerCount }) =>
-                setProfile((prev) => ({
-                  ...prev,
-                  following,
-                  followerCount: followerCount ?? prev.followerCount,
-                }))
-              }
-            />
+            <>
+              <FollowButton
+                userId={profile.userId}
+                following={profile.following}
+                onChange={({ following, followerCount }) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    following,
+                    followerCount: followerCount ?? prev.followerCount,
+                  }))
+                }
+              />
+              <ProfileAlertButton posts={posts} />
+            </>
           )
         }
       />
@@ -108,21 +127,49 @@ export default function UserProfilePage() {
       )}
 
       <div className="mypage page">
-        {/* 마이페이지의 탭 줄과 같은 자리·같은 모양이라 남의 프로필도 눈이 헷갈리지 않는다 */}
-        <nav className="mypage__tabs">
-          <span className="mypage__tab is-active">
-            게시글
-            <span className="mypage__tab-count">{profile.postCount ?? posts.length}</span>
-          </span>
-        </nav>
+        <div className="plist__head">
+          <div>
+            <h2 className="plist__title">
+              게시글 <span className="plist__count">{profile.postCount ?? posts.length}</span>
+            </h2>
+            <p className="plist__sub">{profile.nickname}님이 작성한 공구와 이야기를 모아봤어요</p>
+          </div>
 
-        {posts.length === 0 ? (
+          <div className="plist__tools">
+            <button
+              type="button"
+              className={`plist__sort ${sort === 'latest' ? 'is-on' : ''}`}
+              onClick={() => setSort('latest')}
+            >
+              최신순
+            </button>
+            <button
+              type="button"
+              className={`plist__sort ${sort === 'popular' ? 'is-on' : ''}`}
+              onClick={() => setSort('popular')}
+            >
+              인기순
+            </button>
+
+            <button
+              type="button"
+              className="plist__view"
+              onClick={() => setView(view === 'grid' ? 'list' : 'grid')}
+              aria-label={view === 'grid' ? '목록으로 보기' : '격자로 보기'}
+              title={view === 'grid' ? '목록으로 보기' : '격자로 보기'}
+            >
+              {view === 'grid' ? <GridIcon width={19} height={19} /> : <ListIcon width={19} height={19} />}
+            </button>
+          </div>
+        </div>
+
+        {shown.length === 0 ? (
           <div className="state">
             <p className="state__title">아직 올린 글이 없어요.</p>
           </div>
         ) : (
-          <div className="mypage__grid">
-            {posts.map((post) => (
+          <div className={`mypage__grid ${view === 'list' ? 'mypage__grid--list' : ''}`}>
+            {shown.map((post) => (
               <PostCard key={post.postId} post={post} />
             ))}
           </div>

@@ -47,6 +47,95 @@
   border-radius: 2px;
 }
 
+/* ── 목록 머리말 (게시글 N · 정렬 · 보기) ─────── */
+
+.plist__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 26px 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--gray-150);
+}
+
+.plist__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* 개수는 제목과 붙여 읽히도록 알약 배지로 감싼다 */
+.plist__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.plist__sub {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--gray-500);
+}
+
+.plist__tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.plist__sort {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-400);
+  transition: color 0.15s ease;
+}
+
+.plist__sort:hover {
+  color: var(--gray-600);
+}
+
+.plist__sort.is-on {
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.plist__view {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  border-radius: var(--r-sm);
+  color: var(--gray-500);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.plist__view:hover {
+  background: var(--gray-100);
+  color: var(--ink);
+}
+
+/*
+ * 한 줄에 한 장씩 넓게 보는 모드.
+ * 아래 미디어쿼리의 .mypage__grid 규칙이 뒤에 나와 같은 우선순위면 덮이므로 한 단계 세게 잡는다.
+ */
+.mypage__grid.mypage__grid--list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
 .mypage__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -9,7 +9,8 @@ import './ProfileHeader.css'
  *
  * 화면 끝까지 깔리는 커버 위에 왼쪽 아래로 사진 → 이름 → 숫자를 얹는다.
  * 두 화면이 같은 모양을 유지하도록 markup 을 한곳에 모았고,
- * 화면마다 다른 것(환경설정·팔로우 버튼)은 topRight / besideName 으로 받는다.
+ * 화면마다 다른 것(환경설정·팔로우 버튼)은 topRight / besideName 으로 받고,
+ * besideName 은 이름 바로 오른쪽 같은 줄에 놓인다.
  *
  * 커버 사진은 이 순서로 고른다.
  *   1. 서버가 준 coverImageUrl
@@ -53,7 +54,11 @@ export default function ProfileHeader({
           <Avatar user={profile} size={76} className="phead__avatar" />
 
           <div className="phead__who">
-            <h1 className="phead__name">{profile.nickname}</h1>
+            {/* 이름과 동작 버튼(팔로우·알림)이 한 줄에 선다 */}
+            <div className="phead__nameline">
+              <h1 className="phead__name">{profile.nickname}</h1>
+              {besideName}
+            </div>
 
             {/* 팔로워·팔로잉은 눌러서 목록을 열 수 있고, 게시글 수는 표시만 한다 */}
             <p className="phead__stats">
@@ -70,9 +75,6 @@ export default function ProfileHeader({
               </span>
             </p>
           </div>
-
-          {/* 팔로우 버튼처럼 이름 옆에 붙는 것 */}
-          {besideName && <div className="phead__beside">{besideName}</div>}
 
           {profile.instagramUrl && (
             <a

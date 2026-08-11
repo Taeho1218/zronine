@@ -35,22 +35,52 @@ const SIMILAR_SHOWN = 4
 
 /**
  * 이벤트는 서버에서 자유 문장 한 덩어리(eventNote)로 내려온다.
- * 한 줄에 하나씩 `라벨 | 제목 | 설명` 으로 적으면 카드로 쪼개고,
- * 구분자 없이 그냥 쓴 줄은 통째로 제목이 되어 예전에 적어둔 글도 그대로 나온다.
- * 아무것도 안 적었으면 빈 배열이라 "공구 이벤트" 칸 자체가 사라진다.
+ * 정해진 구조가 없어서, 실제로 들어오는 세 가지 모양을 순서대로 시도한다.
+ *
+ *   1. `라벨 | 제목 | 설명` — 한 줄에 하나씩. 글쓰기 화면에서 안내하는 형식이다.
+ *   2. 줄바꿈 또는 `1. … 2. …` 번호 — 수집한 공구 글이 대부분 이 모양이다.
+ *   3. 그 안에서 `짧은라벨: 내용` 이면 앞부분을 라벨로 뽑는다.
+ *
+ * 어느 것에도 안 걸리면 통째로 제목 하나가 되고, 비어 있으면 빈 배열이라
+ * "공구 이벤트" 칸 자체가 사라진다.
  */
+
+/** "선착순 이벤트: 3명 증정" 처럼 앞에 짧은 이름이 붙은 경우만 라벨로 뗀다. */
+function splitLabel(text) {
+  const at = text.indexOf(':')
+  if (at < 1 || at > 14) return { label: null, title: text }
+  const label = text.slice(0, at).trim()
+  const rest = text.slice(at + 1).trim()
+  // 라벨 자리에 문장이 통째로 오면(마침표·쉼표) 라벨이 아니라 그냥 본문이다.
+  if (!rest || /[.,]/.test(label)) return { label: null, title: text }
+  return { label, title: rest }
+}
+
 function parseEvents(note) {
   if (!note) return []
-  return note
+
+  const lines = note
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => {
-      const parts = line.split('|').map((s) => s.trim())
-      if (parts.length === 1) return { label: null, title: parts[0], desc: null }
+
+  // 한 줄에 "1. … 2. …" 로 몰아 쓴 경우를 항목별로 다시 쪼갠다.
+  const items = lines.flatMap((line) => {
+    if (line.includes('|')) return [line]
+    // "1." 로 시작할 때만 번호 목록으로 본다. 그래야 본문 속 "3. 5만원" 같은 숫자에 안 걸린다.
+    if (!/^1\.\s/.test(line)) return [line]
+    const split = line.split(/(?:^|\s)[1-9]\.\s+/).map((s) => s.trim()).filter(Boolean)
+    return split.length > 1 ? split : [line]
+  })
+
+  return items.map((item) => {
+    if (item.includes('|')) {
+      const parts = item.split('|').map((s) => s.trim())
       if (parts.length === 2) return { label: parts[0], title: parts[1], desc: null }
       return { label: parts[0], title: parts[1], desc: parts.slice(2).join(' · ') }
-    })
+    }
+    return { ...splitLabel(item), desc: null }
+  })
 }
 
 /**
