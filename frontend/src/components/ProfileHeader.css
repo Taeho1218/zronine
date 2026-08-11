@@ -1,41 +1,45 @@
 /*
- * 커버 사진을 따로 받는 기능이 아직 없어 브랜드 색 그라데이션을 배경으로 깐다.
- * 나중에 사용자 커버 이미지가 생기면 이 배경만 이미지로 바꾸면 된다.
+ * 커버는 페이지 폭이 아니라 화면 폭 전체에 깔린다.
+ * 그래서 이 요소는 .page 바깥에 두고, 안쪽 내용만 .page 와 같은 규격으로 가운데 정렬한다.
  */
 .phead {
   position: relative;
-  border-radius: var(--r-lg);
-  overflow: hidden;
   background: linear-gradient(150deg, #1f9d5b 0%, #14ae5c 42%, #0d8845 100%);
+  background-size: cover;
+  background-position: center;
   color: var(--white);
 }
 
-/* 배경에 결을 줘서 단색으로 비어 보이지 않게 한다 */
-.phead::after {
+/*
+ * 사진 커버는 어떤 사진이 오든 글씨가 읽혀야 하므로 아래쪽에 어두운 그라데이션을 얹는다.
+ * (그라데이션 커버일 때는 이미 충분히 어두워 필요 없다)
+ */
+.phead--photo::before {
   content: '';
   position: absolute;
-  right: -80px;
-  top: -120px;
-  width: 380px;
-  height: 380px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0.55) 100%);
   pointer-events: none;
 }
 
 .phead__inner {
   position: relative;
-  padding: 28px 30px 26px;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 34px 24px 26px;
+  min-height: 326px;
   display: flex;
   flex-direction: column;
+  /* 내용은 커버 왼쪽 아래에 붙는다 */
+  justify-content: flex-end;
 }
 
 /* 커버 오른쪽 위 모서리 (환경설정 등) */
 .phead__corner {
   position: absolute;
-  top: 20px;
-  right: 22px;
-  z-index: 1;
+  top: 30px;
+  right: 24px;
 }
 
 .phead__corner a,
@@ -43,30 +47,65 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.18);
   color: var(--white);
   font-size: 13.5px;
   font-weight: 700;
   white-space: nowrap;
-  transition: background-color 0.15s ease;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  opacity: 0.92;
+  transition: opacity 0.15s ease;
 }
 
 .phead__corner a:hover,
 .phead__corner button:hover {
-  background: rgba(255, 255, 255, 0.32);
+  opacity: 1;
 }
 
-/* ── 숫자 줄 ─────────────────────────────────── */
+/* ── 신원 줄 ─────────────────────────────────── */
+
+.phead__identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* 아바타가 사진에 묻히지 않게 흰 테두리를 두른다 */
+.phead__avatar {
+  flex: none;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-sizing: content-box;
+}
+
+.phead__who {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.phead__name {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.2;
+  word-break: break-word;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.phead__email {
+  font-size: 13.5px;
+  opacity: 0.88;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* ── 팔로워 · 팔로잉 · 게시글 ────────────────── */
 
 .phead__stats {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   font-size: 13.5px;
-  opacity: 0.92;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 .phead__stat {
@@ -80,31 +119,16 @@
   font-weight: 800;
 }
 
-/* 이름 아래의 팔로워 / 팔로잉 */
-.phead__follow {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 13.5px;
-}
-
-.phead__follow-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+/* 목록을 열 수 있는 두 개만 눌리는 느낌을 준다 */
+.phead__stat--btn {
   padding: 2px 5px;
   margin: -2px -5px;
   border-radius: var(--r-sm);
-  color: inherit;
   transition: background-color 0.15s ease;
 }
 
-.phead__follow-btn strong {
-  font-weight: 800;
-}
-
-.phead__follow-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+.phead__stat--btn:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .phead__dot {
@@ -112,83 +136,29 @@
   height: 3px;
   border-radius: 50%;
   background: currentColor;
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
-/* ── 신원 줄 ─────────────────────────────────── */
+/* ── 오른쪽에 붙는 것들 ──────────────────────── */
 
-.phead__identity {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 18px;
-}
-
-/* 아바타가 배경에 묻히지 않게 흰 테두리를 두른다 */
-.phead__avatar {
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  box-sizing: content-box;
-}
-
-.phead__who {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.phead__name {
-  font-size: 21px;
-  font-weight: 900;
-  letter-spacing: -0.4px;
-}
-
-.phead__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-.phead__insta {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--white);
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: background-color 0.15s ease;
-}
-
-.phead__insta:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* 이름 옆에 붙는 버튼 (팔로우 등). 인스타 링크보다 앞에 오도록 auto 마진을 여기서 쓴다. */
 .phead__beside {
-  margin-left: 4px;
+  margin-left: auto;
 }
 
-/* 초록 커버 위에서 묻히지 않도록 흰 버튼으로 뒤집는다.
+/* 커버 위에서 묻히지 않도록 흰 버튼으로 뒤집는다.
    자손 선택자라 FollowButton 자신의 규칙보다 우선순위가 높아 순서에 기대지 않는다. */
 .phead__beside .followbtn,
 .phead__mine {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 34px;
-  padding: 0 16px;
+  height: 38px;
+  padding: 0 18px;
   border-radius: var(--r-pill);
   border: 1px solid var(--white);
   background: var(--white);
   color: var(--brand-hover);
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -200,24 +170,60 @@
 
 /* 이미 팔로우 중이면 눌러서 끊는 동작이라 톤을 낮춘다 */
 .phead__beside .followbtn.is-on {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.6);
   color: var(--white);
 }
 
 .phead__beside .followbtn.is-on:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.34);
   color: var(--white);
+}
+
+/* 팔로우 버튼이 없으면 인스타 링크가 오른쪽 끝을 맡는다 */
+.phead__insta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 15px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  backdrop-filter: blur(2px);
+  transition: background-color 0.15s ease;
+}
+
+/* 둘 다 있으면 팔로우 버튼이 오른쪽 끝을 잡고 인스타가 그 왼쪽에 붙는다 */
+.phead__beside + .phead__insta {
+  margin-left: 10px;
+}
+
+.phead__insta:hover {
+  background: rgba(255, 255, 255, 0.34);
 }
 
 @media (max-width: 640px) {
   .phead__inner {
-    padding: 22px 20px 20px;
+    min-height: 286px;
+    padding: 28px 20px 22px;
   }
-  .phead__insta {
-    margin-left: 0;
+  .phead__corner {
+    top: 22px;
+    right: 20px;
+  }
+  .phead__name {
+    font-size: 22px;
   }
   .phead__identity {
     flex-wrap: wrap;
+    gap: 14px;
+  }
+  .phead__beside,
+  .phead__insta {
+    margin-left: 0;
   }
 }

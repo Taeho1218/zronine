@@ -69,7 +69,8 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="mypage page">
+    /* 커버가 화면 끝까지 깔려야 해서 헤더만 .page 바깥에 둔다 */
+    <>
       <ProfileHeader
         profile={profile}
         onOpenFollowers={() => setFollowTab('followers')}
@@ -104,19 +105,27 @@ export default function UserProfilePage() {
         />
       )}
 
-      <h2 className="mypage__section">게시물 {profile.postCount ?? posts.length}</h2>
+      <div className="mypage page">
+        {/* 마이페이지의 탭 줄과 같은 자리·같은 모양이라 남의 프로필도 눈이 헷갈리지 않는다 */}
+        <nav className="mypage__tabs">
+          <span className="mypage__tab is-active">
+            게시글
+            <span className="mypage__tab-count">{profile.postCount ?? posts.length}</span>
+          </span>
+        </nav>
 
-      {posts.length === 0 ? (
-        <div className="state">
-          <p className="state__title">아직 올린 글이 없어요.</p>
-        </div>
-      ) : (
-        <div className="mypage__grid">
-          {posts.map((post) => (
-            <PostCard key={post.postId} post={post} />
-          ))}
-        </div>
-      )}
-    </div>
+        {posts.length === 0 ? (
+          <div className="state">
+            <p className="state__title">아직 올린 글이 없어요.</p>
+          </div>
+        ) : (
+          <div className="mypage__grid">
+            {posts.map((post) => (
+              <PostCard key={post.postId} post={post} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   )
 }
