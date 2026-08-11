@@ -10,6 +10,34 @@
   display: block;
 }
 
+.pcard__dday {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: rgba(31, 41, 55, 0.94);
+  color: var(--white);
+  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.2);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pcard__dday-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.16);
+}
+
 /*
  * 슬라이드를 가로로 늘어놓고 통째로 왼쪽으로 민다.
  * 각 장이 뷰포트 너비를 꽉 채우므로 translateX(-N*100%) 가 곧 N 번째 장이다.

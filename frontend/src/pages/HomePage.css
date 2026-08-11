@@ -7,10 +7,15 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: clamp(30px, 3.4vw, 54px);
-  min-height: 64px;
+  gap: clamp(38px, 3.6vw, 58px);
+  width: 100vw;
+  min-height: 76px;
+  margin-left: calc(50% - 50vw);
   margin-bottom: 32px;
+  padding-left: max(24px, calc((100vw - var(--page-max)) / 2 + 24px));
+  padding-right: max(24px, calc((100vw - var(--page-max)) / 2 + 24px));
   border-bottom: 1px solid var(--gray-150);
+  background: var(--white);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -140,6 +145,8 @@
     gap: 28px;
     min-height: 56px;
     margin-bottom: 24px;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .home__feed-heading {

@@ -490,24 +490,12 @@ export default function PostDetailPage() {
               )}
             </dl>
 
-            {(post.categories?.length > 0 || post.buyUrl) && (
+            {post.categories?.length > 0 && (
               <dl className="dbuy__sub">
-                {post.categories?.length > 0 && (
-                  <div className="dbuy__row">
-                    <dt>카테고리</dt>
-                    <dd>{post.categories.map((c) => c.name).join(' > ')}</dd>
-                  </div>
-                )}
-                {post.buyUrl && (
-                  <div className="dbuy__row">
-                    <dt>상품 출처</dt>
-                    <dd>
-                      <a className="dbuy__src" href={post.buyUrl} target="_blank" rel="noreferrer noopener">
-                        원본 상품 페이지 바로가기 <ExternalLinkIcon width={13} height={13} />
-                      </a>
-                    </dd>
-                  </div>
-                )}
+                <div className="dbuy__row">
+                  <dt>카테고리</dt>
+                  <dd>{post.categories.map((c) => c.name).join(' > ')}</dd>
+                </div>
               </dl>
             )}
 

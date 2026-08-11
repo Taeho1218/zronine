@@ -469,23 +469,11 @@
   font-weight: 500;
 }
 
-/* 카테고리·출처는 성격이 달라 선 하나로 구분한다 */
+/* 핵심 정보와 카테고리를 선 하나로 구분한다 */
 .dbuy__sub {
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid var(--gray-150);
-}
-
-.dbuy__src {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--brand);
-}
-
-.dbuy__src:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .dbuy__cta {

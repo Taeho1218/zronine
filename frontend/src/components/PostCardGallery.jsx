@@ -13,7 +13,7 @@ const AUTOPLAY_MS = 1600
  * 클릭이 상세 페이지 이동과 겹친다. 그래서 이미지만 Link 로 감싸고
  * 화살표와 점은 그 위에 얹는 형제로 둔다.
  */
-export default function PostCardGallery({ postId, images, title }) {
+export default function PostCardGallery({ postId, images, title, badgeLabel = '' }) {
   const [broken, setBroken] = useState(() => new Set())
   const [index, setIndex] = useState(0)
   const [hovering, setHovering] = useState(false)
@@ -39,6 +39,12 @@ export default function PostCardGallery({ postId, images, title }) {
     return (
       <div className="pcard__media">
         <ImageFallback className="imgfallback--card" />
+        {badgeLabel && (
+          <span className="pcard__dday">
+            <span className="pcard__dday-dot" aria-hidden="true" />
+            {badgeLabel}
+          </span>
+        )}
       </div>
     )
   }
@@ -65,6 +71,13 @@ export default function PostCardGallery({ postId, images, title }) {
           ))}
         </div>
       </Link>
+
+      {badgeLabel && (
+        <span className="pcard__dday">
+          <span className="pcard__dday-dot" aria-hidden="true" />
+          {badgeLabel}
+        </span>
+      )}
 
       {total > 1 && (
         <>
