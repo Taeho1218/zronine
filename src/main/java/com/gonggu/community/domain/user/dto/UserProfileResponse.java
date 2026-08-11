@@ -15,6 +15,7 @@ public record UserProfileResponse(
 	String nickname,
 	String profileImageUrl,
 	String instagramUrl,
+	String coverImageUrl,
 	long followerCount,
 	long followingCount,
 	long postCount,
@@ -33,6 +34,8 @@ public record UserProfileResponse(
 			user.getProfileImageUrl(),
 			// 인스타그램 링크는 이메일과 달리 프로필에 공개하려고 등록하는 값이라 본인 여부와 무관하게 내려준다.
 			user.getInstagramUrl(),
+			// 커버 사진도 프로필 이미지와 마찬가지로 남에게 보여주려는 값이라 본인 여부와 무관하게 내려준다.
+			user.getCoverImageUrl(),
 			followerCount,
 			followingCount,
 			postCount,
