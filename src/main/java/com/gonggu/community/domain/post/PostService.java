@@ -382,10 +382,8 @@ public class PostService {
 		if (postType == PostType.SELLER) {
 			requireNotEmpty(imageUrls, "셀러 게시글은 사진을 1장 이상 등록해야 합니다.");
 			requireNotBlank(productName, "물건 이름을 입력해주세요.");
-			if (price == null) {
-				throw new InvalidRequestException(ErrorCode.SELLER_FIELD_REQUIRED, "가격을 입력해주세요.");
-			}
-			requireNotBlank(buyUrl, "구매링크를 입력해주세요.");
+			// 가격/구매링크는 필수에서 제외했다 — 가격 미정이거나 인스타 프로필/DM으로만 안내하는
+			// 공구 글도 있어서, 값이 있으면 그대로 쓰고 없으면 null로 둔다(DB도 원래부터 nullable).
 			if (startDate == null || endDate == null) {
 				throw new InvalidRequestException(ErrorCode.SELLER_FIELD_REQUIRED, "모집 기간을 입력해주세요.");
 			}
