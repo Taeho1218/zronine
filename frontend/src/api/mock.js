@@ -45,8 +45,9 @@ const U4 = { userId: 4, nickname: '지호아빠', profileImageUrl: null }
  * 공구를 여는 인스타 셀러들. 시트의 "인스타 아이디 / 인스타 프로필 URL" 두 칸이 여기에 대응한다.
  * 같은 계정이 연 공구는 모두 같은 사람이 쓴 글로 묶인다.
  *
- * instagramUrl 은 백엔드 UserSummaryResponse 에 아직 없는 필드다.
- * 화면은 값이 있을 때만 링크를 그리므로, 서버가 내려주기 시작하면 그대로 표시된다.
+ * instagramUrl 은 프로필 조회 응답(UserProfileResponse)에는 서버에도 있지만,
+ * 게시글 작성자에 실려오는 UserSummaryResponse 에는 아직 없다.
+ * 그래서 상세 화면의 작성자 옆 링크는 값이 있을 때만 그리고, 서버가 내려주기 시작하면 그대로 표시된다.
  */
 const SELLERS = {
   dreamyaksa_: {

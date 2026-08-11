@@ -168,6 +168,11 @@ public class UserService {
 			user.changeProfileImageUrl(request.profileImageUrl().isBlank() ? null : request.profileImageUrl());
 		}
 
+		if (request.instagramUrl() != null) {
+			// 빈 문자열은 "링크 지우기" 요청으로 해석한다.
+			user.changeInstagramUrl(request.instagramUrl().isBlank() ? null : request.instagramUrl());
+		}
+
 		return getProfile(userId, userId);
 	}
 

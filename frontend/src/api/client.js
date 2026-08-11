@@ -44,6 +44,26 @@ function buildUrl(path, params) {
   return query ? `${url}?${query}` : url
 }
 
+/*
+ * 개발 중 네트워크 탭을 안 열어봐도 무슨 요청이 오갔는지 콘솔에서 바로 보려고 남긴다.
+ * 배포 빌드에서는 찍지 않는다 — 응답 본문에 사용자 정보와 토큰이 섞여 있어
+ * 사용자 브라우저 콘솔에 그대로 남기는 건 곤란하고, import.meta.env.DEV 가
+ * 빌드 시 false 로 박히면서 이 호출들이 통째로 제거되기도 한다.
+ */
+const LOG = import.meta.env.DEV
+
+function logRequest(method, path, { params, body } = {}) {
+  if (LOG) console.log(`%c[API →] ${method} ${path}`, 'color:#6b7280', { params, body })
+}
+
+function logSuccess(method, path, data) {
+  if (LOG) console.log(`%c[API ✓] ${method} ${path}`, 'color:#16a34a', data)
+}
+
+function logFailure(method, path, err) {
+  if (LOG) console.log(`%c[API ✗] ${method} ${path}`, 'color:#dc2626', err)
+}
+
 /**
  * 리프레시 토큰 쿠키를 주고받으려면 credentials 를 실어야 한다.
  * 쿠키의 path 가 /api/auth 라 실제로 딸려나가는 요청은 재발급/로그아웃뿐이지만,
@@ -60,12 +80,17 @@ let reissuePromise = null
 
 export async function reissue() {
   if (!reissuePromise) {
+    logRequest('POST', '/api/auth/reissue')
     reissuePromise = (async () => {
       try {
         if (MOCK_ENABLED) {
           const data = await callMock('/api/auth/reissue', { method: 'POST' })
-          if (!data) return false
+          if (!data) {
+            logFailure('POST', '/api/auth/reissue', '쿠키 없음/만료')
+            return false
+          }
           tokenStore.set({ accessToken: data.accessToken, user: data.user })
+          logSuccess('POST', '/api/auth/reissue', data)
           return true
         }
         // 리프레시 토큰은 바디로 보내지 않는다. 브라우저가 httpOnly 쿠키를 자동으로 붙인다.
@@ -74,10 +99,15 @@ export async function reissue() {
           credentials: CREDENTIALS,
         })
         const body = await res.json().catch(() => null)
-        if (!res.ok || !body?.success) return false
+        if (!res.ok || !body?.success) {
+          logFailure('POST', '/api/auth/reissue', body)
+          return false
+        }
         tokenStore.set({ accessToken: body.data.accessToken, user: body.data.user })
+        logSuccess('POST', '/api/auth/reissue', body.data)
         return true
-      } catch {
+      } catch (err) {
+        logFailure('POST', '/api/auth/reissue', err)
         return false
       } finally {
         // 다음 401 때 다시 시도할 수 있도록 비워준다.
@@ -131,9 +161,7 @@ function canRetryWithReissue(err, path) {
   return err.code === 'EXPIRED_TOKEN' || err.code === 'INVALID_TOKEN' || err.code === 'UNAUTHORIZED'
 }
 
-export async function request(path, options = {}) {
-  if (MOCK_ENABLED) return callMock(path, options)
-
+async function requestOnce(path, options) {
   try {
     return await rawRequest(path, options)
   } catch (err) {
@@ -145,6 +173,20 @@ export async function request(path, options = {}) {
       throw err
     }
     return rawRequest(path, options)
+  }
+}
+
+export async function request(path, options = {}) {
+  const method = options.method ?? 'GET'
+  logRequest(method, path, options)
+
+  try {
+    const data = MOCK_ENABLED ? await callMock(path, options) : await requestOnce(path, options)
+    logSuccess(method, path, data)
+    return data
+  } catch (err) {
+    logFailure(method, path, err)
+    throw err
   }
 }
 

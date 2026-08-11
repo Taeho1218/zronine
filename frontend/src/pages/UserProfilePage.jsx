@@ -4,6 +4,7 @@ import { userApi } from '../api'
 import Avatar from '../components/Avatar'
 import FollowButton from '../components/FollowButton'
 import PostCard from '../components/PostCard'
+import { ExternalLinkIcon } from '../components/icons'
 import { formatDate } from '../lib/format'
 import './MyPage.css'
 
@@ -67,6 +68,17 @@ export default function UserProfilePage() {
 
         <div className="mypage__info">
           <h1 className="mypage__name">{profile.nickname}</h1>
+          {/* 서버가 UserProfileResponse 에 담아주는 값. 등록해둔 사람만 링크가 보인다. */}
+          {profile.instagramUrl && (
+            <a
+              className="mypage__insta"
+              href={profile.instagramUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              인스타그램 <ExternalLinkIcon width={13} height={13} />
+            </a>
+          )}
           {profile.joinedAt && <p className="mypage__joined">{formatDate(profile.joinedAt)} 가입</p>}
         </div>
 
