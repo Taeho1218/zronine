@@ -45,12 +45,17 @@ let reissuePromise = null
 
 export async function reissue() {
   if (!reissuePromise) {
+    console.log('%c[API →] POST /api/auth/reissue', 'color:#6b7280')
     reissuePromise = (async () => {
       try {
         if (MOCK_ENABLED) {
           const data = await mockRequest('/api/auth/reissue', { method: 'POST' })
-          if (!data) return false
+          if (!data) {
+            console.log('%c[API ✗] POST /api/auth/reissue', 'color:#dc2626', '쿠키 없음/만료')
+            return false
+          }
           tokenStore.set({ accessToken: data.accessToken, user: data.user })
+          console.log('%c[API ✓] POST /api/auth/reissue', 'color:#16a34a', data)
           return true
         }
         // 리프레시 토큰은 바디로 보내지 않는다. 브라우저가 httpOnly 쿠키를 자동으로 붙인다.
@@ -59,10 +64,15 @@ export async function reissue() {
           credentials: CREDENTIALS,
         })
         const body = await res.json().catch(() => null)
-        if (!res.ok || !body?.success) return false
+        if (!res.ok || !body?.success) {
+          console.log('%c[API ✗] POST /api/auth/reissue', 'color:#dc2626', body)
+          return false
+        }
         tokenStore.set({ accessToken: body.data.accessToken, user: body.data.user })
+        console.log('%c[API ✓] POST /api/auth/reissue', 'color:#16a34a', body.data)
         return true
-      } catch {
+      } catch (err) {
+        console.log('%c[API ✗] POST /api/auth/reissue', 'color:#dc2626', err)
         return false
       } finally {
         // 다음 401 때 다시 시도할 수 있도록 비워준다.
@@ -116,9 +126,7 @@ function canRetryWithReissue(err, path) {
   return err.code === 'EXPIRED_TOKEN' || err.code === 'INVALID_TOKEN' || err.code === 'UNAUTHORIZED'
 }
 
-export async function request(path, options = {}) {
-  if (MOCK_ENABLED) return mockRequest(path, options)
-
+async function requestOnce(path, options) {
   try {
     return await rawRequest(path, options)
   } catch (err) {
@@ -130,6 +138,33 @@ export async function request(path, options = {}) {
       throw err
     }
     return rawRequest(path, options)
+  }
+}
+
+/** 개발 중 네트워크 탭을 안 열어봐도 무슨 요청이 오갔는지 콘솔에서 바로 보려고 남긴다. */
+function logRequest(method, path, { params, body } = {}) {
+  console.log(`%c[API →] ${method} ${path}`, 'color:#6b7280', { params, body })
+}
+
+function logSuccess(method, path, data) {
+  console.log(`%c[API ✓] ${method} ${path}`, 'color:#16a34a', data)
+}
+
+function logFailure(method, path, err) {
+  console.log(`%c[API ✗] ${method} ${path}`, 'color:#dc2626', err)
+}
+
+export async function request(path, options = {}) {
+  const method = options.method ?? 'GET'
+  logRequest(method, path, options)
+
+  try {
+    const data = MOCK_ENABLED ? await mockRequest(path, options) : await requestOnce(path, options)
+    logSuccess(method, path, data)
+    return data
+  } catch (err) {
+    logFailure(method, path, err)
+    throw err
   }
 }
 
