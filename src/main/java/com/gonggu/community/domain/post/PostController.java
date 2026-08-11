@@ -55,7 +55,7 @@ public class PostController {
 		@RequestParam(required = false) PostStatusFilter status,
 		@RequestParam(required = false) String keyword,
 		@AuthenticationPrincipal CustomUserDetails principal,
-		@PageableDefault(size = PostService.MAX_PAGE_SIZE, sort = "id", direction = Sort.Direction.DESC)
+		@PageableDefault(size = PostService.MAIN_FEED_PAGE_SIZE, sort = "id", direction = Sort.Direction.DESC)
 		Pageable pageable) {
 
 		PostSearchCondition condition = new PostSearchCondition(postType, categoryId, status, keyword);

@@ -47,8 +47,11 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PostService {
 
-	/** 무한 스크롤 한 번에 내려갈 수 있는 게시글 수 상한 */
+	/** 마이페이지 / 다른 사람 프로필의 게시물 목록에서 무한 스크롤 한 번에 내려갈 수 있는 상한 */
 	public static final int MAX_PAGE_SIZE = 15;
+
+	/** 메인 페이지 피드(검색 포함)는 한 번에 12개까지만 내려준다. */
+	public static final int MAIN_FEED_PAGE_SIZE = 12;
 
 	/** 이보다 짧은 검색어는 검색을 수행하지 않는다. */
 	public static final int MIN_KEYWORD_LENGTH = 2;
@@ -157,7 +160,7 @@ public class PostService {
 	 */
 	public PageResponse<PostFeedResponse> search(PostSearchCondition condition, Long viewerId, Pageable pageable) {
 		LocalDateTime now = LocalDateTime.now();
-		Pageable limited = limitPageSize(pageable);
+		Pageable limited = limitPageSize(pageable, MAIN_FEED_PAGE_SIZE);
 
 		// 너무 짧은 검색어는 사실상 전체 조회가 되어 무한 스크롤이 의미 없는 결과로 채워진다.
 		// 검색어를 무시하고 전체를 돌려주면 "검색했는데 관련 없는 글이 나온다"로 보이므로 빈 결과로 끊는다.
@@ -179,7 +182,8 @@ public class PostService {
 	/** 마이페이지 / 다른 사람 프로필의 작성 게시물 목록 */
 	public PageResponse<PostFeedResponse> getPostsByUser(Long targetUserId, Long viewerId, Pageable pageable) {
 		userService.getUserOrThrow(targetUserId);
-		return toFeedPage(postRepository.findByUserIdOrderByIdDesc(targetUserId, limitPageSize(pageable)), viewerId,
+		Pageable limited = limitPageSize(pageable, MAX_PAGE_SIZE);
+		return toFeedPage(postRepository.findByUserIdOrderByIdDesc(targetUserId, limited), viewerId,
 			LocalDateTime.now());
 	}
 
@@ -252,11 +256,11 @@ public class PostService {
 	 * 무한 스크롤 한 번에 내려갈 수 있는 최대 개수를 서버가 강제한다.
 	 * 클라이언트가 size 를 크게 보내 한 번에 전부 긁어가는 것을 막기 위해 컨트롤러 기본값과 별개로 여기서 자른다.
 	 */
-	private Pageable limitPageSize(Pageable pageable) {
-		if (pageable.getPageSize() <= MAX_PAGE_SIZE) {
+	private Pageable limitPageSize(Pageable pageable, int maxSize) {
+		if (pageable.getPageSize() <= maxSize) {
 			return pageable;
 		}
-		return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE, pageable.getSort());
+		return PageRequest.of(pageable.getPageNumber(), maxSize, pageable.getSort());
 	}
 
 	/**
