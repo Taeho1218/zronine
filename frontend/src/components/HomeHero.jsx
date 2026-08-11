@@ -5,31 +5,11 @@ import { formatPeriod } from '../lib/format'
 import ImageFallback from './ImageFallback'
 import './HomeHero.css'
 
-/** 배너에 올릴 최대 개수. 3장씩 보이므로 3의 배수로 둔다. */
-const MAX_BANNERS = 9
-
-/**
- * 순위를 매길 후보를 얼마나 모을지.
- * 서버 한 페이지가 15개로 제한돼 있어 두 페이지를 받아 30개 중에서 고른다.
- * (정확히 하려면 서버에 "인기순" 정렬이 있어야 한다 — 지금은 최신 30개 안에서의 인기순이다)
- */
-const CANDIDATE_PAGES = [0, 1]
-
 /** 자동으로 다음 묶음으로 넘어가는 간격 */
 const AUTOPLAY_MS = 2500
 
 /** CSS 의 transform transition 시간과 맞춘다 */
 const SLIDE_MS = 450
-
-/**
- * 좋아요 → 댓글 → 최신 순으로 줄을 세운다.
- * 앞의 기준이 같을 때만 다음 기준을 본다.
- */
-function rank(a, b) {
-  if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount
-  if (b.commentCount !== a.commentCount) return b.commentCount - a.commentCount
-  return new Date(b.createdAt) - new Date(a.createdAt)
-}
 
 /**
  * 화면 폭에 따라 한 번에 몇 장을 보여줄지.
@@ -63,20 +43,12 @@ export default function HomeHero() {
   const [paused, setPaused] = useState(false)
   const perView = usePerView()
 
+  // 좋아요 → 댓글 → 최신 순 정렬과 "마감된 공구 제외"는 서버(GET /api/posts/popular)가 처리한다.
   useEffect(() => {
     let alive = true
-    Promise.all(CANDIDATE_PAGES.map((p) => postApi.list({ page: p, size: 15 })))
-      .then((pages) => {
-        if (!alive) return
-        const all = pages.flatMap((p) => p?.content ?? [])
-        setBanners(
-          all
-            // 모집이 끝난 공구는 배너에 올리지 않는다. (아직 시작 전인 공구는 남긴다)
-            .filter((post) => post.progress !== 'ENDED')
-            .sort(rank)
-            .slice(0, MAX_BANNERS),
-        )
-      })
+    postApi
+      .popular()
+      .then((list) => alive && setBanners(list ?? []))
       .catch(() => alive && setBanners([]))
     return () => {
       alive = false

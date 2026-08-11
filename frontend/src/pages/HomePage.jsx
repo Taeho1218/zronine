@@ -10,7 +10,7 @@ import './HomePage.css'
 
 /**
  * 한 화면에 보여줄 카드 수. 3열 그리드라 4줄이 딱 떨어진다.
- * 서버는 PostService.MAX_PAGE_SIZE(15) 이하만 받으므로 이 값을 그대로 존중해준다.
+ * 서버 PostService.MAIN_FEED_PAGE_SIZE 와 같은 값이라 더 크게 보내도 서버가 여기까지 잘라준다.
  */
 const PAGE_SIZE = 12
 

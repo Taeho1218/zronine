@@ -410,6 +410,10 @@ function threadComments(postId) {
  */
 const SIMILAR_LIMIT = 3
 
+/** 서버 PostService.POPULAR_LIMIT / MAIN_FEED_PAGE_SIZE 와 같은 값 */
+const POPULAR_LIMIT = 9
+const MAIN_FEED_PAGE_SIZE = 12
+
 function similarPosts(post) {
   if (post.postType !== 'SELLER') return []
 
@@ -559,6 +563,25 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
 
   // ── posts ────────────────────────────────────
   if (p(0) === 'posts') {
+    /*
+     * 홈 배너용 인기 피드. 서버 PostService.getPopularPosts 와 같은 규칙으로,
+     * 마감이 지난 셀러글은 빼고 좋아요 → 댓글 → 최신 순으로 POPULAR_LIMIT 개만 돌려준다.
+     * 페이지가 아니라 배열이라는 점도 서버와 같다.
+     */
+    if (p(1) === 'popular' && method === 'GET') {
+      return posts
+        .filter((x) => x.progress !== 'ENDED')
+        .slice()
+        .sort(
+          (a, b) =>
+            b.likeCount - a.likeCount ||
+            b.commentCount - a.commentCount ||
+            new Date(b.createdAt) - new Date(a.createdAt),
+        )
+        .slice(0, POPULAR_LIMIT)
+        .map(toFeed)
+    }
+
     if (seg.length === 1 && method === 'GET') {
       let list = posts
       if (params?.categoryId) {
@@ -572,7 +595,7 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
           (x) => x.title.toLowerCase().includes(kw) || (x.productName ?? '').toLowerCase().includes(kw),
         )
       }
-      return paginate(list.map(toFeed), Number(params?.page ?? 0), Number(params?.size ?? 15))
+      return paginate(list.map(toFeed), Number(params?.page ?? 0), Number(params?.size ?? MAIN_FEED_PAGE_SIZE))
     }
 
     if (seg.length === 1 && method === 'POST') {

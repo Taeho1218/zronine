@@ -35,6 +35,12 @@ export const postApi = {
   /** 메인 피드 겸 검색. 파라미터는 전부 선택값이라 빈 값은 buildUrl 에서 걸러진다. */
   list: ({ page = 0, size, categoryId, postType, status, keyword } = {}) =>
     http.get('/api/posts', { page, size, categoryId, postType, status, keyword }),
+  /**
+   * 홈 배너의 "인기 피드".
+   * 순위(좋아요 → 댓글 → 최신)와 마감 지난 글 제외를 서버가 정해 고정 개수로 내려주므로
+   * 페이지 파라미터가 없고, 응답도 페이지가 아니라 배열이다.
+   */
+  popular: () => http.get('/api/posts/popular'),
   detail: (postId) => http.get(`/api/posts/${postId}`),
   /**
    * 상세 페이지의 "비슷한 상품".

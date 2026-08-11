@@ -135,7 +135,6 @@ export default function PostWritePage() {
     if (!isSeller) return null
     if (!form.startDate || !form.endDate) return '모집 기간을 선택해주세요.'
     if (form.endDate < form.startDate) return '모집 종료일은 시작일 이후여야 합니다.'
-    if (parsePrice(form.price) == null) return '가격을 입력해주세요.'
     if (form.categoryIds.length === 0) return '카테고리를 한 개 이상 선택해주세요.'
     return null
   }
@@ -319,9 +318,7 @@ export default function PostWritePage() {
 
               <div className="write__row">
                 <label className="field">
-                  <span className="field__label">
-                    가격 <i className="req">*</i>
-                  </span>
+                  <span className="field__label">가격</span>
                   {/* 값에 "원"을 붙이면 백스페이스가 접미사만 지웠다가 다시 붙어 숫자를 못 지운다.
                       그래서 입력값은 콤마까지만 넣고 단위는 별도 요소로 얹는다. */}
                   <div className="pricefield">
@@ -330,7 +327,7 @@ export default function PostWritePage() {
                       inputMode="numeric"
                       value={form.price === '' ? '' : Number(form.price).toLocaleString('ko-KR')}
                       onChange={(e) => set({ price: parsePrice(e.target.value) ?? '' })}
-                      placeholder="19,900원"
+                      placeholder="미정이면 비워두세요"
                     />
                     {form.price !== '' && <span className="pricefield__unit">원</span>}
                   </div>
