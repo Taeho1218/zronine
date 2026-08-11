@@ -305,25 +305,12 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
 
   // ── auth ─────────────────────────────────────
   if (p(0) === 'auth') {
-    if (p(1) === 'login') {
-      return {
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token',
-        tokenType: 'Bearer',
-        accessTokenExpiresIn: 3600,
-        user: ME,
-      }
-    }
+    // 실제 서버처럼 refreshToken 은 바디에 담지 않는다 (httpOnly 쿠키 담당).
+    const token = { accessToken: 'mock-access-token', tokenType: 'Bearer', accessTokenExpiresIn: 3600, user: ME }
+    if (p(1) === 'login') return token
     if (p(1) === 'signup') return ME
-    if (p(1) === 'reissue') {
-      return {
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token',
-        tokenType: 'Bearer',
-        accessTokenExpiresIn: 3600,
-        user: ME,
-      }
-    }
+    // 목업에는 쿠키가 없으므로 "되살릴 세션이 없음"으로 답한다. (비로그인 상태로 시작)
+    if (p(1) === 'reissue') return null
     return null
   }
 
@@ -332,6 +319,14 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
 
   // ── uploads ──────────────────────────────────
   if (p(0) === 'uploads') {
+    // 로컬 개발(provider=local)과 똑같이 사전 서명 URL 은 지원하지 않는다.
+    // 프론트가 multipart 로 폴백하는 경로를 목업에서도 그대로 타보게 하려는 것이다.
+    if (p(1) === 'presign') {
+      const err = new Error('로컬 개발 환경에서는 사전 서명 URL을 지원하지 않습니다.')
+      err.code = 'PRESIGN_NOT_SUPPORTED'
+      err.status = 400
+      throw err
+    }
     // 실제 서버는 저장된 파일 URL 을 돌려주지만, 목업에서는 브라우저 blob URL 로 대신한다.
     const files = body?.getAll?.('files') ?? []
     const one = body?.get?.('file')

@@ -30,30 +30,37 @@ function buildUrl(path, params) {
 }
 
 /**
- * 액세스 토큰이 만료되면 리프레시로 한 번만 재발급하고 원 요청을 재시도한다.
+ * 리프레시 토큰 쿠키를 주고받으려면 credentials 를 실어야 한다.
+ * 쿠키의 path 가 /api/auth 라 실제로 딸려나가는 요청은 재발급/로그아웃뿐이지만,
+ * 나중에 API 를 다른 도메인에 올려도(cross-site) 그대로 동작하도록 모든 요청에 붙인다.
+ * (서버 CorsConfig 가 allowCredentials(true) + 정확한 Origin 을 쓰고 있어 안전하다)
+ */
+const CREDENTIALS = 'include'
+
+/**
+ * 액세스 토큰이 만료되면 리프레시 쿠키로 한 번만 재발급하고 원 요청을 재시도한다.
  * 동시에 여러 요청이 401 을 받아도 재발급은 한 번만 돌도록 진행 중인 Promise 를 공유한다.
  */
 let reissuePromise = null
 
-async function reissue() {
-  const refreshToken = tokenStore.getRefreshToken()
-  if (!refreshToken) return false
-
+export async function reissue() {
   if (!reissuePromise) {
     reissuePromise = (async () => {
       try {
+        if (MOCK_ENABLED) {
+          const data = await mockRequest('/api/auth/reissue', { method: 'POST' })
+          if (!data) return false
+          tokenStore.set({ accessToken: data.accessToken, user: data.user })
+          return true
+        }
+        // 리프레시 토큰은 바디로 보내지 않는다. 브라우저가 httpOnly 쿠키를 자동으로 붙인다.
         const res = await fetch(buildUrl('/api/auth/reissue'), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
+          credentials: CREDENTIALS,
         })
         const body = await res.json().catch(() => null)
         if (!res.ok || !body?.success) return false
-        tokenStore.set({
-          accessToken: body.data.accessToken,
-          refreshToken: body.data.refreshToken,
-          user: body.data.user,
-        })
+        tokenStore.set({ accessToken: body.data.accessToken, user: body.data.user })
         return true
       } catch {
         return false
@@ -78,6 +85,7 @@ async function rawRequest(path, { method = 'GET', params, body, isForm = false, 
   const res = await fetch(buildUrl(path, params), {
     method,
     headers,
+    credentials: CREDENTIALS,
     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   })
 
@@ -94,14 +102,27 @@ async function rawRequest(path, { method = 'GET', params, body, isForm = false, 
   return payload ? payload.data : null
 }
 
+/**
+ * 재발급을 시도해볼 만한 실패인지 판단한다.
+ *
+ * EXPIRED_TOKEN 은 물론이고, 액세스 토큰이 아예 없어 생긴 UNAUTHORIZED 도 대상이다.
+ * 리프레시 쿠키는 액세스 토큰보다 훨씬 오래 살아서(기본 14일) 브라우저를 껐다 켠 뒤에도
+ * 쿠키만으로 세션을 되살릴 수 있기 때문이다.
+ */
+function canRetryWithReissue(err, path) {
+  if (!(err instanceof ApiError) || err.status !== 401) return false
+  // 로그인/재발급 자체가 401 이면 재발급을 다시 부를 이유가 없다 (무한 루프 방지).
+  if (path.startsWith('/api/auth/')) return false
+  return err.code === 'EXPIRED_TOKEN' || err.code === 'INVALID_TOKEN' || err.code === 'UNAUTHORIZED'
+}
+
 export async function request(path, options = {}) {
   if (MOCK_ENABLED) return mockRequest(path, options)
 
   try {
     return await rawRequest(path, options)
   } catch (err) {
-    const expired = err instanceof ApiError && err.status === 401 && err.code === 'EXPIRED_TOKEN'
-    if (!expired || options.auth === false) throw err
+    if (options.auth === false || !canRetryWithReissue(err, path)) throw err
 
     const ok = await reissue()
     if (!ok) {
