@@ -78,6 +78,17 @@ public final class PostSpecifications {
 		return (root, query, cb) -> cb.equal(root.get("user").get("id"), userId);
 	}
 
+	/**
+	 * "인기 피드" 후보 조건 — 마감이 지난 셀러글만 제외한다.
+	 * 일반글은 마감 개념(end_date)이 없어 "끝난 적이 없는 글"로 보고 항상 후보에 남긴다.
+	 */
+	public static Specification<Post> notEnded(LocalDateTime now) {
+		return (root, query, cb) -> cb.or(
+			cb.notEqual(root.get("postType"), PostType.SELLER),
+			cb.greaterThanOrEqualTo(root.get("endDate"), now)
+		);
+	}
+
 	public static Specification<Post> excludingId(Long postId) {
 		if (postId == null) {
 			return null;

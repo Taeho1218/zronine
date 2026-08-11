@@ -56,6 +56,9 @@ public class PostService {
 	/** 상세페이지 "비슷한 상품"에 내려줄 최대 개수 */
 	public static final int SIMILAR_LIMIT = 6;
 
+	/** 홈 화면 "인기 피드"에 내려줄 개수 */
+	public static final int POPULAR_LIMIT = 9;
+
 	private final PostRepository postRepository;
 	private final PostCategoryRepository postCategoryRepository;
 	private final PostLikeRepository postLikeRepository;
@@ -219,6 +222,22 @@ public class PostService {
 		}
 
 		return mapToFeedResponses(candidates, viewerId, now);
+	}
+
+	/**
+	 * 홈 화면 "인기 피드". 마감이 지난 셀러글은 후보에서 빠지고(일반글은 마감이 없어 항상 포함),
+	 * 좋아요 많은 순 → 같으면 댓글 많은 순 → 그것도 같으면 최신순으로 POPULAR_LIMIT 개까지 내려준다.
+	 */
+	public List<PostFeedResponse> getPopularPosts(Long viewerId) {
+		LocalDateTime now = LocalDateTime.now();
+		Pageable limit = PageRequest.of(0, POPULAR_LIMIT, Sort.by(
+			Sort.Order.desc("likeCount"),
+			Sort.Order.desc("commentCount"),
+			Sort.Order.desc("id")
+		));
+
+		List<Post> posts = postRepository.findAll(PostSpecifications.notEnded(now), limit).getContent();
+		return mapToFeedResponses(posts, viewerId, now);
 	}
 
 	/**

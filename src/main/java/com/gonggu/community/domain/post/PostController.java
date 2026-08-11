@@ -63,6 +63,16 @@ public class PostController {
 			postService.search(condition, AuthUtils.optionalUserId(principal), pageable));
 	}
 
+	/**
+	 * 홈 화면 "인기 피드". 마감 지난 셀러글은 제외하고 좋아요 많은 순 → 댓글 많은 순 → 최신순으로
+	 * PostService.POPULAR_LIMIT(9)개까지만 내려주는 고정 개수 목록이라 페이지네이션이 없다.
+	 */
+	@GetMapping("/posts/popular")
+	public ApiResponse<List<PostFeedResponse>> getPopularPosts(
+		@AuthenticationPrincipal CustomUserDetails principal) {
+		return ApiResponse.success(postService.getPopularPosts(AuthUtils.optionalUserId(principal)));
+	}
+
 	@GetMapping("/posts/{postId}")
 	public ApiResponse<PostDetailResponse> getPost(@PathVariable Long postId,
 		@AuthenticationPrincipal CustomUserDetails principal) {
