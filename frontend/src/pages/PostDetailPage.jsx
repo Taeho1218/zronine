@@ -21,6 +21,9 @@ export default function PostDetailPage() {
   const { isLoggedIn } = useAuth()
 
   const [post, setPost] = useState(null)
+  // 주소가 죽은 이미지는 목록에서 빼버린다. 인덱스는 목록이 줄면 어긋나므로 URL 로 기억한다.
+  const [brokenImages, setBrokenImages] = useState(() => new Set())
+  const [activeImage, setActiveImage] = useState(0)
   const [related, setRelated] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -30,6 +33,9 @@ export default function PostDetailPage() {
     setLoading(true)
     setError(null)
     setPost(null)
+    // 다른 글로 이동했으면 이전 글의 이미지 상태를 물고 가지 않는다.
+    setBrokenImages(new Set())
+    setActiveImage(0)
     postApi
       .detail(postId)
       .then((data) => alive && setPost(data))
@@ -132,7 +138,12 @@ export default function PostDetailPage() {
   }
 
   const isSeller = post.postType === 'SELLER'
-  const hero = post.imageUrls?.[0] ?? null
+
+  // 못 불러온 이미지는 빼고 남은 것만 보여준다. 전부 죽었으면 자리표시자로 돌아간다.
+  const images = (post.imageUrls ?? []).filter((url) => !brokenImages.has(url))
+  const heroIndex = Math.min(activeImage, Math.max(0, images.length - 1))
+  const hero = images[heroIndex] ?? null
+  const markBroken = (url) => setBrokenImages((prev) => new Set(prev).add(url))
 
   return (
     <div className="detail page">
@@ -144,9 +155,22 @@ export default function PostDetailPage() {
             <div className="detail__author-row">
               <Avatar user={post.author} size={44} />
               <div className="detail__author">
-                <Link to={`/users/${post.author.userId}`} className="detail__author-name">
-                  {post.author.nickname}
-                </Link>
+                <span className="detail__author-line">
+                  <Link to={`/users/${post.author.userId}`} className="detail__author-name">
+                    {post.author.nickname}
+                  </Link>
+                  {/* 인스타 공구는 주최자 계정으로 확인하는 경우가 많아, 주소가 있으면 바로 열어준다. */}
+                  {post.author.instagramUrl && (
+                    <a
+                      className="detail__insta"
+                      href={post.author.instagramUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      인스타그램 <ExternalLinkIcon width={12} height={12} />
+                    </a>
+                  )}
+                </span>
                 <span className="detail__date">{formatDateTime(post.createdAt)}</span>
               </div>
 
@@ -184,9 +208,16 @@ export default function PostDetailPage() {
             </div>
           </header>
 
-          <figure className={`detail__hero ${hero ? '' : `ph--${placeholderTone(post.postId)}`}`}>
+          <figure
+            className={`detail__hero ${hero ? 'detail__hero--filled' : `ph--${placeholderTone(post.postId)}`}`}
+          >
             {hero ? (
-              <img className="detail__hero-img" src={hero} alt={post.title} />
+              <img
+                className="detail__hero-img"
+                src={hero}
+                alt={post.title}
+                onError={() => markBroken(hero)}
+              />
             ) : (
               <div className="detail__hero-empty">
                 <ImageIcon width={44} height={44} />
@@ -202,7 +233,32 @@ export default function PostDetailPage() {
                   : `${PROGRESS_LABEL[post.progress]} · ${ddayLabel(post.endDate)}`}
               </figcaption>
             )}
+
+            {/* 여러 장일 때만 현재 위치를 알려준다 */}
+            {images.length > 1 && (
+              <span className="detail__hero-count">
+                {heroIndex + 1} / {images.length}
+              </span>
+            )}
           </figure>
+
+          {images.length > 1 && (
+            <ul className="detail__thumbs">
+              {images.map((url, i) => (
+                <li key={url}>
+                  <button
+                    type="button"
+                    className={`detail__thumb ${i === heroIndex ? 'is-active' : ''}`}
+                    onClick={() => setActiveImage(i)}
+                    aria-label={`${i + 1}번째 이미지 보기`}
+                    aria-pressed={i === heroIndex}
+                  >
+                    <img src={url} alt="" loading="lazy" onError={() => markBroken(url)} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
 
           {isSeller && (
             <dl className="detail__meta">
@@ -222,9 +278,16 @@ export default function PostDetailPage() {
               <div className="detail__meta-row">
                 <dt>가격</dt>
                 <dd>
-                  <strong className="detail__price">{formatPrice(post.price)}</strong>
-                  {post.listPrice != null && (
-                    <span className="detail__price-was">{formatPrice(post.listPrice)}</span>
+                  {/* 수집 단계에서 가격을 못 채운 공구가 있어, 값이 없으면 빈칸 대신 상태를 적어준다. */}
+                  {post.price == null ? (
+                    <span className="detail__price-empty">가격 미정</span>
+                  ) : (
+                    <>
+                      <strong className="detail__price">{formatPrice(post.price)}</strong>
+                      {post.listPrice != null && (
+                        <span className="detail__price-was">{formatPrice(post.listPrice)}</span>
+                      )}
+                    </>
                   )}
                 </dd>
               </div>

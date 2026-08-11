@@ -56,14 +56,24 @@ export default function PostCard({ post }) {
     }
   }
 
+  // 이미지 주소가 죽어 있으면(데모 파일 누락, 삭제된 업로드 등) 깨진 아이콘 대신
+  // 원래의 파스텔 자리표시자로 돌려놓는다.
+  const [imageBroken, setImageBroken] = useState(false)
   const thumb = post.thumbnailUrl ?? post.imageUrls?.[0] ?? null
+  const showImage = thumb && !imageBroken
 
   return (
     <article className="pcard">
       <Link to={`/posts/${post.postId}`} className="pcard__link">
         <div className="pcard__media">
-          {thumb ? (
-            <img className="pcard__img" src={thumb} alt="" loading="lazy" />
+          {showImage ? (
+            <img
+              className="pcard__img"
+              src={thumb}
+              alt=""
+              loading="lazy"
+              onError={() => setImageBroken(true)}
+            />
           ) : (
             <div className={`pcard__img pcard__img--empty ph--${placeholderTone(post.postId)}`}>
               <ImageIcon width={30} height={30} />
