@@ -1,7 +1,6 @@
 import Avatar from './Avatar'
 import { ExternalLinkIcon } from './icons'
 import { coverImage } from '../api/coverImage'
-import { getLocalCover } from '../lib/localCover'
 import './ProfileHeader.css'
 
 /**
@@ -13,13 +12,12 @@ import './ProfileHeader.css'
  * besideName 은 이름 바로 오른쪽 같은 줄에 놓인다.
  *
  * 커버 사진은 이 순서로 고른다.
- *   1. 서버가 준 coverImageUrl
- *   2. (내 프로필일 때) 환경설정에서 내가 고른 사진
- *   3. 그 사람이 올린 글의 첫 사진 — 남의 프로필도 초록 단색으로 비어 보이지 않게 한다
- *   4. assets/cover 에 넣어둔 공통 기본 사진
- *   5. 브랜드 색 그라데이션
+ *   1. 서버가 준 coverImageUrl (환경설정에서 올린 사진)
+ *   2. 그 사람이 올린 글의 첫 사진 — 남의 프로필도 초록 단색으로 비어 보이지 않게 한다
+ *   3. assets/cover 에 넣어둔 공통 기본 사진
+ *   4. 브랜드 색 그라데이션
  *
- * 3번은 커버로 찍은 사진이 아니라 상품 사진이라 크게 확대되면 어색하다.
+ * 2번은 커버로 찍은 사진이 아니라 상품 사진이라 크게 확대되면 어색하다.
  * 그래서 이 경우에만 배경을 흐리게 깔아(ambient) 인물/글씨가 앞에 서도록 한다.
  */
 export default function ProfileHeader({
@@ -32,10 +30,8 @@ export default function ProfileHeader({
 }) {
   if (!profile) return null
 
-  // 내가 고른 커버는 내 프로필에서만 되살린다 (남의 프로필에 내 사진이 깔리면 안 된다).
-  const chosen = profile.coverImageUrl ?? (profile.me ? getLocalCover(profile.userId) : null)
-  const cover = chosen ?? fallbackCover ?? coverImage
-  const ambient = !chosen && !!fallbackCover
+  const cover = profile.coverImageUrl ?? fallbackCover ?? coverImage
+  const ambient = !profile.coverImageUrl && !!fallbackCover
 
   return (
     <header className={`phead ${cover ? 'phead--photo' : ''}`}>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi, uploadApi } from '../api'
+import Loading from '../components/Loading'
 import { CheckIcon, CloseIcon, PlusIcon } from '../components/icons'
 import { parsePrice } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
@@ -40,6 +41,8 @@ export default function PostWritePage() {
   const [submitting, runSubmit] = useBusy()
   const [error, setError] = useState(null)
   const [savedDraft, setSavedDraft] = useState(false)
+  // 수정 모드에서 기존 글을 받아오기 전. 빈 폼이 잠깐 보이면 "값이 날아갔나" 싶으므로 가려둔다.
+  const [loadingPost, setLoadingPost] = useState(!!editId)
   const fileRef = useRef(null)
 
   const isSeller = form.postType === 'SELLER'
@@ -55,6 +58,7 @@ export default function PostWritePage() {
   // 수정 모드면 기존 값을 채우고, 새 글이면 남아있는 임시저장을 복원한다.
   useEffect(() => {
     if (editId) {
+      setLoadingPost(true)
       postApi
         .detail(editId)
         .then((post) =>
@@ -73,6 +77,7 @@ export default function PostWritePage() {
           }),
         )
         .catch((err) => setError(err.message))
+        .finally(() => setLoadingPost(false))
       return
     }
 
@@ -225,6 +230,8 @@ export default function PostWritePage() {
       )}
     </div>
   )
+
+  if (loadingPost) return <Loading message="글을 불러오는 중…" />
 
   return (
     <div className={`write page ${isSeller ? '' : 'write--narrow'}`}>

@@ -22,3 +22,8 @@
   font-weight: 600;
   color: var(--gray-500);
 }
+
+/* 알림 패널처럼 좁은 칸에서는 위아래 여백을 줄인다 */
+.state.loading.npanel__loading {
+  padding: 26px 16px;
+}

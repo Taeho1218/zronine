@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
+import Loading from './Loading'
 import { fetchNotifications, markRead } from '../lib/notifications'
 import { fromNow } from '../lib/format'
 import ImageFallback from './ImageFallback'
@@ -103,7 +104,7 @@ export default function NotificationPanel({ anchorRef, onClose }) {
       <div className="npanel__body">
         {!isLoggedIn && <p className="npanel__empty">로그인하면 알림을 받아볼 수 있어요.</p>}
 
-        {isLoggedIn && loading && <p className="npanel__empty">불러오는 중…</p>}
+        {isLoggedIn && loading && <Loading size={72} message="알림을 불러오는 중…" className="npanel__loading" />}
 
         {isLoggedIn && !loading && tab === 'comment' && (
           <p className="npanel__empty">댓글 알림은 아직 서버에서 내려오지 않아요.</p>

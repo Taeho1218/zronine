@@ -4,7 +4,6 @@ import { userApi, uploadApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import { useBusy } from '../lib/useBusy'
 import { downscaleImage } from '../lib/imageResize'
-import { getLocalCover, setLocalCover } from '../lib/localCover'
 import Avatar from '../components/Avatar'
 import Loading from '../components/Loading'
 import WithdrawDialog from '../components/WithdrawDialog'
@@ -48,13 +47,10 @@ export default function SettingsPage() {
     userApi
       .me()
       .then((me) => {
-        // 서버가 커버를 아직 안 내려주므로, 없으면 이 브라우저에 적어둔 값을 되살린다.
-        // 처음 상태와 프로필을 같은 값으로 맞춰야 화면을 열자마자 "변경됨"이 되지 않는다.
-        const cover = me.coverImageUrl ?? getLocalCover(me.userId)
-        setProfile({ ...me, coverImageUrl: cover })
+        setProfile(me)
         setNickname(me.nickname ?? '')
         setImageUrl(me.profileImageUrl ?? null)
-        setCoverUrl(cover)
+        setCoverUrl(me.coverImageUrl ?? null)
         setInstagramUrl(me.instagramUrl ?? '')
       })
       .catch((err) => setMessage({ type: 'error', text: err.message }))
@@ -143,10 +139,7 @@ export default function SettingsPage() {
           instagramUrl: instagramUrl.trim(),
           coverImageUrl: coverUrl ?? '',
         })
-        // 서버가 커버를 아직 안 돌려주므로, 돌아온 값이 없으면 방금 고른 값을 그대로 쓴다.
-        const cover = updated.coverImageUrl ?? coverUrl
-        setLocalCover(updated.userId ?? profile.userId, cover)
-        setProfile({ ...updated, coverImageUrl: cover })
+        setProfile(updated)
         // 헤더 아바타·닉네임도 바로 새 값으로 바뀌게 한다.
         updateUser({ nickname: updated.nickname, profileImageUrl: updated.profileImageUrl })
         setNickState(null)
