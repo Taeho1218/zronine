@@ -47,14 +47,20 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PostService {
 
-	/** 무한 스크롤 한 번에 내려갈 수 있는 게시글 수 상한 */
+	/** 마이페이지 / 다른 사람 프로필의 게시물 목록에서 무한 스크롤 한 번에 내려갈 수 있는 상한 */
 	public static final int MAX_PAGE_SIZE = 15;
+
+	/** 메인 페이지 피드(검색 포함)는 한 번에 12개까지만 내려준다. */
+	public static final int MAIN_FEED_PAGE_SIZE = 12;
 
 	/** 이보다 짧은 검색어는 검색을 수행하지 않는다. */
 	public static final int MIN_KEYWORD_LENGTH = 2;
 
 	/** 상세페이지 "비슷한 상품"에 내려줄 최대 개수 */
 	public static final int SIMILAR_LIMIT = 6;
+
+	/** 홈 화면 "인기 피드"에 내려줄 개수 */
+	public static final int POPULAR_LIMIT = 9;
 
 	private final PostRepository postRepository;
 	private final PostCategoryRepository postCategoryRepository;
@@ -154,7 +160,7 @@ public class PostService {
 	 */
 	public PageResponse<PostFeedResponse> search(PostSearchCondition condition, Long viewerId, Pageable pageable) {
 		LocalDateTime now = LocalDateTime.now();
-		Pageable limited = limitPageSize(pageable);
+		Pageable limited = limitPageSize(pageable, MAIN_FEED_PAGE_SIZE);
 
 		// 너무 짧은 검색어는 사실상 전체 조회가 되어 무한 스크롤이 의미 없는 결과로 채워진다.
 		// 검색어를 무시하고 전체를 돌려주면 "검색했는데 관련 없는 글이 나온다"로 보이므로 빈 결과로 끊는다.
@@ -176,7 +182,8 @@ public class PostService {
 	/** 마이페이지 / 다른 사람 프로필의 작성 게시물 목록 */
 	public PageResponse<PostFeedResponse> getPostsByUser(Long targetUserId, Long viewerId, Pageable pageable) {
 		userService.getUserOrThrow(targetUserId);
-		return toFeedPage(postRepository.findByUserIdOrderByIdDesc(targetUserId, limitPageSize(pageable)), viewerId,
+		Pageable limited = limitPageSize(pageable, MAX_PAGE_SIZE);
+		return toFeedPage(postRepository.findByUserIdOrderByIdDesc(targetUserId, limited), viewerId,
 			LocalDateTime.now());
 	}
 
@@ -222,6 +229,22 @@ public class PostService {
 	}
 
 	/**
+	 * 홈 화면 "인기 피드". 마감이 지난 셀러글은 후보에서 빠지고(일반글은 마감이 없어 항상 포함),
+	 * 좋아요 많은 순 → 같으면 댓글 많은 순 → 그것도 같으면 최신순으로 POPULAR_LIMIT 개까지 내려준다.
+	 */
+	public List<PostFeedResponse> getPopularPosts(Long viewerId) {
+		LocalDateTime now = LocalDateTime.now();
+		Pageable limit = PageRequest.of(0, POPULAR_LIMIT, Sort.by(
+			Sort.Order.desc("likeCount"),
+			Sort.Order.desc("commentCount"),
+			Sort.Order.desc("id")
+		));
+
+		List<Post> posts = postRepository.findAll(PostSpecifications.notEnded(now), limit).getContent();
+		return mapToFeedResponses(posts, viewerId, now);
+	}
+
+	/**
 	 * 공백만 있는 검색어는 "검색 안 함"으로 보고 전체 목록을 돌려주지만,
 	 * 한 글자짜리 검색어는 검색 의도가 있는 요청이라 최소 길이 미달로 처리한다.
 	 */
@@ -233,11 +256,11 @@ public class PostService {
 	 * 무한 스크롤 한 번에 내려갈 수 있는 최대 개수를 서버가 강제한다.
 	 * 클라이언트가 size 를 크게 보내 한 번에 전부 긁어가는 것을 막기 위해 컨트롤러 기본값과 별개로 여기서 자른다.
 	 */
-	private Pageable limitPageSize(Pageable pageable) {
-		if (pageable.getPageSize() <= MAX_PAGE_SIZE) {
+	private Pageable limitPageSize(Pageable pageable, int maxSize) {
+		if (pageable.getPageSize() <= maxSize) {
 			return pageable;
 		}
-		return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE, pageable.getSort());
+		return PageRequest.of(pageable.getPageNumber(), maxSize, pageable.getSort());
 	}
 
 	/**
@@ -359,10 +382,8 @@ public class PostService {
 		if (postType == PostType.SELLER) {
 			requireNotEmpty(imageUrls, "셀러 게시글은 사진을 1장 이상 등록해야 합니다.");
 			requireNotBlank(productName, "물건 이름을 입력해주세요.");
-			if (price == null) {
-				throw new InvalidRequestException(ErrorCode.SELLER_FIELD_REQUIRED, "가격을 입력해주세요.");
-			}
-			requireNotBlank(buyUrl, "구매링크를 입력해주세요.");
+			// 가격/구매링크는 필수에서 제외했다 — 가격 미정이거나 인스타 프로필/DM으로만 안내하는
+			// 공구 글도 있어서, 값이 있으면 그대로 쓰고 없으면 null로 둔다(DB도 원래부터 nullable).
 			if (startDate == null || endDate == null) {
 				throw new InvalidRequestException(ErrorCode.SELLER_FIELD_REQUIRED, "모집 기간을 입력해주세요.");
 			}
