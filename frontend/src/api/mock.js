@@ -360,6 +360,7 @@ function profileOf(userId, viewerIsMe) {
     nickname: user.nickname,
     profileImageUrl: user.profileImageUrl,
     instagramUrl: user.instagramUrl ?? null,
+    coverImageUrl: user.coverImageUrl ?? null,
     followerCount: followersOf(user.userId).length,
     followingCount: followingsOf(user.userId).length,
     postCount: posts.filter((p) => p.author.userId === user.userId).length,
@@ -441,6 +442,16 @@ function findPost(id) {
   return post
 }
 
+/** 목업 업로드 결과. 새로고침해도 살아있도록 blob 대신 data URL 로 돌려준다. */
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(new Error('파일을 읽지 못했어요.'))
+    reader.readAsDataURL(file)
+  })
+}
+
 /** path/method 를 실제 백엔드 라우팅과 같은 순서로 매칭한다. */
 export async function mockRequest(path, { method = 'GET', params, body } = {}) {
   await delay()
@@ -472,11 +483,14 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
       err.status = 400
       throw err
     }
-    // 실제 서버는 저장된 파일 URL 을 돌려주지만, 목업에서는 브라우저 blob URL 로 대신한다.
+    /*
+     * 실제 서버는 저장된 파일 URL 을 돌려준다. 목업에서는 data URL 로 대신하는데,
+     * blob URL 은 새로고침하면 죽어서 "올렸는데 다음에 오면 사라진다"로 보이기 때문이다.
+     */
     const files = body?.getAll?.('files') ?? []
     const one = body?.get?.('file')
-    if (p(2) === 'bulk') return files.map((f) => URL.createObjectURL(f))
-    return one ? URL.createObjectURL(one) : ''
+    if (p(2) === 'bulk') return Promise.all(files.map(fileToDataUrl))
+    return one ? fileToDataUrl(one) : ''
   }
 
   // ── users ────────────────────────────────────
@@ -514,6 +528,8 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
       if (body?.nickname != null) ME.nickname = body.nickname
       if (body?.profileImageUrl != null) ME.profileImageUrl = body.profileImageUrl || null
       if (body?.instagramUrl != null) ME.instagramUrl = body.instagramUrl || null
+      // 서버에는 아직 없는 값이지만, 있을 때 어떻게 도는지 목업에서 미리 확인할 수 있게 받아둔다.
+      if (body?.coverImageUrl != null) ME.coverImageUrl = body.coverImageUrl || null
       return profileOf(ME.userId, true)
     }
 

@@ -66,6 +66,41 @@
   color: var(--ink);
 }
 
+/* ── 커버 사진 ────────────────────────────────── */
+
+.settings__cover {
+  margin-top: 8px;
+  height: 132px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--gray-150);
+  /* 사진이 없을 때도 프로필 화면과 같은 배경이 보이도록 같은 그라데이션을 쓴다 */
+  background: linear-gradient(150deg, #1f9d5b 0%, #14ae5c 42%, #0d8845 100%);
+  background-size: cover;
+  background-position: center;
+  display: grid;
+  place-items: center;
+}
+
+.settings__cover.is-set {
+  border-color: transparent;
+}
+
+.settings__cover-empty {
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.85;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.settings__cover-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
 /* ── 입력 ─────────────────────────────────────── */
 
 .settings__field + .settings__field {

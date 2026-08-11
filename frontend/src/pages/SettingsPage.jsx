@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { userApi, uploadApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import { useBusy } from '../lib/useBusy'
+import { downscaleImage } from '../lib/imageResize'
+import { getLocalCover, setLocalCover } from '../lib/localCover'
 import Avatar from '../components/Avatar'
 import WithdrawDialog from '../components/WithdrawDialog'
 import { CheckIcon } from '../components/icons'
@@ -29,6 +31,7 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState(null)
   const [nickname, setNickname] = useState('')
   const [imageUrl, setImageUrl] = useState(null)
+  const [coverUrl, setCoverUrl] = useState(null)
   const [instagramUrl, setInstagramUrl] = useState('')
 
   const [nickState, setNickState] = useState(null) // null | 'checking' | 'ok' | 'taken'
@@ -37,15 +40,20 @@ export default function SettingsPage() {
 
   const [uploading, runUpload] = useBusy()
   const [saving, runSave] = useBusy()
+  const [coverBusy, runCover] = useBusy()
   const [loggingOut, runLogout] = useBusy()
 
   useEffect(() => {
     userApi
       .me()
       .then((me) => {
-        setProfile(me)
+        // 서버가 커버를 아직 안 내려주므로, 없으면 이 브라우저에 적어둔 값을 되살린다.
+        // 처음 상태와 프로필을 같은 값으로 맞춰야 화면을 열자마자 "변경됨"이 되지 않는다.
+        const cover = me.coverImageUrl ?? getLocalCover(me.userId)
+        setProfile({ ...me, coverImageUrl: cover })
         setNickname(me.nickname ?? '')
         setImageUrl(me.profileImageUrl ?? null)
+        setCoverUrl(cover)
         setInstagramUrl(me.instagramUrl ?? '')
       })
       .catch((err) => setMessage({ type: 'error', text: err.message }))
@@ -97,6 +105,23 @@ export default function SettingsPage() {
     })
   }
 
+  function pickCover(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    runCover(async () => {
+      setMessage(null)
+      try {
+        // 커버는 폭이 넓어 원본이 그대로 올라가면 용량이 크다. 먼저 줄여서 올린다.
+        const [url] = await uploadApi.images([await downscaleImage(file)])
+        setCoverUrl(url)
+      } catch (err) {
+        setMessage({ type: 'error', text: err.message })
+      }
+    })
+  }
+
   function save(e) {
     e.preventDefault()
     if (nicknameError) {
@@ -115,8 +140,12 @@ export default function SettingsPage() {
           nickname: trimmed,
           profileImageUrl: imageUrl ?? '',
           instagramUrl: instagramUrl.trim(),
+          coverImageUrl: coverUrl ?? '',
         })
-        setProfile(updated)
+        // 서버가 커버를 아직 안 돌려주므로, 돌아온 값이 없으면 방금 고른 값을 그대로 쓴다.
+        const cover = updated.coverImageUrl ?? coverUrl
+        setLocalCover(updated.userId ?? profile.userId, cover)
+        setProfile({ ...updated, coverImageUrl: cover })
         // 헤더 아바타·닉네임도 바로 새 값으로 바뀌게 한다.
         updateUser({ nickname: updated.nickname, profileImageUrl: updated.profileImageUrl })
         setNickState(null)
@@ -153,6 +182,7 @@ export default function SettingsPage() {
   const dirty =
     trimmed !== profile.nickname ||
     (imageUrl ?? '') !== (profile.profileImageUrl ?? '') ||
+    (coverUrl ?? '') !== (profile.coverImageUrl ?? '') ||
     instagramUrl.trim() !== (profile.instagramUrl ?? '')
 
   return (
@@ -209,6 +239,36 @@ export default function SettingsPage() {
           )}
         </label>
 
+        <div className="field settings__field">
+          <span className="field__label">커버 사진</span>
+
+          {/* 프로필 화면에서 보이는 것과 비슷한 비율로 미리 보여준다 */}
+          <div
+            className={`settings__cover ${coverUrl ? 'is-set' : ''}`}
+            style={coverUrl ? { backgroundImage: `url(${coverUrl})` } : undefined}
+          >
+            {!coverUrl && <span className="settings__cover-empty">기본 배경이 표시됩니다</span>}
+          </div>
+
+          <div className="settings__cover-actions">
+            <label className="btn btn--ghost settings__file">
+              {coverBusy ? '올리는 중…' : coverUrl ? '커버 사진 변경' : '커버 사진 올리기'}
+              <input type="file" accept="image/*" className="sr-only" onChange={pickCover} disabled={coverBusy} />
+            </label>
+
+            {coverUrl && (
+              <button type="button" className="settings__plain" onClick={() => setCoverUrl(null)}>
+                기본 배경으로
+              </button>
+            )}
+          </div>
+
+          <span className="field__help">
+            가로가 긴 사진이 잘 어울려요 (권장 1920×400 이상). 아래쪽에 이름이 얹히니 아래 1/3 에는 중요한
+            피사체가 없는 사진이 좋습니다.
+          </span>
+        </div>
+
         <label className="field settings__field">
           <span className="field__label">인스타그램 주소</span>
           <input
@@ -227,7 +287,7 @@ export default function SettingsPage() {
         )}
 
         <div className="settings__actions">
-          <button type="submit" className="btn btn--primary" disabled={saving || uploading || !dirty}>
+          <button type="submit" className="btn btn--primary" disabled={saving || uploading || coverBusy || !dirty}>
             {saving ? '저장 중…' : '저장'}
           </button>
         </div>
