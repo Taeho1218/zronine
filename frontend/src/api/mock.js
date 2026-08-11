@@ -5,6 +5,8 @@
  * 실제 API 와 응답 스키마(PostFeedResponse / PostDetailResponse / CommentResponse ...)를 맞춰두었으므로
  * 목업을 끄면 화면 코드는 그대로 두고 서버 데이터로 전환된다.
  */
+import { sampleSet } from './sampleImages'
+
 export const MOCK_ENABLED = import.meta.env.VITE_USE_MOCK === 'true'
 
 const CATEGORIES = [
@@ -15,12 +17,27 @@ const CATEGORIES = [
   { categoryId: 5, name: '디지털' },
   { categoryId: 6, name: '다이어트' },
   { categoryId: 7, name: '영양제' },
+  { categoryId: 8, name: '화장품' },
 ]
 
 const ME = { userId: 1, nickname: '로스터리 민', profileImageUrl: null }
 const U2 = { userId: 2, nickname: '커피러버', profileImageUrl: null }
 const U3 = { userId: 3, nickname: 'soo****', profileImageUrl: null }
 const U4 = { userId: 4, nickname: '지호아빠', profileImageUrl: null }
+
+/**
+ * 인스타 공구를 여는 셀러. 수집 시트의 "인스타 아이디 / 인스타 프로필 URL" 두 칸이 여기에 대응한다.
+ *
+ * instagramUrl 은 백엔드 UserSummaryResponse 에 아직 없는 필드다.
+ * 화면은 값이 있을 때만 링크를 그리므로, 서버가 내려주기 시작하면 그대로 표시되고
+ * 없으면 아무것도 그리지 않는다.
+ */
+const SELLER_DREAMYAKSA = {
+  userId: 5,
+  nickname: 'dreamyaksa_',
+  profileImageUrl: null,
+  instagramUrl: 'https://www.instagram.com/dreamyaksa_/',
+}
 
 /**
  * 서버의 LocalDateTime 은 타임존이 없는 로컬 시각이다.
@@ -44,23 +61,23 @@ const hoursAgo = (n) => {
 }
 
 let posts = [
+  // 수집 시트 GB-001. 시트에 없는 값(가격, 이벤트)은 채우지 않고 비워둔다.
   {
     postId: 1,
     postType: 'SELLER',
-    author: ME,
-    title: '에티오피아 예가체프 G1 · 갓 볶은 스페셜티 원두 1kg 공동구매',
-    content:
-      '매주 화요일 주문 즉시 로스팅해 보내드리는 에티오피아 예가체프 G1 원두입니다. 재스민과 베르가못의 화사한 향, 은은한 레몬 산미가 특징이에요.\n\n공동구매로 함께 모이면 1kg 대용량을 정가보다 29% 저렴하게 나눠 받을 수 있습니다. 참여 시 분쇄도(홀빈/드립/에스프레소)를 선택할 수 있고, 로스팅 후 2일 이내 순차 발송됩니다.',
-    imageUrls: [],
-    productName: '예가체프 G1 원두 1kg',
-    price: 19900,
-    listPrice: 28000,
-    buyUrl: 'https://example.com/products/yirgacheffe-g1',
-    startDate: daysFromNow(0),
-    endDate: daysFromNow(7),
-    eventNote: '50명 달성 시 드립백 10개 증정',
+    author: SELLER_DREAMYAKSA,
+    title: '바이오던스 클렌징&겔패드 공동구매',
+    content: '상품 링크 확인 요망',
+    // post-1.* 부터 post-1-2.*, post-1-3.* ... 순서로 있는 만큼 자동으로 붙는다.
+    imageUrls: sampleSet('post-1'),
+    productName: '바이오던스 클렌징&겔패드',
+    price: null,
+    buyUrl: 'https://biodance.co.kr/product/detail.html?product_no=573',
+    startDate: '2026-08-10T10:00:00',
+    endDate: '2026-08-13T23:59:00',
+    eventNote: null,
     progress: 'ONGOING',
-    categories: [CATEGORIES[0], CATEGORIES[6]],
+    categories: [CATEGORIES[7]],
     likeCount: 100,
     commentCount: 24,
     liked: false,
@@ -68,7 +85,6 @@ let posts = [
     alerted: true,
     followingAuthor: false,
     mine: false,
-    participantCount: 42,
     createdAt: hoursAgo(3),
   },
   {
@@ -77,7 +93,7 @@ let posts = [
     author: ME,
     title: '콜롬비아 수프리모 핸드드립 원두 1kg',
     content: '균형 잡힌 바디감과 초콜릿 뉘앙스가 좋은 데일리 원두입니다.',
-    imageUrls: [],
+    imageUrls: sampleSet('post-2'),
     productName: '콜롬비아 수프리모 1kg',
     price: 17500,
     buyUrl: 'https://example.com/products/supremo',
@@ -102,7 +118,7 @@ let posts = [
     author: U2,
     title: '디카페인 스위스워터 원두 1kg',
     content: '화학 용매 없이 물로만 카페인을 제거한 스위스워터 공정 원두예요.',
-    imageUrls: [],
+    imageUrls: sampleSet('post-3'),
     productName: '디카페인 스위스워터 1kg',
     price: 21000,
     buyUrl: 'https://example.com/products/decaf',
@@ -127,7 +143,7 @@ let posts = [
     author: U3,
     title: '브라질 산토스 블렌드 홀빈 1kg',
     content: '고소한 견과류 향이 도는 입문용 블렌드입니다.',
-    imageUrls: [],
+    imageUrls: sampleSet('post-4'),
     productName: '브라질 산토스 블렌드 1kg',
     price: 15900,
     buyUrl: 'https://example.com/products/santos',
@@ -152,7 +168,7 @@ let posts = [
     author: U4,
     title: '저당 그래놀라 500g x 3팩 공동구매',
     content: '설탕 대신 알룰로스를 쓴 저당 그래놀라입니다. 아침 대용으로 좋아요.',
-    imageUrls: [],
+    imageUrls: sampleSet('post-5'),
     productName: '저당 그래놀라 500g',
     price: 12900,
     buyUrl: 'https://example.com/products/granola',
@@ -177,7 +193,7 @@ let posts = [
     author: U2,
     title: '공구 처음 참여해봤는데 후기 남겨요',
     content: '배송도 빠르고 포장도 꼼꼼했어요. 다음에도 참여할 예정입니다!',
-    imageUrls: [],
+    imageUrls: sampleSet('post-6'),
     productName: null,
     price: null,
     buyUrl: null,
@@ -204,7 +220,7 @@ let comments = [
     postId: 1,
     parentId: null,
     author: U2,
-    content: '디카페인도 같이 진행하실 계획 있으실까요? 있으면 꼭 참여하고 싶어요!',
+    content: '겔패드는 몇 매입인가요? 링크 들어가보니 옵션이 여러 개라서요!',
     secret: false,
     visible: true,
     mine: false,
@@ -215,11 +231,11 @@ let comments = [
     commentId: 2,
     postId: 1,
     parentId: null,
-    author: ME,
-    content: '다음 공구 때 디카페인 옵션 추가 예정이에요. 알림 신청해두시면 열릴 때 바로 알려드릴게요 🙌',
+    author: SELLER_DREAMYAKSA,
+    content: '2박스(각 60매) 기준으로 진행돼요. 옵션은 참여 폼에서 선택하실 수 있어요 🙌',
     secret: false,
     visible: true,
-    mine: true,
+    mine: false,
     likeCount: 12,
     createdAt: hoursAgo(0.7),
   },
@@ -228,7 +244,7 @@ let comments = [
     postId: 1,
     parentId: null,
     author: U3,
-    content: '지난 공구 때 향 정말 좋았어요. 이번엔 에스프레소용으로 참여합니다 :)',
+    content: '저번에 써봤는데 아침에 붓기 빠지는 느낌이 좋았어요. 이번에도 참여합니다 :)',
     secret: false,
     visible: true,
     mine: false,
@@ -240,7 +256,7 @@ let comments = [
     postId: 1,
     parentId: null,
     author: U4,
-    content: '분쇄도 선택은 결제 후에 어디서 하나요?',
+    content: '배송은 마감 후 언제쯤 시작되나요?',
     secret: false,
     visible: true,
     mine: false,
