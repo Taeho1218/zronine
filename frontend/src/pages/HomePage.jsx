@@ -5,7 +5,6 @@ import PostCard from '../components/PostCard'
 import Loading from '../components/Loading'
 import Pagination from '../components/Pagination'
 import HomeHero from '../components/HomeHero'
-import FeedFilter from '../components/FeedFilter'
 import { normalizeKeyword } from '../lib/search'
 import './HomePage.css'
 
@@ -14,6 +13,13 @@ import './HomePage.css'
  * 서버 PostService.MAIN_FEED_PAGE_SIZE 와 같은 값이라 더 크게 보내도 서버가 여기까지 잘라준다.
  */
 const PAGE_SIZE = 12
+
+const QUICK_FILTERS = [
+  { label: '진행 중', key: 'status', value: 'ONGOING' },
+  { label: '진행 예정', key: 'status', value: 'UPCOMING' },
+  { label: '셀러 글', key: 'postType', value: 'SELLER' },
+  { label: '유저 글', key: 'postType', value: 'GENERAL' },
+]
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -89,16 +95,13 @@ export default function HomePage() {
     })
   }
 
-  /** 글 종류 / 모집 상태 필터. key 가 'reset' 이면 둘 다 지운다. */
+  /** 한 번에 하나의 빠른 필터만 적용하고, 선택된 필터를 다시 누르면 전체로 돌아간다. */
   function changeFilter(key, value) {
     updateParams((next) => {
-      if (key === 'reset') {
-        next.delete('postType')
-        next.delete('status')
-        return
-      }
-      if (value) next.set(key, value)
-      else next.delete(key)
+      const isActive = next.get(key) === value
+      next.delete('postType')
+      next.delete('status')
+      if (!isActive) next.set(key, value)
     })
   }
 
@@ -112,36 +115,54 @@ export default function HomePage() {
 
   return (
     <div className="home page">
-      {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
-      <HomeHero />
-
-      <div className="home__chips" role="tablist" aria-label="카테고리">
-        {/* 카테고리와 성격이 다른 필터라 칩 줄 왼쪽에 따로 세운다 */}
-        <FeedFilter postType={postType} status={status} onChange={changeFilter} />
-        <span className="home__chips-divider" aria-hidden="true" />
-
+      <nav className="home__category-nav" aria-label="상품 카테고리">
         <button
           type="button"
-          role="tab"
-          aria-selected={!categoryId}
-          className={`chip ${!categoryId ? 'chip--active' : ''}`}
+          aria-current={!categoryId ? 'page' : undefined}
+          className={`home__category-link ${!categoryId ? 'home__category-link--active' : ''}`}
           onClick={() => selectCategory(null)}
         >
           전체
         </button>
-        {categories.map((c) => (
+        {categories.map((category) => (
           <button
-            key={c.categoryId}
+            key={category.categoryId}
             type="button"
-            role="tab"
-            aria-selected={String(c.categoryId) === categoryId}
-            className={`chip ${String(c.categoryId) === categoryId ? 'chip--active' : ''}`}
-            onClick={() => selectCategory(c.categoryId)}
+            aria-current={String(category.categoryId) === categoryId ? 'page' : undefined}
+            className={`home__category-link ${
+              String(category.categoryId) === categoryId ? 'home__category-link--active' : ''
+            }`}
+            onClick={() => selectCategory(category.categoryId)}
           >
-            {c.name}
+            {category.name}
           </button>
         ))}
-      </div>
+      </nav>
+
+      {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
+      <HomeHero />
+
+      <section className="home__feed-heading" aria-labelledby="home-feed-title">
+        <h2 id="home-feed-title" className="home__feed-title">
+          지금 공구
+        </h2>
+        <div className="home__quick-filters" aria-label="게시글 필터">
+          {QUICK_FILTERS.map((filter) => {
+            const isActive = searchParams.get(filter.key) === filter.value
+            return (
+              <button
+                key={filter.label}
+                type="button"
+                aria-pressed={isActive}
+                className={`home__quick-filter ${isActive ? 'home__quick-filter--active' : ''}`}
+                onClick={() => changeFilter(filter.key, filter.value)}
+              >
+                {filter.label}
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
       {keyword && (
         <p className="home__searched">
