@@ -5,6 +5,7 @@ import { useAuth } from '../store/AuthContext'
 import Avatar from '../components/Avatar'
 import PostCard from '../components/PostCard'
 import ImageFallback from '../components/ImageFallback'
+import FollowListModal from '../components/FollowListModal'
 import { ExternalLinkIcon } from '../components/icons'
 import { ddayLabel, formatDate, formatPeriod } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
@@ -32,6 +33,14 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [logoutBusy, runLogout] = useBusy()
+  // null 이면 닫힌 상태, 'followers' | 'followings' 면 그 탭으로 열린다.
+  const [followTab, setFollowTab] = useState(null)
+
+  /** 목록 창에서 팔로우를 눌렀으면 프로필의 숫자도 다시 읽어 맞춘다. */
+  function closeFollowList(changed) {
+    setFollowTab(null)
+    if (changed) userApi.me().then(setProfile).catch(() => {})
+  }
 
   useEffect(() => {
     userApi
@@ -69,14 +78,15 @@ export default function MyPage() {
             <dt>게시물</dt>
             <dd>{profile?.postCount ?? 0}</dd>
           </div>
-          <div>
+          {/* 팔로워/팔로잉은 눌러서 목록을 볼 수 있다 */}
+          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followers')}>
             <dt>팔로워</dt>
             <dd>{profile?.followerCount ?? 0}</dd>
-          </div>
-          <div>
+          </button>
+          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followings')}>
             <dt>팔로잉</dt>
             <dd>{profile?.followingCount ?? 0}</dd>
-          </div>
+          </button>
         </dl>
 
         <button
@@ -88,6 +98,15 @@ export default function MyPage() {
           {logoutBusy ? '로그아웃 중…' : '로그아웃'}
         </button>
       </header>
+
+      {followTab && profile && (
+        <FollowListModal
+          userId={profile.userId}
+          nickname={profile.nickname}
+          initialTab={followTab}
+          onClose={closeFollowList}
+        />
+      )}
 
       <nav className="mypage__tabs" role="tablist">
         {TABS.map((t) => (

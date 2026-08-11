@@ -1,0 +1,99 @@
+.pcard__media {
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  /* 시안처럼 원본 비율을 유지한 이미지를 회색 판 위에 얹는다 */
+  background: var(--gray-200);
+}
+
+.pcard__viewport {
+  display: block;
+}
+
+/*
+ * 슬라이드를 가로로 늘어놓고 통째로 왼쪽으로 민다.
+ * 각 장이 뷰포트 너비를 꽉 채우므로 translateX(-N*100%) 가 곧 N 번째 장이다.
+ */
+.pcard__track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.pcard__img {
+  flex: 0 0 100%;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+}
+
+/* ── 좌우 화살표 ──────────────────────────────── */
+
+.pcard__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.18);
+
+  /* 평소에는 숨겨두고 카드에 마우스를 올렸을 때만 보인다 */
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.pcard__media:hover .pcard__nav {
+  opacity: 1;
+}
+
+.pcard__nav:hover {
+  background: var(--white);
+}
+
+.pcard__nav--prev {
+  left: 8px;
+}
+
+.pcard__nav--next {
+  right: 8px;
+}
+
+/* ── 하단 가운데 점 ───────────────────────────── */
+
+.pcard__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.pcard__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 3px rgba(16, 24, 40, 0.35);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+/* 현재 장은 알약 모양으로 길어져 눈에 띈다 */
+.pcard__dot.is-current {
+  width: 16px;
+  background: var(--white);
+}
+
+/* 손가락으로 쓰는 화면에서는 hover 가 없으므로 화살표를 항상 보여준다 */
+@media (hover: none) {
+  .pcard__nav {
+    opacity: 1;
+  }
+}

@@ -54,8 +54,25 @@
   margin: 0 0 0 auto;
 }
 
-.mypage__stats div {
+.mypage__stats div,
+.mypage__stat-btn {
   text-align: center;
+}
+
+/* 눌러서 목록을 여는 통계 (팔로워/팔로잉) */
+.mypage__stat-btn {
+  padding: 6px 10px;
+  margin: -6px -10px;
+  border-radius: var(--r-md);
+  transition: background-color 0.15s ease;
+}
+
+.mypage__stat-btn:hover {
+  background: var(--gray-100);
+}
+
+.mypage__stat-btn:hover dd {
+  color: var(--brand);
 }
 
 .mypage__stats dt {

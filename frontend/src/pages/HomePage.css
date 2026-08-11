@@ -1,5 +1,6 @@
 .home {
-  padding-top: 32px;
+  /* 헤더 바로 아래에 칩이 붙으면 답답해 보여 여유를 준다 */
+  padding-top: 40px;
   padding-bottom: 80px;
 }
 
@@ -64,5 +65,9 @@
 @media (max-width: 640px) {
   .home__grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* 화면이 좁으면 위 여백까지 넉넉하면 첫 카드가 너무 아래로 밀린다 */
+  .home {
+    padding-top: 32px;
   }
 }

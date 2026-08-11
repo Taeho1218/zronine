@@ -307,10 +307,44 @@ let nextCommentId = 100
 
 /** 내가 팔로우 중인 사람들. 실제로는 서버가 들고 있는 상태다. */
 const following = new Set()
-const followerCounts = new Map([[SELLERS.dreamyaksa_.userId, 1280]])
 
 /** 프로필 화면에 필요한 사람 정보. 글 작성자들에서 모아 만든다. */
 const ALL_USERS = [ME, U2, U3, U4, ...Object.values(SELLERS)]
+
+/**
+ * 목업용 팔로우 관계.
+ *
+ * 서버에는 실제 관계 데이터가 있지만 목업에는 없어서, 사용자 id 로 계산되는 규칙을 하나 정해 쓴다.
+ * 규칙 자체에 의미는 없고, 새로고침해도 목록과 숫자가 흔들리지 않는 것이 목적이다.
+ * 숫자(팔로워 수)를 따로 들고 있으면 목록과 어긋나기 쉬워 항상 목록 길이에서 뽑는다.
+ */
+function baseFollowersOf(userId) {
+  const id = Number(userId)
+  return ALL_USERS.filter((u) => u.userId !== id && (u.userId * 7 + id) % 3 === 0)
+}
+
+function followersOf(userId) {
+  const id = Number(userId)
+  const others = baseFollowersOf(id).filter((u) => u.userId !== ME.userId)
+  // 내가 팔로우 중이면 나도 그 사람의 팔로워다.
+  return following.has(id) ? [ME, ...others] : others
+}
+
+function followingsOf(userId) {
+  const id = Number(userId)
+  // 내 팔로잉 목록에는 이번 세션에 누른 팔로우가 그대로 반영돼야 한다.
+  if (id === ME.userId) return ALL_USERS.filter((u) => following.has(u.userId))
+  return ALL_USERS.filter((u) => baseFollowersOf(u.userId).some((f) => f.userId === id))
+}
+
+/** 팔로워/팔로잉 목록 한 줄 (FollowUserResponse) */
+const toFollowUser = (user) => ({
+  userId: user.userId,
+  nickname: user.nickname,
+  profileImageUrl: user.profileImageUrl,
+  // 목록을 보고 있는 사람(=나)이 이 사람을 팔로우 중인지
+  following: following.has(user.userId),
+})
 
 function profileOf(userId, viewerIsMe) {
   const user = ALL_USERS.find((u) => u.userId === Number(userId))
@@ -326,8 +360,8 @@ function profileOf(userId, viewerIsMe) {
     nickname: user.nickname,
     profileImageUrl: user.profileImageUrl,
     instagramUrl: user.instagramUrl ?? null,
-    followerCount: followerCounts.get(user.userId) ?? 12,
-    followingCount: 34,
+    followerCount: followersOf(user.userId).length,
+    followingCount: followingsOf(user.userId).length,
     postCount: posts.filter((p) => p.author.userId === user.userId).length,
     joinedAt: hoursAgo(24 * 200),
     following: following.has(user.userId),
@@ -452,19 +486,22 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
     }
 
     // 팔로우 / 언팔로우
+    // 팔로워 / 팔로잉 목록
+    if (p(2) === 'followers') return paginate(followersOf(p(1)).map(toFollowUser), Number(params?.page ?? 0), 20)
+    if (p(2) === 'followings') return paginate(followingsOf(p(1)).map(toFollowUser), Number(params?.page ?? 0), 20)
+
     if (p(2) === 'follow') {
       const targetId = Number(p(1))
       const isFollow = method === 'POST'
       if (isFollow) following.add(targetId)
       else following.delete(targetId)
 
-      const count = (followerCounts.get(targetId) ?? 12) + (isFollow ? 1 : -1)
-      followerCounts.set(targetId, count)
       // 목록/상세의 followingAuthor 도 같이 맞춰준다.
       posts.forEach((post) => {
         if (post.author.userId === targetId) post.followingAuthor = isFollow
       })
-      return { targetUserId: targetId, following: isFollow, followerCount: count }
+      // 숫자는 따로 세지 않고 목록에서 뽑아, 목록과 카운트가 어긋나지 않게 한다.
+      return { targetUserId: targetId, following: isFollow, followerCount: followersOf(targetId).length }
     }
 
     // 다른 사람 프로필

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi } from '../api'
 import PostCard from '../components/PostCard'
 import Pagination from '../components/Pagination'
+import { normalizeKeyword } from '../lib/search'
 import './HomePage.css'
 
 /** 서버 한 페이지 크기와 같다 (PostService.MAX_PAGE_SIZE). */
@@ -10,7 +11,8 @@ const PAGE_SIZE = 15
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const keyword = searchParams.get('keyword') ?? ''
+  // 주소를 직접 고쳐 한 글자로 들어오는 경우가 있어 입력창과 같은 기준으로 한 번 더 거른다.
+  const keyword = normalizeKeyword(searchParams.get('keyword'))
   const categoryId = searchParams.get('categoryId') ?? ''
 
   // 주소에는 사람이 읽는 1부터의 번호를 쓰고, 서버에는 0부터의 번호를 보낸다.

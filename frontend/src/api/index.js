@@ -53,6 +53,8 @@ export const commentApi = {
 export const followApi = {
   follow: (userId) => http.post(`/api/users/${userId}/follow`),
   unfollow: (userId) => http.delete(`/api/users/${userId}/follow`),
+  followers: (userId, page = 0) => http.get(`/api/users/${userId}/followers`, { page }),
+  followings: (userId, page = 0) => http.get(`/api/users/${userId}/followings`, { page }),
 }
 
 /* ── 이미지 업로드 ──────────────────────────────────────────────────────────

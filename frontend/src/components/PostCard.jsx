@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { postApi } from '../api'
 import { useAuth } from '../store/AuthContext'
+import { formatPeriod, formatPrice } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
-import ImageFallback from './ImageFallback'
-import { BookmarkIcon, HeartIcon } from './icons'
+import PostCardGallery from './PostCardGallery'
+import { BookmarkIcon, CommentIcon, HeartIcon } from './icons'
 import './PostCard.css'
 
 /**
@@ -64,30 +65,43 @@ export default function PostCard({ post }) {
     })
   }
 
-  // 이미지 주소가 죽어 있으면(데모 파일 누락, 삭제된 업로드 등) 깨진 아이콘 대신
-  // 원래의 파스텔 자리표시자로 돌려놓는다.
-  const [imageBroken, setImageBroken] = useState(false)
-  const thumb = post.thumbnailUrl ?? post.imageUrls?.[0] ?? null
-  const showImage = thumb && !imageBroken
+  // 목록 응답에는 대표 썸네일과 전체 이미지가 함께 온다.
+  // 전체가 비어 있는 옛 응답도 있을 수 있어 썸네일 하나라도 있으면 그것으로 채운다.
+  const images = post.imageUrls?.length ? post.imageUrls : post.thumbnailUrl ? [post.thumbnailUrl] : []
+  const isSeller = post.postType === 'SELLER'
+  const period = formatPeriod(post.startDate, post.endDate)
 
   return (
     <article className="pcard">
+      {/* 사진이 여러 장이면 넘겨볼 수 있고, 없으면 마스코트가 자리를 채운다 */}
+      <PostCardGallery postId={post.postId} images={images} title={post.title} />
+
       <Link to={`/posts/${post.postId}`} className="pcard__link">
-        {/* 사진을 안 올린 글에는 마스코트를 대신 띄운다 */}
-        <div className="pcard__media">
-          {showImage ? (
-            <img
-              className="pcard__img"
-              src={thumb}
-              alt=""
-              loading="lazy"
-              onError={() => setImageBroken(true)}
-            />
-          ) : (
-            <ImageFallback className="imgfallback--card" />
-          )}
+        {post.categories?.length > 0 && (
+          <ul className="pcard__cats">
+            {post.categories.map((c) => (
+              <li key={c.categoryId} className="pcard__cat">
+                {c.name}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* 제목 자리 높이를 고정해두고 그 안에서 세로 가운데로 맞춘다.
+            한 줄짜리와 두 줄짜리 제목이 섞여도 카드마다 아래 내용이 같은 높이에서 시작한다. */}
+        <div className="pcard__title-box">
+          <h3 className="pcard__title">{post.title}</h3>
         </div>
-        <h3 className="pcard__title">{post.title}</h3>
+
+        {/* 일반글에는 기간도 가격도 없어 이 줄 자체를 그리지 않는다 */}
+        {(period || isSeller) && (
+          <div className="pcard__meta">
+            {period && <span className="pcard__period">{period}</span>}
+            <span className={`pcard__price ${post.price == null ? 'pcard__price--empty' : ''}`}>
+              {post.price == null ? '가격 미정' : formatPrice(post.price)}
+            </span>
+          </div>
+        )}
       </Link>
 
       <div className="pcard__footer">
@@ -103,6 +117,7 @@ export default function PostCard({ post }) {
             추천 {likeCount}
           </button>
           <Link to={`/posts/${post.postId}#comments`} className="pcard__action">
+            <CommentIcon width={17} height={17} />
             댓글 {post.commentCount}
           </Link>
         </div>

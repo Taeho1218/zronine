@@ -74,11 +74,17 @@ img {
 
 /* ── 공용 유틸 ─────────────────────────────────── */
 
+/*
+ * 좌우 여백만 책임진다.
+ * padding 단축 속성을 쓰면 각 화면(.home, .detail ...)이 정한 위아래 여백까지 0 으로 덮어써
+ * "분명히 padding-top 을 줬는데 안 먹는" 상황이 생긴다. 그래서 방향을 나눠 지정한다.
+ */
 .page {
   width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
-  padding: 0 24px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 .sr-only {

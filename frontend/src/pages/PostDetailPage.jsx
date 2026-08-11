@@ -52,8 +52,20 @@ export default function PostDetailPage() {
   const relatedCategoryId = post?.categories?.[0]?.categoryId
   const currentPostId = post?.postId
 
+  /**
+   * "비슷한 상품"은 같은 카테고리의 공구를 뽑아 보여주는 자리다.
+   * 그래서 기준 삼을 카테고리가 있을 때만 의미가 있다.
+   *
+   * 유저가 쓴 일반글은 상품도 카테고리도 없어서 예전에는 categoryId 없이 목록을 불렀고,
+   * 그 결과 아무 관계 없는 공구 3개가 "비슷한 상품"으로 붙었다. 이제 아예 부르지 않는다.
+   */
+  const canShowRelated = post?.postType === 'SELLER' && relatedCategoryId != null
+
   useEffect(() => {
-    if (!currentPostId) return undefined
+    if (!currentPostId || !canShowRelated) {
+      setRelated([])
+      return undefined
+    }
     let alive = true
     postApi
       .list({ page: 0, categoryId: relatedCategoryId, postType: 'SELLER' })
@@ -65,7 +77,7 @@ export default function PostDetailPage() {
     return () => {
       alive = false
     }
-  }, [currentPostId, relatedCategoryId])
+  }, [currentPostId, relatedCategoryId, canShowRelated])
 
   /**
    * 댓글 개수는 CommentSection 이 실제 목록을 세어 알려준다.
@@ -153,7 +165,8 @@ export default function PostDetailPage() {
 
   return (
     <div className="detail page">
-      <div className="detail__layout">
+      {/* 사이드바가 없으면 본문이 화면 끝까지 늘어나 읽기 불편해지므로 한 단 레이아웃으로 좁힌다 */}
+      <div className={`detail__layout ${canShowRelated ? '' : 'detail__layout--single'}`}>
         <main className="detail__main">
           <header className="detail__head">
             <h1 className="detail__title">{post.title}</h1>
@@ -356,34 +369,37 @@ export default function PostDetailPage() {
           <CommentSection post={post} onCountChange={handleCommentCountChange} />
         </main>
 
-        <aside className="detail__side">
-          <h2 className="detail__side-title">비슷한 상품</h2>
-          {related.length === 0 ? (
-            <p className="detail__side-empty">아직 비슷한 공구가 없어요.</p>
-          ) : (
-            <ul className="detail__side-list">
-              {related.map((r) => (
-                <li key={r.postId}>
-                  <Link to={`/posts/${r.postId}`} className="rcard">
-                    {r.thumbnailUrl ? (
-                      <img className="rcard__thumb" src={r.thumbnailUrl} alt="" />
-                    ) : (
-                      <ImageFallback size={60} />
-                    )}
-                    <span className="rcard__body">
-                      <span className="rcard__name">{r.productName || r.title}</span>
-                      <span className="rcard__price">{formatPrice(r.price)}</span>
-                      <span className="rcard__meta">
-                        {r.participantCount != null ? `${r.participantCount}명 참여 · ` : ''}
-                        {ddayLabel(r.endDate)}
+        {/* 공구글이면서 카테고리가 있을 때만 이 자리가 의미를 가진다 */}
+        {canShowRelated && (
+          <aside className="detail__side">
+            <h2 className="detail__side-title">비슷한 상품</h2>
+            {related.length === 0 ? (
+              <p className="detail__side-empty">아직 비슷한 공구가 없어요.</p>
+            ) : (
+              <ul className="detail__side-list">
+                {related.map((r) => (
+                  <li key={r.postId}>
+                    <Link to={`/posts/${r.postId}`} className="rcard">
+                      {r.thumbnailUrl ? (
+                        <img className="rcard__thumb" src={r.thumbnailUrl} alt="" />
+                      ) : (
+                        <ImageFallback size={60} />
+                      )}
+                      <span className="rcard__body">
+                        <span className="rcard__name">{r.productName || r.title}</span>
+                        <span className="rcard__price">{formatPrice(r.price)}</span>
+                        <span className="rcard__meta">
+                          {r.participantCount != null ? `${r.participantCount}명 참여 · ` : ''}
+                          {ddayLabel(r.endDate)}
+                        </span>
                       </span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </aside>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </aside>
+        )}
       </div>
     </div>
   )

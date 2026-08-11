@@ -12,6 +12,12 @@
   align-items: start;
 }
 
+/* 사이드바 없이 한 단일 때. 본문이 너무 넓어지지 않게 2단일 때의 본문 폭에 맞춘다. */
+.detail__layout--single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 952px;
+}
+
 .detail__main {
   min-width: 0;
 }

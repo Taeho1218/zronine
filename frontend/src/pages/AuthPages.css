@@ -140,6 +140,11 @@
   overflow: hidden;
 }
 
+/* 필수 약관에 동의하지 않은 채 가입을 누른 상태 */
+.terms--error {
+  border-color: var(--danger);
+}
+
 .terms__all {
   display: flex;
   align-items: center;

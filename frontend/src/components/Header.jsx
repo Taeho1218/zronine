@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import NotificationPanel from './NotificationPanel'
+import { MIN_KEYWORD_LENGTH } from '../lib/search'
 import { BellIcon, BookmarkIcon, SearchIcon } from './icons'
 import symbolUrl from '../assets/brand/gg_symbol.svg'
 import './Header.css'
@@ -11,6 +12,7 @@ export default function Header() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [keyword, setKeyword] = useState(searchParams.get('keyword') ?? '')
+  const [hint, setHint] = useState(null)
   const [alertOpen, setAlertOpen] = useState(false)
   const bellRef = useRef(null)
 
@@ -19,9 +21,23 @@ export default function Header() {
     setKeyword(searchParams.get('keyword') ?? '')
   }, [searchParams])
 
+  function changeKeyword(value) {
+    setKeyword(value)
+    // 글자를 더 채우는 순간 안내를 거둔다. 계속 띄워두면 잔소리처럼 보인다.
+    if (hint && value.trim().length >= MIN_KEYWORD_LENGTH) setHint(null)
+  }
+
   function submitSearch(e) {
     e.preventDefault()
     const q = keyword.trim()
+
+    // 빈 검색은 "검색 해제"로 본다. 한 글자만 남은 경우에만 막고 이유를 알려준다.
+    if (q.length > 0 && q.length < MIN_KEYWORD_LENGTH) {
+      setHint(`검색어를 ${MIN_KEYWORD_LENGTH}자 이상 입력해주세요.`)
+      return
+    }
+
+    setHint(null)
     navigate(q ? `/?keyword=${encodeURIComponent(q)}` : '/')
   }
 
@@ -38,13 +54,20 @@ export default function Header() {
         <form className="header__search" onSubmit={submitSearch} role="search">
           <SearchIcon className="header__search-icon" />
           <input
-            className="header__search-input"
+            className={`header__search-input ${hint ? 'is-invalid' : ''}`}
             type="search"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="검색"
+            onChange={(e) => changeKeyword(e.target.value)}
+            onBlur={() => setHint(null)}
+            placeholder="검색어를 2자 이상 입력하세요"
             aria-label="공구 검색"
+            aria-invalid={!!hint}
           />
+          {hint && (
+            <p className="header__search-hint" role="alert">
+              {hint}
+            </p>
+          )}
         </form>
 
         <nav className="header__actions">

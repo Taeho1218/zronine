@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { userApi } from '../api'
 import Avatar from '../components/Avatar'
 import FollowButton from '../components/FollowButton'
+import FollowListModal from '../components/FollowListModal'
 import PostCard from '../components/PostCard'
 import { ExternalLinkIcon } from '../components/icons'
 import { formatDate } from '../lib/format'
@@ -19,6 +20,14 @@ export default function UserProfilePage() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  // null 이면 닫힌 상태, 'followers' | 'followings' 면 그 탭으로 열린다.
+  const [followTab, setFollowTab] = useState(null)
+
+  /** 목록 창에서 팔로우를 눌렀으면 프로필의 숫자도 다시 읽어 맞춘다. */
+  function closeFollowList(changed) {
+    setFollowTab(null)
+    if (changed) userApi.profile(userId).then(setProfile).catch(() => {})
+  }
 
   useEffect(() => {
     let alive = true
@@ -87,14 +96,15 @@ export default function UserProfilePage() {
             <dt>게시물</dt>
             <dd>{profile.postCount ?? 0}</dd>
           </div>
-          <div>
+          {/* 팔로워/팔로잉은 눌러서 목록을 볼 수 있다 */}
+          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followers')}>
             <dt>팔로워</dt>
             <dd>{profile.followerCount ?? 0}</dd>
-          </div>
-          <div>
+          </button>
+          <button type="button" className="mypage__stat-btn" onClick={() => setFollowTab('followings')}>
             <dt>팔로잉</dt>
             <dd>{profile.followingCount ?? 0}</dd>
-          </div>
+          </button>
         </dl>
 
         {profile.me ? (
@@ -115,6 +125,15 @@ export default function UserProfilePage() {
           />
         )}
       </header>
+
+      {followTab && (
+        <FollowListModal
+          userId={profile.userId}
+          nickname={profile.nickname}
+          initialTab={followTab}
+          onClose={closeFollowList}
+        />
+      )}
 
       <h2 className="mypage__section">게시물 {profile.postCount ?? posts.length}</h2>
 
