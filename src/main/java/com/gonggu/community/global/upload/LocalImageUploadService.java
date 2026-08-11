@@ -6,10 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -30,16 +27,14 @@ import lombok.extern.slf4j.Slf4j;
  * 전부 사라지므로, 운영 배포에서는 반드시 R2ImageUploadService(app.upload.provider=r2)를 써야 한다.
  * 호출부는 ImageUploadService 인터페이스만 보고 있으므로 프로퍼티 값만 바꾸면 코드 변경 없이 교체된다.
  *
- * 파일명은 클라이언트가 보낸 이름을 그대로 쓰지 않고 UUID 로 새로 만든다.
- * 원본 파일명에는 경로 조작 문자(../)나 중복 이름이 섞일 수 있기 때문이다.
+ * presign()은 지원하지 않는다 — 로컬 개발 서버는 "많은 사용자가 동시에 올려서 서버가 무리 간다"는
+ * 문제가 애초에 없는 환경이라, 사전 서명 URL 대신 기존 프록시 업로드(upload/uploadAll)만으로 충분하다.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "app.upload", name = "provider", havingValue = "local", matchIfMissing = true)
 public class LocalImageUploadService implements ImageUploadService {
-
-	private static final DateTimeFormatter DATE_DIR_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
 	private final UploadProperties uploadProperties;
 
@@ -59,22 +54,19 @@ public class LocalImageUploadService implements ImageUploadService {
 	public String upload(MultipartFile file) {
 		ImageFileValidator.validate(file, uploadProperties.getMaxFileSizeBytes());
 
-		String extension = ImageFileValidator.resolveExtension(file.getOriginalFilename());
-		String relativeDir = LocalDate.now().format(DATE_DIR_FORMAT);
-		String storedFileName = UUID.randomUUID().toString().replace("-", "") + "." + extension;
-
-		Path targetDir = rootLocation.resolve(relativeDir).normalize();
+		String key = ImageFileValidator.generateKey(file.getOriginalFilename());
+		Path target = rootLocation.resolve(key).normalize();
 		try {
-			Files.createDirectories(targetDir);
+			Files.createDirectories(target.getParent());
 			try (InputStream in = file.getInputStream()) {
-				Files.copy(in, targetDir.resolve(storedFileName), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
 			}
 		} catch (IOException e) {
 			log.error("이미지 저장 실패: {}", file.getOriginalFilename(), e);
 			throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
 		}
 
-		return uploadProperties.getUrlPrefix() + "/" + relativeDir + "/" + storedFileName;
+		return uploadProperties.getUrlPrefix() + "/" + key;
 	}
 
 	@Override
@@ -103,5 +95,11 @@ public class LocalImageUploadService implements ImageUploadService {
 		} catch (IOException e) {
 			log.warn("이미지 삭제 실패: {}", imageUrl, e);
 		}
+	}
+
+	@Override
+	public PresignedUploadResponse presign(PresignUploadRequest request) {
+		throw new InvalidRequestException(ErrorCode.PRESIGN_NOT_SUPPORTED,
+			"로컬 개발 환경에서는 사전 서명 URL을 지원하지 않습니다. /api/uploads/images 를 사용하세요.");
 	}
 }

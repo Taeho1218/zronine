@@ -66,7 +66,8 @@ public enum ErrorCode {
 	EMPTY_FILE(HttpStatus.BAD_REQUEST, "업로드할 파일이 비어 있습니다."),
 	UNSUPPORTED_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 이미지 형식입니다."),
 	FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "허용된 파일 크기를 초과했습니다."),
-	FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+	FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+	PRESIGN_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "현재 업로드 저장소는 사전 서명 URL을 지원하지 않습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String defaultMessage;
