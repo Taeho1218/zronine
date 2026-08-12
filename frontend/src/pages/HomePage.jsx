@@ -5,6 +5,7 @@ import PostCard from '../components/PostCard'
 import Loading from '../components/Loading'
 import Pagination from '../components/Pagination'
 import HomeHero from '../components/HomeHero'
+import { sortCategories } from '../lib/categories'
 import { normalizeKeyword } from '../lib/search'
 import './HomePage.css'
 
@@ -43,7 +44,8 @@ export default function HomePage() {
   useEffect(() => {
     categoryApi
       .list()
-      .then((list) => setCategories(list ?? []))
+      // 서버가 내려주는 순서가 아니라 화면에서 정한 차례(식품 → 화장품 → …)로 늘어놓는다
+      .then((list) => setCategories(sortCategories(list)))
       .catch(() => setCategories([]))
   }, [])
 
