@@ -19,11 +19,13 @@
   }
 }
 
+/* 탭 줄이 없어져 머리말과 목록을 가르는 선이 사라졌으므로 여기서 긋는다 */
 .npanel__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 16px 10px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--gray-150);
 }
 
 .npanel__title {
@@ -74,37 +76,6 @@
 .npanel__close:hover {
   background: var(--gray-100);
   color: var(--ink);
-}
-
-.npanel__tabs {
-  display: flex;
-  gap: 18px;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--gray-150);
-}
-
-.npanel__tab {
-  position: relative;
-  padding: 8px 0 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-500);
-}
-
-.npanel__tab.is-active {
-  color: var(--brand);
-}
-
-/* 활성 탭 밑줄 */
-.npanel__tab.is-active::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  background: var(--brand);
-  border-radius: 2px;
 }
 
 .npanel__body {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import Loading from './Loading'
@@ -8,15 +8,15 @@ import ImageFallback from './ImageFallback'
 import { CheckIcon, ClockIcon, CloseIcon, ExternalLinkIcon } from './icons'
 import './NotificationPanel.css'
 
-const TABS = [
-  { key: 'all', label: '전체' },
-  { key: 'gonggu', label: '공구' },
-  { key: 'comment', label: '댓글' },
-]
-
+/**
+ * 종 아이콘을 눌렀을 때 내려오는 알림 목록.
+ *
+ * 여기 뜨는 것은 내가 알림 신청한 공구의 진행 상태뿐이다. 댓글·좋아요 알림은 서버에 원본
+ * 데이터가 없어 만들 수 없고, 빈 탭으로 자리만 잡아두면 오지 않는 알림을 기다리게 된다.
+ * 그래서 종류를 나누는 탭 없이 공구 알림만 보여준다.
+ */
 export default function NotificationPanel({ anchorRef, onClose }) {
   const { isLoggedIn } = useAuth()
-  const [tab, setTab] = useState('all')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const panelRef = useRef(null)
@@ -54,10 +54,6 @@ export default function NotificationPanel({ anchorRef, onClose }) {
     }
   }, [isLoggedIn])
 
-  const visible = useMemo(
-    () => (tab === 'all' ? items : items.filter((n) => n.kind === tab)),
-    [items, tab],
-  )
   const unreadCount = items.filter((n) => n.unread).length
 
   function readAll() {
@@ -86,37 +82,18 @@ export default function NotificationPanel({ anchorRef, onClose }) {
         </div>
       </div>
 
-      <div className="npanel__tabs" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.key}
-            className={`npanel__tab ${tab === t.key ? 'is-active' : ''}`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
       <div className="npanel__body">
         {!isLoggedIn && <p className="npanel__empty">로그인하면 알림을 받아볼 수 있어요.</p>}
 
         {isLoggedIn && loading && <Loading size={72} message="알림을 불러오는 중…" className="npanel__loading" />}
 
-        {isLoggedIn && !loading && tab === 'comment' && (
-          <p className="npanel__empty">댓글 알림은 아직 서버에서 내려오지 않아요.</p>
-        )}
-
-        {isLoggedIn && !loading && tab !== 'comment' && visible.length === 0 && (
+        {isLoggedIn && !loading && items.length === 0 && (
           <p className="npanel__empty">새로운 알림이 없어요.</p>
         )}
 
-        {isLoggedIn && !loading && tab !== 'comment' && visible.length > 0 && (
+        {isLoggedIn && !loading && items.length > 0 && (
           <ul className="npanel__list">
-            {visible.map((n) => (
+            {items.map((n) => (
               <li key={n.id} className={`npanel__item ${n.unread ? 'is-unread' : ''}`}>
                 <Link className="npanel__link" to={`/posts/${n.postId}`} onClick={() => { readOne(n.id); onClose() }}>
                   <span className={`npanel__icon npanel__icon--${n.icon}`}>
