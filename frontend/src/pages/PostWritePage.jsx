@@ -434,7 +434,10 @@ export default function PostWritePage() {
             (셀러 글의 제목은 위 2단 그리드의 "한줄설명" 필드다) */}
         {!isSeller && (
           <label className="field write__content">
-            <span className="field__label">제목</span>
+            {/* 유저 글도 제목 없이는 등록되지 않는다 (validate 가 먼저 막는다) */}
+            <span className="field__label">
+              제목 <i className="req">*</i>
+            </span>
             <input
               className="input"
               value={form.title}
@@ -446,8 +449,9 @@ export default function PostWritePage() {
         )}
 
         <label className="field write__content">
+          {/* 셀러 글이든 유저 글이든 내용 없이는 등록되지 않는다 (validate 가 먼저 막는다) */}
           <span className="field__label">
-            상세 설명 {isSeller && <i className="req">*</i>}
+            상세 설명 <i className="req">*</i>
           </span>
           <textarea
             className="textarea"
