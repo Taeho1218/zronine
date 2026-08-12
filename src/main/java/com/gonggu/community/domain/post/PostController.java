@@ -42,6 +42,7 @@ public class PostController {
 	 * 메인 페이지 피드 겸 검색 API.
 	 *
 	 * keyword / categoryId / status 는 서로 조합해서 AND 로 걸 수 있다.
+	 * sortBy 는 그 결과의 정렬 기준만 바꾼다 (LATEST 기본값 / POPULAR = 좋아요 많은 순).
 	 * 무한 스크롤용이라 한 번에 최대 15개(PostService.MAX_PAGE_SIZE)까지만 내려가고,
 	 * 응답의 hasNext / nextPage 로 다음 페이지를 이어서 요청한다.
 	 *
@@ -54,11 +55,12 @@ public class PostController {
 		@RequestParam(required = false) Integer categoryId,
 		@RequestParam(required = false) PostStatusFilter status,
 		@RequestParam(required = false) String keyword,
+		@RequestParam(required = false, defaultValue = "LATEST") PostSortFilter sortBy,
 		@AuthenticationPrincipal CustomUserDetails principal,
 		@PageableDefault(size = PostService.MAIN_FEED_PAGE_SIZE, sort = "id", direction = Sort.Direction.DESC)
 		Pageable pageable) {
 
-		PostSearchCondition condition = new PostSearchCondition(postType, categoryId, status, keyword);
+		PostSearchCondition condition = new PostSearchCondition(postType, categoryId, status, keyword, sortBy);
 		return ApiResponse.success(
 			postService.search(condition, AuthUtils.optionalUserId(principal), pageable));
 	}
