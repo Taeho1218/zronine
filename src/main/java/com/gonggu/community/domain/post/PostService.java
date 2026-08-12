@@ -62,6 +62,13 @@ public class PostService {
 	/** 홈 화면 "인기 피드"에 내려줄 개수 */
 	public static final int POPULAR_LIMIT = 9;
 
+	/** 좋아요 많은 순 → 같으면 댓글 많은 순 → 그것도 같으면 최신순. 인기 피드와 메인 피드의 POPULAR 정렬이 함께 쓴다. */
+	private static final Sort POPULAR_SORT = Sort.by(
+		Sort.Order.desc("likeCount"),
+		Sort.Order.desc("commentCount"),
+		Sort.Order.desc("id")
+	);
+
 	private final PostRepository postRepository;
 	private final PostCategoryRepository postCategoryRepository;
 	private final PostLikeRepository postLikeRepository;
@@ -153,14 +160,18 @@ public class PostService {
 	}
 
 	/**
-	 * 메인 페이지 피드 겸 검색 API. (검색어 + 카테고리 + 진행중/진행예정 필터)
+	 * 메인 페이지 피드 겸 검색 API. (검색어 + 카테고리 + 진행중/진행예정 필터 + 정렬)
 	 *
-	 * 세 조건은 서로 독립적이라 지정된 것만 AND 로 묶는다.
-	 * 예: 카테고리=패션 + 검색어=신발 + 진행중 을 동시에 걸면 세 조건을 모두 만족하는 글만 남는다.
+	 * 네 조건은 서로 독립적이라 지정된 것만 AND 로 묶는다.
+	 * 예: 카테고리=패션 + 검색어=신발 + 진행중 을 동시에 걸면 세 조건을 모두 만족하는 글만 남고,
+	 * sortBy 는 그렇게 걸러진 결과의 정렬 순서만 바꾼다.
 	 */
 	public PageResponse<PostFeedResponse> search(PostSearchCondition condition, Long viewerId, Pageable pageable) {
 		LocalDateTime now = LocalDateTime.now();
 		Pageable limited = limitPageSize(pageable, MAIN_FEED_PAGE_SIZE);
+		if (condition.sortBy() == PostSortFilter.POPULAR) {
+			limited = PageRequest.of(limited.getPageNumber(), limited.getPageSize(), POPULAR_SORT);
+		}
 
 		// 너무 짧은 검색어는 사실상 전체 조회가 되어 무한 스크롤이 의미 없는 결과로 채워진다.
 		// 검색어를 무시하고 전체를 돌려주면 "검색했는데 관련 없는 글이 나온다"로 보이므로 빈 결과로 끊는다.
@@ -234,11 +245,7 @@ public class PostService {
 	 */
 	public List<PostFeedResponse> getPopularPosts(Long viewerId) {
 		LocalDateTime now = LocalDateTime.now();
-		Pageable limit = PageRequest.of(0, POPULAR_LIMIT, Sort.by(
-			Sort.Order.desc("likeCount"),
-			Sort.Order.desc("commentCount"),
-			Sort.Order.desc("id")
-		));
+		Pageable limit = PageRequest.of(0, POPULAR_LIMIT, POPULAR_SORT);
 
 		List<Post> posts = postRepository.findAll(PostSpecifications.notEnded(now), limit).getContent();
 		return mapToFeedResponses(posts, viewerId, now);
