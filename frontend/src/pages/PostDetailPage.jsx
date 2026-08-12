@@ -27,6 +27,7 @@ import {
   formatPeriodDay,
   formatPrice,
   PROGRESS_LABEL,
+  serverInstant,
 } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import './PostDetailPage.css'
@@ -289,7 +290,8 @@ export default function PostDetailPage() {
                   </a>
                 )}
               </span>
-              <span className="detail__date">{formatDateTime(post.createdAt)}</span>
+              {/* 서버가 UTC 로 찍어 보내는 값이라 실제 순간으로 바꿔 읽는다 */}
+              <span className="detail__date">{formatDateTime(serverInstant(post.createdAt))}</span>
             </div>
 
             <div className="detail__head-actions">

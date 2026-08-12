@@ -8,15 +8,15 @@
 import { sampleSet } from './sampleImages'
 
 /**
- * 서버의 LocalDateTime 은 타임존이 없는 로컬 시각이다.
- * toISOString() 은 UTC 로 바꿔버려 화면에서 9시간(KST) 어긋나므로 로컬 시각 그대로 문자열을 만든다.
+ * 서버가 찍어 보내는 시각(작성 시각·알림 시각)의 생김새를 그대로 흉내낸다.
+ *
+ * 배포된 백엔드는 UTC 로 돌고 createdAt 은 타임존 없는 LocalDateTime 이라 UTC 벽시계 값이
+ * "2026-08-11T04:40:13" 처럼 그대로 내려온다. 화면이 그 값을 format.serverInstant 로 읽으므로
+ * 목업도 같은 모양으로 내려줘야 목업과 실서버에서 시각이 똑같이 보인다.
+ *
+ * 모집 기간(start/end)에는 쓰지 않는다. 그건 글쓴이가 고른 날짜를 그대로 담는 자리다.
  */
-const iso = (d) => {
-  const p = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(
-    d.getMinutes(),
-  )}:${p(d.getSeconds())}`
-}
+const iso = (d) => `${d.toISOString().slice(0, 19)}`
 
 const CATEGORIES = [
   { categoryId: 1, name: '식품' },
@@ -246,8 +246,8 @@ let posts = SHEET.map((row, index) => {
     alerted: PRESET_ALERTED.has(postId),
     followingAuthor: false,
     mine: false,
-    // 시트에 등록 시각이 없어 모집 시작일을 작성 시각으로 쓴다.
-    createdAt: row.start,
+    // 시트에 등록 시각이 없어 모집 시작일을 작성 시각으로 쓴다. (서버와 같은 UTC 모양으로 맞춰서)
+    createdAt: iso(new Date(row.start)),
   }
 })
 

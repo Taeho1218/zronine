@@ -5,7 +5,7 @@ import { useAuth } from '../store/AuthContext'
 import Avatar from './Avatar'
 import Loading from './Loading'
 import { CommentIcon, HeartIcon, LockIcon, ThumbsUpIcon, TrashIcon } from './icons'
-import { formatDate, fromNow } from '../lib/format'
+import { formatDate, fromNow, serverInstant } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import './CommentSection.css'
 
@@ -212,6 +212,9 @@ function CommentItem({
   onNeedLogin,
   isReply = false,
 }) {
+  // 서버가 UTC 로 찍어 보내는 값이라 실제 순간으로 바꿔 읽는다
+  const writtenAt = serverInstant(comment.createdAt)
+
   return (
     <li className={`cmt__item ${isReply ? 'cmt__item--reply' : ''}`}>
       <Avatar user={comment.author} size={40} />
@@ -221,7 +224,7 @@ function CommentItem({
           <span className="cmt__name">{comment.author.nickname}</span>
           {comment.author.userId === postAuthorId && <span className="cmt__badge">주최자</span>}
           <span className="cmt__time">
-            {formatDate(comment.createdAt)} · {fromNow(comment.createdAt)}
+            {formatDate(writtenAt)} · {fromNow(writtenAt)}
           </span>
         </div>
 
