@@ -1,72 +1,133 @@
 .home {
-  /* 헤더 바로 아래에 칩이 붙으면 답답해 보여 여유를 준다 */
-  padding-top: 40px;
+  padding-top: 0;
   padding-bottom: 80px;
 }
 
 /*
- * 카테고리는 알약 버튼 대신 글자만 늘어놓은 메뉴 줄로 둔다.
- * 왼쪽의 필터(FeedFilter)만 알약 모양을 유지해, 성격이 다른 조건임이 모양으로 드러난다.
+ * 흰 띠는 창 끝까지 깔고, 그 안의 항목만 본문과 같은 폭·같은 시작선에 맞춘다.
+ *
+ * 예전에는 본문 안에서 width:100vw 로 창 폭을 흉내냈는데, 100vw 는 세로 스크롤바 자리까지
+ * 포함하는 값이라 스크롤바 너비만큼 가로로 넘쳤다. 스크롤바가 화면 위에 겹쳐 뜨는 맥에서는
+ * 티가 안 나지만 자리를 차지하는 윈도우에서는 가로 스크롤이 생기고 오른쪽이 잘려 보인다.
+ * 띠를 본문 바깥의 보통 블록으로 두면 창 폭을 계산할 일이 없어 이 차이가 사라진다.
  */
-.home__chips {
+.home__category-bar {
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--gray-150);
+  background: var(--white);
+}
+
+.home__category-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 26px;
-  border-bottom: 1px solid var(--gray-150);
-
-  /* 화면이 좁으면 줄바꿈 대신 옆으로 밀어서 본다 */
+  justify-content: flex-start;
+  gap: clamp(38px, 3.6vw, 58px);
+  width: 100%;
+  /* 본문(.page)과 같은 규격이라 카테고리와 아래 카드의 왼쪽 끝이 맞는다 */
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 24px;
+  /* 시안보다 한 줄이 두꺼워 보여 1mm 줄인다 */
+  min-height: calc(76px - 1mm);
+  /* 좁은 화면에서 항목이 넘치면 이 줄만 옆으로 밀어서 본다 */
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.home__chips::-webkit-scrollbar {
+.home__category-nav::-webkit-scrollbar {
   display: none;
 }
 
-/* 필터와 카테고리가 다른 종류임을 눈으로 갈라준다 */
-.home__chips-divider {
-  flex: none;
-  width: 1px;
-  height: 20px;
-  background: var(--gray-200);
-  margin: 0 14px 0 8px;
-}
-
-/* 글자만 놓인 메뉴 항목. 고른 것은 진하게 하고 아래에 밑줄을 그어 알린다. */
-.chip {
+.home__category-link {
   position: relative;
   flex: none;
-  height: 52px;
-  padding: 0 18px;
-  background: none;
-  border: none;
+  align-self: stretch;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--gray-600);
   font-size: 15px;
   font-weight: 600;
-  color: var(--gray-500);
   white-space: nowrap;
-  transition: color 0.15s ease;
+  transition: color 0.18s ease;
 }
 
-.chip:hover {
-  color: var(--ink);
+.home__category-link:hover {
+  color: var(--brand-hover);
 }
 
-.chip--active {
+.home__category-link--active {
   color: var(--ink);
   font-weight: 800;
 }
 
-/* 밑줄이 줄 아래 경계선 위에 정확히 겹치도록 -1px */
-.chip--active::after {
+.home__category-link--active::after {
   content: '';
   position: absolute;
-  left: 14px;
-  right: 14px;
+  left: 0;
+  right: 0;
   bottom: -1px;
-  height: 2px;
-  background: var(--ink);
-  border-radius: 2px;
+  height: 3px;
+  background: var(--brand);
+  border-radius: 3px 3px 0 0;
+}
+
+.home__feed-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.home__feed-title {
+  flex: none;
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+.home__quick-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.home__quick-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.home__quick-filter {
+  flex: none;
+  min-height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--gray-600);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+
+.home__quick-filter:hover {
+  border-color: var(--brand-border);
+  color: var(--brand-hover);
+}
+
+.home__quick-filter--active {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--white);
+}
+
+.home__quick-filter--active:hover {
+  color: var(--white);
 }
 
 .home__searched {
@@ -94,11 +155,33 @@
 }
 
 @media (max-width: 640px) {
+  .home__category-bar {
+    margin-bottom: 24px;
+  }
+
+  .home__category-nav {
+    gap: 28px;
+    min-height: 56px;
+  }
+
+  .home__feed-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .home__quick-filters {
+    width: 100%;
+  }
+
   .home__grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  /* 화면이 좁으면 위 여백까지 넉넉하면 첫 카드가 너무 아래로 밀린다 */
-  .home {
-    padding-top: 32px;
+}
+
+/* 본문(.page)의 좌우 여백이 좁아지는 폭. 카테고리 줄도 같이 줄여야 시작선이 맞는다 */
+@media (max-width: 520px) {
+  .home__category-nav {
+    padding: 0 16px;
   }
 }

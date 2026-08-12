@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi, uploadApi } from '../api'
+import Loading from '../components/Loading'
 import { CheckIcon, CloseIcon, PlusIcon } from '../components/icons'
 import { parsePrice } from '../lib/format'
+import { getDraft, isBlankDraft, listDrafts, removeDraft, saveDraft as storeDraft } from '../lib/drafts'
 import { useBusy } from '../lib/useBusy'
+import { useAuth } from '../store/AuthContext'
 import './PostWritePage.css'
 
 const MAX_IMAGES = 5
-const DRAFT_KEY = 'gonggu.draft'
 
 const EMPTY = {
   postType: 'SELLER',
@@ -30,9 +32,18 @@ const toLocalDateTime = (v, endOfDay = false) => (v ? `${v}T${endOfDay ? '23:59:
 
 export default function PostWritePage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
-  const initialType = searchParams.get('type') === 'GENERAL' ? 'GENERAL' : 'SELLER'
+  /* 마이페이지 임시저장 탭에서 "이어서 쓰기" 로 들어온 경우, 그 칸을 지목해서 연다. */
+  const draftParam = searchParams.get('draft')
+  /*
+   * 글 종류를 주소에 싣고 들어온 경우에만 값이 잡힌다 (오른쪽 아래 글쓰기 버튼에서 고르고 온 경우).
+   * 헤더·푸터의 "글쓰기" 처럼 종류 없이 들어오면 null 이고, 그때는 임시저장에 적힌 종류를 따른다.
+   */
+  const typeParam = searchParams.get('type')
+  const requestedType = typeParam === 'SELLER' || typeParam === 'GENERAL' ? typeParam : null
+  const initialType = requestedType ?? 'SELLER'
 
   const [form, setForm] = useState({ ...EMPTY, postType: initialType })
   const [categories, setCategories] = useState([])
@@ -40,6 +51,10 @@ export default function PostWritePage() {
   const [submitting, runSubmit] = useBusy()
   const [error, setError] = useState(null)
   const [savedDraft, setSavedDraft] = useState(false)
+  // 지금 화면이 물고 있는 임시저장 칸. 있으면 "임시저장"을 다시 눌러도 새 칸을 만들지 않고 덮어쓴다.
+  const [draftId, setDraftId] = useState(draftParam)
+  // 수정 모드에서 기존 글을 받아오기 전. 빈 폼이 잠깐 보이면 "값이 날아갔나" 싶으므로 가려둔다.
+  const [loadingPost, setLoadingPost] = useState(!!editId)
   const fileRef = useRef(null)
 
   const isSeller = form.postType === 'SELLER'
@@ -55,6 +70,7 @@ export default function PostWritePage() {
   // 수정 모드면 기존 값을 채우고, 새 글이면 남아있는 임시저장을 복원한다.
   useEffect(() => {
     if (editId) {
+      setLoadingPost(true)
       postApi
         .detail(editId)
         .then((post) =>
@@ -73,16 +89,29 @@ export default function PostWritePage() {
           }),
         )
         .catch((err) => setError(err.message))
+        .finally(() => setLoadingPost(false))
       return
     }
 
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY)
-      if (raw) setForm({ ...EMPTY, ...JSON.parse(raw) })
-    } catch {
-      /* 손상된 임시저장은 무시한다 */
-    }
-  }, [editId])
+    /*
+     * 이어서 쓰기로 지목해 들어왔으면 그 칸을, 그냥 들어왔으면 가장 최근에 임시저장한 글을 되살린다.
+     * (전부 마이페이지 "임시저장" 탭에 남아 있으므로, 다른 글을 이어 쓰려면 거기서 고르면 된다)
+     */
+    const draft = draftParam ? getDraft(draftParam) : listDrafts(user?.userId)[0]
+    if (!draft?.form) return
+
+    setDraftId(draft.draftId)
+    /*
+     * 쓰던 내용은 되살리되, 글 종류만은 방금 고르고 들어온 값이 이긴다.
+     * "셀러로 글쓰기" 를 고른 사람에게 지난번 유저글 임시저장의 종류가 씌워지면
+     * 고른 게 무시된 것처럼 보이기 때문이다.
+     */
+    setForm({
+      ...EMPTY,
+      ...draft.form,
+      postType: requestedType ?? draft.form.postType ?? EMPTY.postType,
+    })
+  }, [editId, draftParam])
 
   async function pickImages(e) {
     const files = Array.from(e.target.files ?? [])
@@ -118,13 +147,20 @@ export default function PostWritePage() {
     })
   }
 
+  /** 쓰던 글을 이 브라우저에 담아둔다. 서버로는 나가지 않으므로 등록 전까지 아무에게도 안 보인다. */
   function saveDraft() {
+    if (isBlankDraft(form)) {
+      setError('임시저장할 내용이 없어요. 제목이나 내용을 먼저 적어주세요.')
+      return
+    }
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
+      const saved = storeDraft(form, { draftId, userId: user?.userId })
+      setDraftId(saved.draftId)
+      setError(null)
       setSavedDraft(true)
       setTimeout(() => setSavedDraft(false), 2000)
     } catch {
-      setError('임시저장에 실패했어요.')
+      setError('임시저장에 실패했어요. 브라우저 저장 공간이 부족할 수 있어요.')
     }
   }
 
@@ -175,7 +211,8 @@ export default function PostWritePage() {
       setError(null)
       try {
         const saved = editId ? await postApi.update(editId, payload) : await postApi.create(payload)
-        localStorage.removeItem(DRAFT_KEY)
+        // 글로 올라갔으니 임시저장 칸은 비운다 (마이페이지 목록에서도 사라진다)
+        removeDraft(draftId)
         navigate(`/posts/${saved?.postId ?? editId}`)
       } catch (err) {
         setError(err.message)
@@ -225,6 +262,8 @@ export default function PostWritePage() {
       )}
     </div>
   )
+
+  if (loadingPost) return <Loading message="글을 불러오는 중…" />
 
   return (
     <div className={`write page ${isSeller ? '' : 'write--narrow'}`}>
@@ -395,7 +434,10 @@ export default function PostWritePage() {
             (셀러 글의 제목은 위 2단 그리드의 "한줄설명" 필드다) */}
         {!isSeller && (
           <label className="field write__content">
-            <span className="field__label">제목</span>
+            {/* 유저 글도 제목 없이는 등록되지 않는다 (validate 가 먼저 막는다) */}
+            <span className="field__label">
+              제목 <i className="req">*</i>
+            </span>
             <input
               className="input"
               value={form.title}
@@ -407,8 +449,9 @@ export default function PostWritePage() {
         )}
 
         <label className="field write__content">
+          {/* 셀러 글이든 유저 글이든 내용 없이는 등록되지 않는다 (validate 가 먼저 막는다) */}
           <span className="field__label">
-            상세 설명 {isSeller && <i className="req">*</i>}
+            상세 설명 <i className="req">*</i>
           </span>
           <textarea
             className="textarea"
@@ -426,10 +469,23 @@ export default function PostWritePage() {
         {error && <p className="field__error write__error">{error}</p>}
 
         <div className="write__actions">
-          {savedDraft && <span className="write__saved">임시저장했어요</span>}
-          <button type="button" className="btn btn--ghost" onClick={saveDraft}>
-            임시저장
-          </button>
+          {savedDraft && (
+            <span className="write__saved">
+              임시저장했어요 ·{' '}
+              <Link className="write__saved-link" to="/mypage?tab=drafts">
+                마이페이지에서 보기
+              </Link>
+            </span>
+          )}
+          {/*
+            수정 중에는 임시저장을 두지 않는다. 여기서 담아두면 "어떤 글을 고치던 중" 이라는 사실이 빠져,
+            나중에 그 임시저장을 등록할 때 고치려던 글이 그대로 남은 채 새 글이 하나 더 생긴다.
+          */}
+          {!editId && (
+            <button type="button" className="btn btn--ghost" onClick={saveDraft}>
+              임시저장
+            </button>
+          )}
           <button
             type="submit"
             className="btn btn--primary write__submit"

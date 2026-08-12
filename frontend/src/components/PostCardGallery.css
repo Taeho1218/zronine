@@ -3,11 +3,39 @@
   border-radius: var(--r-md);
   overflow: hidden;
   /* 시안처럼 원본 비율을 유지한 이미지를 회색 판 위에 얹는다 */
-  background: var(--gray-200);
+  background: var(--white);
 }
 
 .pcard__viewport {
   display: block;
+}
+
+.pcard__dday {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: rgba(31, 41, 55, 0.94);
+  color: var(--white);
+  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.2);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pcard__dday-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.16);
 }
 
 /*
@@ -19,8 +47,43 @@
   transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.pcard__img {
+.pcard__slide {
+  position: relative;
   flex: 0 0 100%;
+  /* 흐린 배경을 키워서 깔기 때문에 옆 장으로 번지지 않도록 각 장에서 잘라둔다 */
+  overflow: hidden;
+}
+
+/*
+ * 사진이 다 채우지 못한 자리를 그 사진의 색으로 메우는 배경.
+ * src 가 앞의 사진과 같아 요청은 한 번만 나가고, 흐리게 키워 깔면 사진마다 다른 색 판이 된다.
+ */
+.pcard__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 흐림은 가장자리를 투명하게 만든다. 그만큼 키워서 빈 테두리가 안 보이게 한다 */
+  transform: scale(1.35);
+  filter: blur(28px) saturate(0.82) brightness(1.08);
+  /* 원본 그대로면 앞의 사진과 대비가 약해져 한 톤 눌러둔다 */
+  opacity: 0.22;
+}
+
+/* 위아래로 옅게 깔리는 그라데이션. 사진 색이 밝든 어둡든 D-day 배지와 점이 읽힌다 */
+.pcard__slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.42), transparent 30%, transparent 70%, rgba(255, 255, 255, 0.42));
+  pointer-events: none;
+}
+
+.pcard__img {
+  /* 흐린 배경과 그라데이션 위로 올린다 */
+  position: relative;
+  z-index: 1;
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: contain;

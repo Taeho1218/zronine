@@ -1,6 +1,13 @@
 # Render Blueprint. Render 대시보드에서 "New +" → "Blueprint" 로 이 저장소를 연결하면
 # 아래 설정을 읽어서 서비스를 자동으로 구성해준다.
 #
+# 이 저장소는 서비스 두 개를 함께 올린다.
+#   - gonggu-community-backend  : Spring Boot (Docker)
+#   - gonggu-community-frontend : React 정적 사이트
+#
+# 프론트를 처음 올린 뒤에는 백엔드의 CORS_ALLOWED_ORIGINS 에 프론트 주소를 넣어야 한다.
+# (자격증명 쿠키를 쓰기 때문에 와일드카드를 못 쓰고 주소를 정확히 적어야 한다)
+#
 # Render는 관리형 MySQL을 제공하지 않으므로(관리형 DB는 PostgreSQL만 있음),
 # DB_URL / DB_USERNAME / DB_PASSWORD 는 외부 MySQL(PlanetScale, Aiven, Railway 등)의
 # 접속 정보를 대시보드에서 직접 입력해야 한다 (sync: false 항목들).
@@ -29,3 +36,33 @@ services:
         value: "1209600"
       - key: JPA_SHOW_SQL
         value: "false"
+
+  # ── 프론트엔드 (정적 사이트) ─────────────────────────────────────────────
+  #
+  # Vite 는 VITE_* 값을 빌드 시점에 코드에 박아 넣는다. 그래서 API 주소는
+  # 런타임 설정이 아니라 아래 envVars 로 주고, 값을 바꾸면 다시 배포해야 한다.
+  - type: web
+    name: gonggu-community-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_API_BASE_URL
+        value: https://gonggu-community-backend.onrender.com
+      - key: VITE_USE_MOCK
+        value: "false"
+    # 새로고침이나 링크로 /posts/1 에 바로 들어와도 index.html 이 응답해야
+    # React Router 가 주소를 읽고 그 화면을 그린다. (없으면 404)
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      # 해시가 붙은 파일만 오래 캐시한다. index.html 은 항상 새로 받아야
+      # 배포 직후에도 새 번들을 가리킨다.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { postApi } from '../api'
 import { useAuth } from '../store/AuthContext'
-import { formatPeriod, formatPrice } from '../lib/format'
+import { ddayLabel, formatPeriod, formatPrice } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import PostCardGallery from './PostCardGallery'
 import PostCardMenu from './PostCardMenu'
@@ -71,6 +71,8 @@ export default function PostCard({ post }) {
   const images = post.imageUrls?.length ? post.imageUrls : post.thumbnailUrl ? [post.thumbnailUrl] : []
   const isSeller = post.postType === 'SELLER'
   const period = formatPeriod(post.startDate, post.endDate)
+  const openingDday = post.progress === 'UPCOMING' ? ddayLabel(post.startDate) : ''
+  const openingLabel = openingDday === 'D-DAY' ? '오늘 오픈' : openingDday ? `오픈 ${openingDday}` : ''
 
   return (
     <article className="pcard">
@@ -78,7 +80,7 @@ export default function PostCard({ post }) {
       <PostCardMenu postId={post.postId} />
 
       {/* 사진이 여러 장이면 넘겨볼 수 있고, 없으면 마스코트가 자리를 채운다 */}
-      <PostCardGallery postId={post.postId} images={images} title={post.title} />
+      <PostCardGallery postId={post.postId} images={images} title={post.title} badgeLabel={openingLabel} />
 
       <Link to={`/posts/${post.postId}`} className="pcard__link">
         {post.categories?.length > 0 && (

@@ -1,5 +1,5 @@
 import { userApi } from '../api'
-import { ddayLabel } from './format'
+import { ddayLabel, serverInstant } from './format'
 
 /**
  * 알림 패널에 뿌릴 행 목록을 만든다.
@@ -50,7 +50,8 @@ function alertToNotification(alert) {
     postId: alert.postId,
     thumbnailUrl: alert.thumbnailUrl,
     buyUrl: alert.buyUrl,
-    createdAt: alert.alertedAt,
+    // 서버가 UTC 로 찍어 보내는 값이라 실제 순간으로 바꿔 담는다 (패널은 "3분 전"으로 그린다)
+    createdAt: serverInstant(alert.alertedAt),
   }
 }
 

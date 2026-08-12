@@ -196,6 +196,115 @@
   flex: none;
 }
 
+/* ── 임시저장 ─────────────────────────────────── */
+
+.state__help {
+  max-width: 420px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.drafts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drafts__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.drafts__thumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-md);
+  object-fit: cover;
+}
+
+.drafts__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.drafts__name {
+  font-weight: 700;
+  /* 제목을 길게 쓴 임시저장이 줄을 밀어내지 않도록 한 줄로 자른다 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drafts__name:hover {
+  text-decoration: underline;
+}
+
+.drafts__meta {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* 셀러/유저 구분은 목록에서 제일 먼저 눈에 들어와야 해서 배지로 세운다 */
+.drafts__type {
+  display: inline-block;
+  padding: 1px 8px;
+  margin-right: 2px;
+  border-radius: var(--r-pill);
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.drafts__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.drafts__resume {
+  height: 40px;
+  flex: none;
+}
+
+.drafts__delete {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--r-sm);
+  color: var(--gray-400);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.drafts__delete:hover {
+  background: var(--gray-100);
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .drafts__row {
+    flex-wrap: wrap;
+  }
+
+  .drafts__actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 1024px) {
   .mypage__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

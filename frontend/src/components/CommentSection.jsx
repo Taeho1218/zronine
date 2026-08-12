@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { commentApi, postApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import Avatar from './Avatar'
+import Loading from './Loading'
 import { CommentIcon, HeartIcon, LockIcon, ThumbsUpIcon, TrashIcon } from './icons'
-import { formatDate, fromNow } from '../lib/format'
+import { formatDate, fromNow, serverInstant } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import './CommentSection.css'
 
@@ -176,9 +177,7 @@ export default function CommentSection({ post, onCountChange }) {
       </form>
 
       {loading ? (
-        <div className="state">
-          <span className="spinner" />
-        </div>
+        <Loading size={64} message="댓글을 불러오는 중…" />
       ) : comments.length === 0 ? (
         <p className="cmt__empty">첫 댓글을 남겨보세요.</p>
       ) : (
@@ -213,6 +212,9 @@ function CommentItem({
   onNeedLogin,
   isReply = false,
 }) {
+  // 서버가 UTC 로 찍어 보내는 값이라 실제 순간으로 바꿔 읽는다
+  const writtenAt = serverInstant(comment.createdAt)
+
   return (
     <li className={`cmt__item ${isReply ? 'cmt__item--reply' : ''}`}>
       <Avatar user={comment.author} size={40} />
@@ -222,7 +224,7 @@ function CommentItem({
           <span className="cmt__name">{comment.author.nickname}</span>
           {comment.author.userId === postAuthorId && <span className="cmt__badge">주최자</span>}
           <span className="cmt__time">
-            {formatDate(comment.createdAt)} · {fromNow(comment.createdAt)}
+            {formatDate(writtenAt)} · {fromNow(writtenAt)}
           </span>
         </div>
 

@@ -1,0 +1,93 @@
+.pmenu {
+  position: relative;
+  flex: none;
+  margin-left: 4px;
+}
+
+/*
+ * 아바타를 그대로 버튼으로 쓴다. 프로필 화면의 아바타(.phead__avatar)처럼 테두리를 한 겹 둘러
+ * 사진이 밝든 어둡든 헤더 위에서 동그란 덩어리로 읽히게 한다.
+ */
+.pmenu__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  background: var(--white);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pmenu__trigger:hover,
+.pmenu__trigger.is-open {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.pmenu__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 168px;
+  padding: 6px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  animation: pmenu-in 0.12s ease-out;
+  z-index: 60;
+}
+
+@keyframes pmenu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.pmenu__who {
+  padding: 8px 12px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--gray-150);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  /* 닉네임이 길어도 메뉴가 늘어나지 않게 한 줄로 자른다 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pmenu__item {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  text-align: left;
+  color: var(--gray-600);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.pmenu__item:hover:not(:disabled) {
+  background: var(--gray-100);
+  color: var(--ink);
+}
+
+.pmenu__item--danger:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.pmenu__item:disabled {
+  color: var(--gray-400);
+  cursor: default;
+}
+
+/* 움직임을 줄여달라고 설정한 사람에게는 등장 효과를 뺀다 */
+@media (prefers-reduced-motion: reduce) {
+  .pmenu__panel {
+    animation: none;
+  }
+}

@@ -469,23 +469,39 @@
   font-weight: 500;
 }
 
-/* 카테고리·출처는 성격이 달라 선 하나로 구분한다 */
+/* 핵심 정보와 카테고리를 선 하나로 구분한다 */
 .dbuy__sub {
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid var(--gray-150);
 }
 
-.dbuy__src {
-  display: inline-flex;
+/* ── 카테고리 알약 ────────────────────────────── */
+
+/* 알약이 글자보다 키가 커서, 이 줄만 기준선 대신 가운데로 맞춘다 */
+.dbuy__row--cats {
   align-items: center;
-  gap: 5px;
-  color: var(--brand);
 }
 
-.dbuy__src:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.dbuy__cats {
+  display: flex;
+  flex-wrap: wrap;
+  /* 다른 줄의 값과 마찬가지로 오른쪽에 붙는다 */
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* 홈 카드의 .pcard__cat 과 같은 모양 — 같은 정보는 어디서 보든 같게 보이도록 */
+.dbuy__cat {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .dbuy__cta {

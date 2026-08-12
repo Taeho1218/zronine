@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import Loading from './components/Loading'
+import WriteFab from './components/WriteFab'
 import { useAuth } from './store/AuthContext'
 import HomePage from './pages/HomePage'
 import PostDetailPage from './pages/PostDetailPage'
@@ -19,9 +21,7 @@ function Protected({ children }) {
 
   if (!ready) {
     return (
-      <div className="state">
-        <span className="spinner" />
-      </div>
+      <Loading />
     )
   }
   if (!isLoggedIn) {
@@ -73,6 +73,8 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      {/* 화면에 고정된 글쓰기 입구. 어느 화면 위에 뜰지는 컴포넌트가 직접 정한다 */}
+      <WriteFab />
     </div>
   )
 }

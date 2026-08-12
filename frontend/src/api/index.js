@@ -33,8 +33,12 @@ export const categoryApi = {
 
 export const postApi = {
   /** 메인 피드 겸 검색. 파라미터는 전부 선택값이라 빈 값은 buildUrl 에서 걸러진다. */
-  list: ({ page = 0, size, categoryId, postType, status, keyword } = {}) =>
-    http.get('/api/posts', { page, size, categoryId, postType, status, keyword }),
+  /*
+   * sort 는 서버가 Pageable 로 받는 값이라 "필드,방향" 모양으로 보낸다.
+   * 배열로 주면 1순위·2순위가 되고, 안 주면 서버 기본값(최신순)이다.
+   */
+  list: ({ page = 0, size, categoryId, postType, status, keyword, sort } = {}) =>
+    http.get('/api/posts', { page, size, categoryId, postType, status, keyword, sort }),
   /**
    * 홈 배너의 "인기 피드".
    * 순위(좋아요 → 댓글 → 최신)와 마감 지난 글 제외를 서버가 정해 고정 개수로 내려주므로

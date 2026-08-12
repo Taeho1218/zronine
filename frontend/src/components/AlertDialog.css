@@ -1,0 +1,83 @@
+/* 화면 한가운데 뜨는 알림 창. 탈퇴 확인 창(.wd)과 같은 규격을 쓴다 */
+.adlg {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.adlg__dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+}
+
+.adlg__panel {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  padding: 28px 24px 24px;
+  background: var(--white);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+  animation: adlg-pop 0.16s ease-out;
+}
+
+/* 아래에서 살짝 올라오며 나타난다. 갑자기 튀어나오면 눌린 버튼과 연결이 안 보인다 */
+@keyframes adlg-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+/*
+ * 창 안에서 도는 마스코트.
+ * .state.loading 은 화면 전체를 채울 때 기준이라 위 여백이 129px 이다. 창 안에서는 그만큼이 필요 없다.
+ * (알림 패널의 .npanel__loading 과 같은 방식)
+ */
+.state.loading.adlg__loading {
+  padding: 4px 0 6px;
+  /* 로딩 ↔ 결과로 바뀔 때 창 높이가 튀지 않도록 결과 화면과 비슷한 높이를 잡아둔다 */
+  min-height: 168px;
+  justify-content: center;
+}
+
+.adlg__mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: rgba(20, 174, 92, 0.12);
+  color: var(--brand);
+}
+
+.adlg__title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.adlg__desc {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gray-500);
+}
+
+.adlg__confirm {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* 움직임을 줄여달라고 설정한 사람에게는 등장 효과를 빼고 그냥 띄운다 */
+@media (prefers-reduced-motion: reduce) {
+  .adlg__panel {
+    animation: none;
+  }
+}

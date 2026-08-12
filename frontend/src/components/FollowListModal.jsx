@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { followApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import Avatar from './Avatar'
+import Loading from './Loading'
 import FollowButton from './FollowButton'
 import { CloseIcon } from './icons'
 import './FollowListModal.css'
@@ -92,9 +93,7 @@ export default function FollowListModal({ userId, nickname, initialTab = 'follow
 
         <div className="fmodal__body">
           {loading && (
-            <div className="state">
-              <span className="spinner" />
-            </div>
+            <Loading size={64} />
           )}
 
           {!loading && error && (

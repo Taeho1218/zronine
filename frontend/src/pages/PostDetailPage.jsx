@@ -6,6 +6,7 @@ import Avatar from '../components/Avatar'
 import CommentSection from '../components/CommentSection'
 import FollowButton from '../components/FollowButton'
 import ImageFallback from '../components/ImageFallback'
+import Loading from '../components/Loading'
 import {
   BellIcon,
   BookmarkIcon,
@@ -26,12 +27,19 @@ import {
   formatPeriodDay,
   formatPrice,
   PROGRESS_LABEL,
+  serverInstant,
 } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import './PostDetailPage.css'
 
 /** 사이드바의 "비슷한 상품"은 좁은 칸에 2줄로 놓아 4개까지만 보여준다. */
 const SIMILAR_SHOWN = 4
+
+/**
+ * "비슷한 상품"이 이 시간을 넘겨도 안 오면 그때 마스코트를 띄운다.
+ * 대개는 금방 오는데 곧바로 띄우면 마스코트가 깜빡 나타났다 사라져 더 어수선하다.
+ */
+const SIMILAR_SLOW_MS = 400
 
 /**
  * 이벤트는 서버에서 자유 문장 한 덩어리(eventNote)로 내려온다.
@@ -123,6 +131,8 @@ export default function PostDetailPage() {
   const [brokenImages, setBrokenImages] = useState(() => new Set())
   const [activeImage, setActiveImage] = useState(0)
   const [related, setRelated] = useState([])
+  // 비슷한 상품이 늦게 올 때만 켜진다 (응답이 오거나 화면을 뜨면 다시 꺼진다)
+  const [relatedSlow, setRelatedSlow] = useState(false)
   // 응답이 올 때까지 같은 동작을 다시 실행하지 못하게 막는다.
   const [saveBusy, runSave] = useBusy()
   const [alertBusy, runAlert] = useBusy()
@@ -160,15 +170,30 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!currentPostId) {
       setRelated([])
+      setRelatedSlow(false)
       return undefined
     }
     let alive = true
+    // 다른 글로 옮겼으면 이전 글의 추천을 잠깐이라도 새 글 것처럼 보여주지 않는다.
+    setRelated([])
+    setRelatedSlow(false)
+    const slowTimer = setTimeout(() => alive && setRelatedSlow(true), SIMILAR_SLOW_MS)
+
+    function settled() {
+      if (!alive) return
+      clearTimeout(slowTimer)
+      setRelatedSlow(false)
+    }
+
     postApi
       .similar(currentPostId)
       .then((list) => alive && setRelated(list ?? []))
       .catch(() => alive && setRelated([]))
+      .finally(settled)
+
     return () => {
       alive = false
+      clearTimeout(slowTimer)
     }
   }, [currentPostId])
 
@@ -231,10 +256,7 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="state">
-        <span className="spinner" />
-        <span>불러오는 중…</span>
-      </div>
+      <Loading />
     )
   }
 
@@ -291,7 +313,8 @@ export default function PostDetailPage() {
                   </a>
                 )}
               </span>
-              <span className="detail__date">{formatDateTime(post.createdAt)}</span>
+              {/* 서버가 UTC 로 찍어 보내는 값이라 실제 순간으로 바꿔 읽는다 */}
+              <span className="detail__date">{formatDateTime(serverInstant(post.createdAt))}</span>
             </div>
 
             <div className="detail__head-actions">
@@ -492,24 +515,21 @@ export default function PostDetailPage() {
               )}
             </dl>
 
-            {(post.categories?.length > 0 || post.buyUrl) && (
+            {post.categories?.length > 0 && (
               <dl className="dbuy__sub">
-                {post.categories?.length > 0 && (
-                  <div className="dbuy__row">
-                    <dt>카테고리</dt>
-                    <dd>{post.categories.map((c) => c.name).join(' > ')}</dd>
-                  </div>
-                )}
-                {post.buyUrl && (
-                  <div className="dbuy__row">
-                    <dt>상품 출처</dt>
-                    <dd>
-                      <a className="dbuy__src" href={post.buyUrl} target="_blank" rel="noreferrer noopener">
-                        원본 상품 페이지 바로가기 <ExternalLinkIcon width={13} height={13} />
-                      </a>
-                    </dd>
-                  </div>
-                )}
+                <div className="dbuy__row dbuy__row--cats">
+                  <dt>카테고리</dt>
+                  <dd>
+                    {/* 여러 개를 ' > ' 로 이으면 상하위 분류처럼 읽힌다. 홈 카드와 같은 알약으로 늘어놓는다 */}
+                    <ul className="dbuy__cats">
+                      {post.categories.map((c) => (
+                        <li key={c.categoryId} className="dbuy__cat">
+                          {c.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
               </dl>
             )}
 
@@ -525,6 +545,19 @@ export default function PostDetailPage() {
               </>
             )}
           </div>
+
+          {/*
+            응답이 늦으면 자리를 미리 만들어 마스코트를 돌린다.
+            결과가 없을 수도 있는 자리라(일반글은 빈 배열) 제목만 먼저 세우고 목록은 나중에 채운다.
+          */}
+          {relatedSlow && (
+            <section className="dsim">
+              <div className="dsim__head">
+                <h2 className="dsim__title">비슷한 상품</h2>
+              </div>
+              <Loading size={64} message="비슷한 상품을 찾는 중…" className="dsim__loading" />
+            </section>
+          )}
 
           {/* 서버가 골라준 결과가 있을 때만 이 자리를 만든다 */}
           {canShowRelated && (

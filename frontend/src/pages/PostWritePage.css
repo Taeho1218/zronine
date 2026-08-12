@@ -310,6 +310,10 @@
   color: var(--brand);
 }
 
+.write__saved-link {
+  text-decoration: underline;
+}
+
 .write__submit {
   min-width: 132px;
 }

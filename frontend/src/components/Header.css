@@ -195,3 +195,34 @@
     margin-left: 0;
   }
 }
+
+/*
+ * 손바닥만 한 화면. 로고 글자·아이콘 여백이 검색창을 밀어내 오른쪽 버튼이 화면 밖으로 나가던 폭이다.
+ * 줄일 수 있는 것부터 줄여 한 줄에 다 들어오게 한다.
+ */
+@media (max-width: 520px) {
+  .header__inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+  /* 마크만으로도 어디인지 알 수 있어 글자를 접는다 */
+  .header__logo-text {
+    display: none;
+  }
+  .header__search-input {
+    height: 42px;
+    border-radius: calc(42px * 0.5);
+    padding: 0 12px 0 38px;
+  }
+  .header__search-icon {
+    left: 12px;
+  }
+  .header__icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .header__cta {
+    height: 38px;
+    padding: 0 12px;
+  }
+}

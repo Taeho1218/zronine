@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi } from '../api'
 import PostCard from '../components/PostCard'
+import Loading from '../components/Loading'
 import Pagination from '../components/Pagination'
 import HomeHero from '../components/HomeHero'
-import FeedFilter from '../components/FeedFilter'
+import { sortCategories } from '../lib/categories'
 import { normalizeKeyword } from '../lib/search'
 import './HomePage.css'
 
@@ -14,6 +15,25 @@ import './HomePage.css'
  */
 const PAGE_SIZE = 12
 
+const QUICK_FILTERS = [
+  { label: '진행 중', key: 'status', value: 'ONGOING' },
+  { label: '진행 예정', key: 'status', value: 'UPCOMING' },
+  { label: '셀러 글', key: 'postType', value: 'SELLER' },
+  { label: '유저 글', key: 'postType', value: 'GENERAL' },
+  // 이 하나만 거르는 값이 아니라 순서를 바꾸는 값이라, 다른 필터와 겹쳐서 켤 수 있다.
+  { label: '인기순', key: 'sort', value: 'popular' },
+]
+
+/**
+ * 주소의 sort=popular 를 서버가 받는 정렬 값으로 바꾼다.
+ *
+ * 순서는 홈 배너의 인기 피드(서버 PostService.getPopularPosts)와 같게 맞춘다 —
+ * 추천 많은 순 → 댓글 많은 순 → 최신순. 한 화면에서 "인기" 가 두 가지 뜻이면 곤란하다.
+ * 뒤 순위가 없으면 값이 같은 글끼리 순서가 정해지지 않아, 같은 목록을 다시 불러올 때마다
+ * 자리가 뒤바뀌어 보인다.
+ */
+const SORT_PARAM = { popular: ['likeCount,desc', 'commentCount,desc', 'id,desc'] }
+
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   // 주소를 직접 고쳐 한 글자로 들어오는 경우가 있어 입력창과 같은 기준으로 한 번 더 거른다.
@@ -21,6 +41,7 @@ export default function HomePage() {
   const categoryId = searchParams.get('categoryId') ?? ''
   const postType = searchParams.get('postType') ?? ''
   const status = searchParams.get('status') ?? ''
+  const sort = searchParams.get('sort') ?? ''
 
   // 주소에는 사람이 읽는 1부터의 번호를 쓰고, 서버에는 0부터의 번호를 보낸다.
   // 페이지를 주소에 담아둬야 새로고침·뒤로가기·링크 공유가 모두 같은 화면을 가리킨다.
@@ -36,7 +57,8 @@ export default function HomePage() {
   useEffect(() => {
     categoryApi
       .list()
-      .then((list) => setCategories(list ?? []))
+      // 서버가 내려주는 순서가 아니라 화면에서 정한 차례(식품 → 화장품 → …)로 늘어놓는다
+      .then((list) => setCategories(sortCategories(list)))
       .catch(() => setCategories([]))
   }, [])
 
@@ -52,6 +74,7 @@ export default function HomePage() {
         categoryId: categoryId || undefined,
         postType: postType || undefined,
         status: status || undefined,
+        sort: SORT_PARAM[sort],
       })
       .then((res) => {
         if (!alive) return
@@ -71,7 +94,7 @@ export default function HomePage() {
     return () => {
       alive = false
     }
-  }, [keyword, categoryId, postType, status, page])
+  }, [keyword, categoryId, postType, status, sort, page])
 
   /** 필터를 바꾸면 보던 페이지 번호는 의미가 없어지므로 함께 지운다. */
   function updateParams(mutate) {
@@ -88,16 +111,20 @@ export default function HomePage() {
     })
   }
 
-  /** 글 종류 / 모집 상태 필터. key 가 'reset' 이면 둘 다 지운다. */
+  /**
+   * 한 번에 하나의 빠른 필터만 적용하고, 선택된 필터를 다시 누르면 전체로 돌아간다.
+   * 정렬(인기순)은 무엇을 보여줄지가 아니라 어떤 차례로 보여줄지를 정하는 값이라
+   * 거르는 조건을 지우지 않는다. "진행 중 + 인기순" 처럼 겹쳐 쓸 수 있어야 한다.
+   */
   function changeFilter(key, value) {
     updateParams((next) => {
-      if (key === 'reset') {
+      const isActive = next.get(key) === value
+      if (key === 'sort') next.delete('sort')
+      else {
         next.delete('postType')
         next.delete('status')
-        return
       }
-      if (value) next.set(key, value)
-      else next.delete(key)
+      if (!isActive) next.set(key, value)
     })
   }
 
@@ -110,76 +137,94 @@ export default function HomePage() {
   }
 
   return (
-    <div className="home page">
-      {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
-      <HomeHero />
-
-      <div className="home__chips" role="tablist" aria-label="카테고리">
-        {/* 카테고리와 성격이 다른 필터라 칩 줄 왼쪽에 따로 세운다 */}
-        <FeedFilter postType={postType} status={status} onChange={changeFilter} />
-        <span className="home__chips-divider" aria-hidden="true" />
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={!categoryId}
-          className={`chip ${!categoryId ? 'chip--active' : ''}`}
-          onClick={() => selectCategory(null)}
-        >
-          전체
-        </button>
-        {categories.map((c) => (
+    /* 카테고리 줄의 흰 띠는 창 끝까지 깔려야 해서 본문(.page) 바깥에 둔다 */
+    <>
+      <div className="home__category-bar">
+        <nav className="home__category-nav" aria-label="상품 카테고리">
           <button
-            key={c.categoryId}
             type="button"
-            role="tab"
-            aria-selected={String(c.categoryId) === categoryId}
-            className={`chip ${String(c.categoryId) === categoryId ? 'chip--active' : ''}`}
-            onClick={() => selectCategory(c.categoryId)}
+            aria-current={!categoryId ? 'page' : undefined}
+            className={`home__category-link ${!categoryId ? 'home__category-link--active' : ''}`}
+            onClick={() => selectCategory(null)}
           >
-            {c.name}
+            전체
           </button>
-        ))}
+          {categories.map((category) => (
+            <button
+              key={category.categoryId}
+              type="button"
+              aria-current={String(category.categoryId) === categoryId ? 'page' : undefined}
+              className={`home__category-link ${
+                String(category.categoryId) === categoryId ? 'home__category-link--active' : ''
+              }`}
+              onClick={() => selectCategory(category.categoryId)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </nav>
       </div>
 
-      {keyword && (
-        <p className="home__searched">
-          <strong>‘{keyword}’</strong> 검색 결과 {totalElements}건
-        </p>
-      )}
+      <div className="home page">
+        {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
+        <HomeHero />
 
-      {loading && (
-        <div className="state">
-          <span className="spinner" />
-          <span>공구를 불러오는 중…</span>
-        </div>
-      )}
-
-      {!loading && error && (
-        <div className="state">
-          <p className="state__title">목록을 불러오지 못했어요.</p>
-          <p>{error}</p>
-        </div>
-      )}
-
-      {!loading && !error && posts.length === 0 && (
-        <div className="state">
-          <p className="state__title">아직 등록된 공구가 없어요.</p>
-          <p>첫 번째 공구를 열어보세요.</p>
-        </div>
-      )}
-
-      {!loading && !error && posts.length > 0 && (
-        <>
-          <div className="home__grid">
-            {posts.map((post) => (
-              <PostCard key={post.postId} post={post} />
-            ))}
+        <section className="home__feed-heading" aria-labelledby="home-feed-title">
+          <h2 id="home-feed-title" className="home__feed-title">
+            지금 공구
+          </h2>
+          <div className="home__quick-filters" aria-label="게시글 필터">
+            {QUICK_FILTERS.map((filter) => {
+              const isActive = searchParams.get(filter.key) === filter.value
+              return (
+                <button
+                  key={filter.label}
+                  type="button"
+                  aria-pressed={isActive}
+                  className={`home__quick-filter ${isActive ? 'home__quick-filter--active' : ''}`}
+                  onClick={() => changeFilter(filter.key, filter.value)}
+                >
+                  {filter.label}
+                </button>
+              )
+            })}
           </div>
+        </section>
 
-          <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
-        </>
-      )}
-    </div>
+        {keyword && (
+          <p className="home__searched">
+            <strong>‘{keyword}’</strong> 검색 결과 {totalElements}건
+          </p>
+        )}
+
+        {loading && <Loading message="공구를 불러오는 중…" />}
+
+        {!loading && error && (
+          <div className="state">
+            <p className="state__title">목록을 불러오지 못했어요.</p>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && posts.length === 0 && (
+          <div className="state">
+            <p className="state__title">아직 등록된 공구가 없어요.</p>
+            <p>첫 번째 공구를 열어보세요.</p>
+          </div>
+        )}
+
+        {!loading && !error && posts.length > 0 && (
+          <>
+            <div className="home__grid">
+              {posts.map((post) => (
+                <PostCard key={post.postId} post={post} />
+              ))}
+            </div>
+
+            <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
+          </>
+        )}
+      </div>
+    </>
   )
 }

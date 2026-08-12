@@ -100,6 +100,14 @@ img {
   padding-right: 24px;
 }
 
+/* 폭이 좁아지면 좌우 여백이 내용보다 비싸진다. 여백부터 줄여 카드에 폭을 넘긴다 */
+@media (max-width: 520px) {
+  .page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -288,20 +296,5 @@ img {
 .state__title {
   font-weight: 700;
   color: var(--gray-600);
-}
-
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--gray-200);
-  border-top-color: var(--brand);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 

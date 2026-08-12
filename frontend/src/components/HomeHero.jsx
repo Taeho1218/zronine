@@ -5,11 +5,24 @@ import { formatPeriod } from '../lib/format'
 import ImageFallback from './ImageFallback'
 import './HomeHero.css'
 
-/** 자동으로 다음 묶음으로 넘어가는 간격 */
-const AUTOPLAY_MS = 2500
+/**
+ * 자동으로 다음 묶음으로 넘어가는 간격.
+ * 넘어가는 데 SLIDE_MS 를 쓰므로, 실제로 멈춰 있는 시간은 이 값에서 그만큼을 뺀 만큼이다.
+ */
+const AUTOPLAY_MS = 3200
 
-/** CSS 의 transform transition 시간과 맞춘다 */
-const SLIDE_MS = 450
+/** CSS(.hero__track)의 transform transition 시간과 맞춘다 */
+const SLIDE_MS = 1200
+
+/**
+ * 한 번에 보이는 장 수에 맞춘 한 장의 비율.
+ *
+ * 배너 띠의 높이는 "한 장의 폭 x 비율" 이라, 비율을 그대로 두고 장 수만 줄이면
+ * 화면이 좁을수록 배너가 급격히 높아진다(1200 에서 384px 이던 띠가 640 에서 640px 이 된다).
+ * 그래서 3장·2장일 때 띠 높이가 모두 폭의 1/3 이 되도록 비율을 함께 바꾼다.
+ * 한 장만 보이는 폭에서는 1/3 이 너무 납작해서 4:3 으로 조금 높인다.
+ */
+const SLIDE_RATIO = { 1: '4 / 3', 2: '3 / 2', 3: '1 / 1' }
 
 /**
  * 화면 폭에 따라 한 번에 몇 장을 보여줄지.
@@ -127,7 +140,7 @@ export default function HomeHero() {
                 key={`${post.postId}-${i}`}
                 to={`/posts/${post.postId}`}
                 className="hero__slide"
-                style={{ flexBasis: `${100 / perView}%` }}
+                style={{ flexBasis: `${100 / perView}%`, aspectRatio: SLIDE_RATIO[perView] ?? '1 / 1' }}
               >
                 {image ? (
                   <img className="hero__img" src={image} alt="" />
