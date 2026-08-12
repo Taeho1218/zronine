@@ -4,6 +4,7 @@ import { userApi, uploadApi } from '../api'
 import { useAuth } from '../store/AuthContext'
 import { useBusy } from '../lib/useBusy'
 import { downscaleImage } from '../lib/imageResize'
+import AlertDialog from '../components/AlertDialog'
 import Avatar from '../components/Avatar'
 import Loading from '../components/Loading'
 import WithdrawDialog from '../components/WithdrawDialog'
@@ -37,6 +38,8 @@ export default function SettingsPage() {
   const [nickState, setNickState] = useState(null) // null | 'checking' | 'ok' | 'taken'
   const [message, setMessage] = useState(null) // { type: 'ok' | 'error', text }
   const [askWithdraw, setAskWithdraw] = useState(false)
+  // 저장 창의 상태. null(닫힘) | 'saving'(마스코트가 도는 중) | 'done'(확인을 누르면 마이페이지로)
+  const [saveDialog, setSaveDialog] = useState(null)
 
   const [uploading, runUpload] = useBusy()
   const [saving, runSave] = useBusy()
@@ -128,6 +131,8 @@ export default function SettingsPage() {
 
     runSave(async () => {
       setMessage(null)
+      // 창을 먼저 띄워두고 그 안에서 진행 → 결과 순으로 바뀐다.
+      setSaveDialog('saving')
       try {
         /*
          * 서버는 null 을 "변경하지 않음"으로, 빈 문자열을 "지우기"로 읽는다.
@@ -143,8 +148,11 @@ export default function SettingsPage() {
         // 헤더 아바타·닉네임도 바로 새 값으로 바뀌게 한다.
         updateUser({ nickname: updated.nickname, profileImageUrl: updated.profileImageUrl })
         setNickState(null)
-        setMessage({ type: 'ok', text: '저장했어요.' })
+        // 알림 창으로 알려주므로 폼 안쪽 문구는 띄우지 않는다 (같은 말이 두 번 나온다)
+        setSaveDialog('done')
       } catch (err) {
+        // 실패하면 창을 닫아 고칠 자리로 돌려보낸다. 입력값은 그대로 남는다.
+        setSaveDialog(null)
         setMessage({ type: 'error', text: err.message })
       }
     })
@@ -318,6 +326,16 @@ export default function SettingsPage() {
           </button>
         </div>
       </section>
+
+      {saveDialog && (
+        <AlertDialog
+          loading={saveDialog === 'saving'}
+          loadingLabel="저장하는 중…"
+          title="저장되었습니다"
+          description="변경한 프로필이 반영되었어요."
+          onConfirm={() => navigate('/mypage')}
+        />
+      )}
 
       {askWithdraw && (
         <WithdrawDialog
