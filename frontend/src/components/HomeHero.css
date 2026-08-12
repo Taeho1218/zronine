@@ -143,10 +143,27 @@
 }
 
 @media (max-width: 640px) {
+  .hero {
+    margin-bottom: 28px;
+  }
+
+  /* 배너 밖으로 나가 있던 화살표를 안쪽으로 들인다. 폭이 좁아 밖에 두면 잘린다 */
   .hero__nav--prev {
     left: 8px;
   }
   .hero__nav--next {
     right: 8px;
+  }
+  .hero__nav {
+    width: 38px;
+    height: 38px;
+  }
+
+  .hero__caption {
+    padding: 48px 16px 16px;
+  }
+
+  .hero__title {
+    font-size: 16.5px;
   }
 }

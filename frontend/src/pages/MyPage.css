@@ -293,7 +293,64 @@
   color: var(--danger);
 }
 
+@media (max-width: 1024px) {
+  .mypage__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 640px) {
+  /*
+   * 탭 넷을 한 줄에 다 못 담는 폭이다. 글자를 줄여 우겨넣으면 어느 탭인지 읽기 어려워지므로
+   * 이 줄만 옆으로 밀어 보게 한다 (홈의 카테고리 줄과 같은 방식).
+   *
+   * overflow-x 를 주면 세로도 함께 잘리기 때문에, 탭 아래 1px 밖으로 나가 있던
+   * 선택 표시(::after)를 안쪽으로 들여 잘리지 않게 한다.
+   */
+  .mypage__tabs {
+    gap: 2px;
+    margin: 18px 0 18px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .mypage__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mypage__tab {
+    flex: none;
+    padding: 10px 10px 12px;
+    font-size: 14px;
+  }
+
+  .mypage__tab.is-active::after {
+    left: 4px;
+    right: 4px;
+    bottom: 0;
+  }
+
+  .mypage__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 목록 한 줄: 썸네일 + 글자까지만 첫 줄에 두고, 버튼은 아래 줄에서 폭을 다 쓴다 */
+  .alerts__row,
+  .drafts__row {
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .alerts__row {
+    flex-wrap: wrap;
+  }
+
+  .alerts__buy {
+    width: 100%;
+    margin-left: 0;
+  }
+
   .drafts__row {
     flex-wrap: wrap;
   }
@@ -303,16 +360,12 @@
     margin-left: 0;
     justify-content: flex-end;
   }
-}
 
-@media (max-width: 1024px) {
-  .mypage__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .plist__head {
+    margin: 20px 0 16px;
   }
-}
 
-@media (max-width: 640px) {
-  .mypage__grid {
-    grid-template-columns: minmax(0, 1fr);
+  .plist__title {
+    font-size: 17px;
   }
 }

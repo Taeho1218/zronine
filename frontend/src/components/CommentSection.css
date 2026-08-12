@@ -303,3 +303,44 @@
     padding-left: 0;
   }
 }
+
+@media (max-width: 520px) {
+  .cmt {
+    margin-top: 36px;
+    padding-top: 24px;
+  }
+
+  .cmt__reaction {
+    height: 60px;
+    font-size: 15px;
+  }
+
+  .cmt__heading {
+    margin: 28px 0 14px;
+    font-size: 18px;
+  }
+
+  .cmt__form-row {
+    gap: 10px;
+  }
+
+  .cmt__input {
+    height: 50px;
+    padding: 0 16px;
+  }
+
+  .cmt__item {
+    gap: 10px;
+    padding: 18px 0;
+  }
+
+  /* 대댓글이 깊어질수록 글 폭이 좁아지므로 들여쓰기를 줄인다 */
+  .cmt__replies {
+    padding-left: 10px;
+  }
+
+  /* 답글쓰기·삭제가 손가락으로 눌릴 만큼은 떨어져 있어야 한다 */
+  .cmt__actions {
+    gap: 16px;
+  }
+}

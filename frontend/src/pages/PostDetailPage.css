@@ -637,6 +637,11 @@
     display: flex;
     flex-direction: column;
     gap: 32px;
+    /*
+     * 2단일 때의 start 는 "카드를 위로 붙여라"라는 뜻이었지만, 세로로 세우고 나면
+     * 축이 바뀌어 "폭을 내용만큼만 가져라"가 된다. 그러면 짧은 요약 카드가 화면 절반만 쓴다.
+     */
+    align-items: stretch;
   }
   .detail__side {
     display: contents;
@@ -659,5 +664,65 @@
   .detail__head-actions {
     width: 100%;
     margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .detail {
+    padding-top: 24px;
+    padding-bottom: 72px;
+  }
+
+  /* 글쓴이 줄: 이름·날짜가 먼저 오고 버튼 묶음은 아래 줄로 내려간다 */
+  .detail__author-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .detail__hero,
+  .detail__hero-img {
+    /* 세로로 긴 사진이 화면 한 장을 통째로 먹지 않도록 */
+    max-height: 62vh;
+  }
+
+  .detail__nav {
+    width: 34px;
+    height: 34px;
+  }
+
+  .detail__thumb {
+    width: 64px;
+    height: 64px;
+  }
+
+  .detail__section {
+    margin-top: 26px;
+  }
+
+  .detail__content {
+    padding: 18px 16px;
+  }
+
+  .devent__card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .dbuy {
+    padding: 20px 18px 18px;
+  }
+
+  .dbuy__cta {
+    height: 52px;
+    font-size: 16px;
+  }
+
+  /*
+   * 이름은 그대로 두고 값이 남는 폭을 다 갖게 한다.
+   * 폭이 모자라면 값 안에서 줄이 바뀌므로, 어느 줄에서든 값은 오른쪽 끝에 맞춰 읽힌다.
+   */
+  .dbuy__row dd {
+    flex: 1;
+    min-width: 0;
   }
 }

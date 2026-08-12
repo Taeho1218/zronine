@@ -79,6 +79,12 @@ img {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /*
+   * 휴대폰 브라우저의 100vh 는 주소창이 걷힌 상태의 높이라, 주소창이 보이는 동안에는
+   * 화면보다 커서 내용이 짧은 페이지에도 스크롤이 생긴다. dvh 는 지금 실제로 보이는 높이다.
+   * (모르는 브라우저는 이 줄을 무시하고 위의 100vh 를 쓴다)
+   */
+  min-height: 100dvh;
 }
 
 .app__main {
@@ -296,5 +302,30 @@ img {
 .state__title {
   font-weight: 700;
   color: var(--gray-600);
+}
+
+/* ── 좁은 화면 ─────────────────────────────────── */
+
+/*
+ * iOS 사파리는 글자가 16px 보다 작은 입력칸에 커서를 넣는 순간 화면을 확대한다.
+ * 그리고 저절로 돌아오지 않아서, 한 번 입력하고 나면 그 뒤로 계속 좌우로 밀어 가며 봐야 한다.
+ * 좁은 화면에서만 입력칸 글자를 16px 로 올려 확대가 일어날 일 자체를 없앤다.
+ * (본문 15px 과 1px 차이라 눈에는 거의 티가 나지 않는다)
+ */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select,
+  .input,
+  .textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  /* 빈 목록·오류 안내가 화면 절반을 먹지 않도록 위아래 여백을 줄인다 */
+  .state {
+    padding: 48px 16px;
+  }
 }
 

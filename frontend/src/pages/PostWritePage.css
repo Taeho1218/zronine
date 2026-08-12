@@ -346,3 +346,62 @@
   font-weight: 700;
   color: var(--gray-700);
 }
+
+@media (max-width: 640px) {
+  .write {
+    padding-top: 24px;
+    padding-bottom: 72px;
+  }
+
+  /* 제목과 셀러/유저 토글이 한 줄에 안 들어가면 토글을 아래로 내린다 */
+  .write__top {
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .write__title {
+    font-size: 22px;
+  }
+
+  /* 16:7 은 이 폭에서 너무 납작해 안내 문구가 테두리에 닿는다 */
+  .uploader--wide .uploader__drop {
+    aspect-ratio: 3 / 2;
+  }
+
+  .write__notice {
+    align-items: flex-start;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+
+  .catchip {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .write__content {
+    margin-top: 24px;
+  }
+
+  /*
+   * 임시저장·등록을 오른쪽 끝에 몰아두면 한 손으로 쥐었을 때 반대편 엄지에서 멀다.
+   * 줄 전체를 나눠 갖게 해 어느 손으로도 닿게 하고, 안내 문구는 그 위 줄로 올린다.
+   */
+  .write__actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .write__saved {
+    width: 100%;
+    margin-right: 0;
+    order: -1;
+  }
+
+  .write__actions .btn {
+    flex: 1;
+    min-width: 0;
+  }
+}

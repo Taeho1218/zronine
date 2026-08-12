@@ -206,3 +206,41 @@
 .settings__withdraw:hover {
   background: #fef2f2;
 }
+
+@media (max-width: 520px) {
+  .settings {
+    padding-top: 28px;
+    padding-bottom: 72px;
+  }
+
+  .settings__title {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  /* 카드 안쪽 여백이 26px 씩 양쪽이면 입력칸에 남는 폭이 너무 줄어든다 */
+  .settings__card {
+    padding: 20px 16px;
+  }
+
+  .settings__photo {
+    gap: 14px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+
+  /*
+   * 설명 글과 버튼이 한 줄에 같이 있으면 둘 다 좁아져 글이 서너 줄로 접힌다.
+   * 버튼을 아래 줄로 내려 폭을 다 쓰게 하면 설명도 버튼도 읽기 편해진다.
+   */
+  .settings__row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .settings__row-btn,
+  .settings__withdraw,
+  .settings__actions .btn {
+    width: 100%;
+  }
+}

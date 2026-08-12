@@ -19,7 +19,9 @@
   position: relative;
   width: 100%;
   max-width: 420px;
+  /* dvh 는 주소창이 나와 있는 지금 실제로 보이는 높이. 모르는 브라우저는 앞 줄의 vh 를 쓴다 */
   max-height: min(560px, calc(100vh - 48px));
+  max-height: min(560px, calc(100dvh - 48px));
   display: flex;
   flex-direction: column;
   background: var(--white);
@@ -143,4 +145,20 @@
 
 .fmodal__user:hover .fmodal__nickname {
   text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  /* 창이 화면 폭을 최대한 쓰도록 바깥 여백을 줄인다 */
+  .fmodal {
+    padding: 16px;
+  }
+
+  .fmodal__panel {
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+  }
+
+  .fmodal__row {
+    padding: 10px 14px;
+  }
 }
