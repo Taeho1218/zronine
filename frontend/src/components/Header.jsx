@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import NotificationPanel from './NotificationPanel'
+import ProfileMenu from './ProfileMenu'
 import { MIN_KEYWORD_LENGTH } from '../lib/search'
 import { fetchNotifications } from '../lib/notifications'
 import { BellIcon, BookmarkIcon, SearchIcon } from './icons'
@@ -115,9 +116,8 @@ export default function Header() {
               <Link to="/write" className="header__write">
                 글쓰기
               </Link>
-              <Link to="/mypage" className="header__cta">
-                마이페이지
-              </Link>
+              {/* 마이페이지·로그아웃은 내 아바타 아래로 접어둔다 */}
+              <ProfileMenu />
             </>
           ) : (
             <Link to="/login" className="header__cta">
