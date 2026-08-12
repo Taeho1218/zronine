@@ -38,6 +38,11 @@ function buildUrl(path, params) {
   const qs = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') return
+    // 같은 이름을 여러 번 보내야 하는 값이 있다 (예: 정렬 기준을 1·2순위로 겹쳐 주는 sort)
+    if (Array.isArray(value)) {
+      value.forEach((v) => v !== undefined && v !== null && v !== '' && qs.append(key, v))
+      return
+    }
     qs.append(key, value)
   })
   const query = qs.toString()

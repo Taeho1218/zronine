@@ -611,6 +611,21 @@ export async function mockRequest(path, { method = 'GET', params, body } = {}) {
           (x) => x.title.toLowerCase().includes(kw) || (x.productName ?? '').toLowerCase().includes(kw),
         )
       }
+      /*
+       * 정렬. 서버는 Pageable 의 sort 를 "필드,방향" 으로 받고 여러 개면 앞이 1순위다.
+       * 화면에서 실제로 쓰는 건 인기순 하나뿐이라 그 조합(추천 → 댓글 → 최신)만 흉내낸다.
+       */
+      const sorts = [params?.sort ?? []].flat()
+      if (sorts.some((s) => String(s).startsWith('likeCount'))) {
+        list = list
+          .slice()
+          .sort(
+            (a, b) =>
+              b.likeCount - a.likeCount ||
+              b.commentCount - a.commentCount ||
+              b.postId - a.postId,
+          )
+      }
       return paginate(list.map(toFeed), Number(params?.page ?? 0), Number(params?.size ?? MAIN_FEED_PAGE_SIZE))
     }
 

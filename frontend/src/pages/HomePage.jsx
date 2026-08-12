@@ -20,7 +20,19 @@ const QUICK_FILTERS = [
   { label: '진행 예정', key: 'status', value: 'UPCOMING' },
   { label: '셀러 글', key: 'postType', value: 'SELLER' },
   { label: '유저 글', key: 'postType', value: 'GENERAL' },
+  // 이 하나만 거르는 값이 아니라 순서를 바꾸는 값이라, 다른 필터와 겹쳐서 켤 수 있다.
+  { label: '인기순', key: 'sort', value: 'popular' },
 ]
+
+/**
+ * 주소의 sort=popular 를 서버가 받는 정렬 값으로 바꾼다.
+ *
+ * 순서는 홈 배너의 인기 피드(서버 PostService.getPopularPosts)와 같게 맞춘다 —
+ * 추천 많은 순 → 댓글 많은 순 → 최신순. 한 화면에서 "인기" 가 두 가지 뜻이면 곤란하다.
+ * 뒤 순위가 없으면 값이 같은 글끼리 순서가 정해지지 않아, 같은 목록을 다시 불러올 때마다
+ * 자리가 뒤바뀌어 보인다.
+ */
+const SORT_PARAM = { popular: ['likeCount,desc', 'commentCount,desc', 'id,desc'] }
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -29,6 +41,7 @@ export default function HomePage() {
   const categoryId = searchParams.get('categoryId') ?? ''
   const postType = searchParams.get('postType') ?? ''
   const status = searchParams.get('status') ?? ''
+  const sort = searchParams.get('sort') ?? ''
 
   // 주소에는 사람이 읽는 1부터의 번호를 쓰고, 서버에는 0부터의 번호를 보낸다.
   // 페이지를 주소에 담아둬야 새로고침·뒤로가기·링크 공유가 모두 같은 화면을 가리킨다.
@@ -61,6 +74,7 @@ export default function HomePage() {
         categoryId: categoryId || undefined,
         postType: postType || undefined,
         status: status || undefined,
+        sort: SORT_PARAM[sort],
       })
       .then((res) => {
         if (!alive) return
@@ -80,7 +94,7 @@ export default function HomePage() {
     return () => {
       alive = false
     }
-  }, [keyword, categoryId, postType, status, page])
+  }, [keyword, categoryId, postType, status, sort, page])
 
   /** 필터를 바꾸면 보던 페이지 번호는 의미가 없어지므로 함께 지운다. */
   function updateParams(mutate) {
@@ -97,12 +111,19 @@ export default function HomePage() {
     })
   }
 
-  /** 한 번에 하나의 빠른 필터만 적용하고, 선택된 필터를 다시 누르면 전체로 돌아간다. */
+  /**
+   * 한 번에 하나의 빠른 필터만 적용하고, 선택된 필터를 다시 누르면 전체로 돌아간다.
+   * 정렬(인기순)은 무엇을 보여줄지가 아니라 어떤 차례로 보여줄지를 정하는 값이라
+   * 거르는 조건을 지우지 않는다. "진행 중 + 인기순" 처럼 겹쳐 쓸 수 있어야 한다.
+   */
   function changeFilter(key, value) {
     updateParams((next) => {
       const isActive = next.get(key) === value
-      next.delete('postType')
-      next.delete('status')
+      if (key === 'sort') next.delete('sort')
+      else {
+        next.delete('postType')
+        next.delete('status')
+      }
       if (!isActive) next.set(key, value)
     })
   }
