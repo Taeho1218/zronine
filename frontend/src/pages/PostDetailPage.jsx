@@ -20,6 +20,7 @@ import {
   UserIcon,
   WarningIcon,
 } from '../components/icons'
+import { sortCategories } from '../lib/categories'
 import {
   ddayLabel,
   formatDateDay,
@@ -273,6 +274,8 @@ export default function PostDetailPage() {
   }
 
   const isSeller = post.postType === 'SELLER'
+  // 카테고리는 서버가 담아준 순서대로 오므로, 화면에서 정한 차례로 다시 세운다
+  const categories = sortCategories(post.categories)
   const events = parseEvents(post.eventNote)
   const statusText =
     isSeller && post.progress !== 'NONE'
@@ -515,14 +518,14 @@ export default function PostDetailPage() {
               )}
             </dl>
 
-            {post.categories?.length > 0 && (
+            {categories.length > 0 && (
               <dl className="dbuy__sub">
                 <div className="dbuy__row dbuy__row--cats">
                   <dt>카테고리</dt>
                   <dd>
                     {/* 여러 개를 ' > ' 로 이으면 상하위 분류처럼 읽힌다. 홈 카드와 같은 알약으로 늘어놓는다 */}
                     <ul className="dbuy__cats">
-                      {post.categories.map((c) => (
+                      {categories.map((c) => (
                         <li key={c.categoryId} className="dbuy__cat">
                           {c.name}
                         </li>
@@ -564,8 +567,8 @@ export default function PostDetailPage() {
             <section className="dsim">
               <div className="dsim__head">
                 <h2 className="dsim__title">비슷한 상품</h2>
-                {post.categories?.length > 0 && (
-                  <Link to={`/?categoryId=${post.categories[0].categoryId}`} className="dsim__more">
+                {categories.length > 0 && (
+                  <Link to={`/?categoryId=${categories[0].categoryId}`} className="dsim__more">
                     더보기 <ChevronRightIcon width={14} height={14} />
                   </Link>
                 )}

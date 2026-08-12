@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi, uploadApi } from '../api'
 import Loading from '../components/Loading'
 import { CheckIcon, CloseIcon, PlusIcon } from '../components/icons'
+import { sortCategories } from '../lib/categories'
 import { parsePrice } from '../lib/format'
 import { getDraft, isBlankDraft, listDrafts, removeDraft, saveDraft as storeDraft } from '../lib/drafts'
 import { useBusy } from '../lib/useBusy'
@@ -63,7 +64,8 @@ export default function PostWritePage() {
   useEffect(() => {
     categoryApi
       .list()
-      .then((list) => setCategories(list ?? []))
+      // 고르는 자리도 홈과 같은 차례로 늘어놓는다 (식품 → 화장품 → …)
+      .then((list) => setCategories(sortCategories(list)))
       .catch(() => setCategories([]))
   }, [])
 

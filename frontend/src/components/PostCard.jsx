@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { postApi } from '../api'
 import { useAuth } from '../store/AuthContext'
+import { sortCategories } from '../lib/categories'
 import { ddayLabel, formatPeriod, formatPrice } from '../lib/format'
 import { useBusy } from '../lib/useBusy'
 import PostCardGallery from './PostCardGallery'
@@ -70,6 +71,8 @@ export default function PostCard({ post }) {
   // 전체가 비어 있는 옛 응답도 있을 수 있어 썸네일 하나라도 있으면 그것으로 채운다.
   const images = post.imageUrls?.length ? post.imageUrls : post.thumbnailUrl ? [post.thumbnailUrl] : []
   const isSeller = post.postType === 'SELLER'
+  // 카테고리는 서버가 담아준 순서대로 오므로, 화면에서 정한 차례로 다시 세운다
+  const categories = sortCategories(post.categories)
   const period = formatPeriod(post.startDate, post.endDate)
   const openingDday = post.progress === 'UPCOMING' ? ddayLabel(post.startDate) : ''
   const openingLabel = openingDday === 'D-DAY' ? '오늘 오픈' : openingDday ? `오픈 ${openingDday}` : ''
@@ -83,9 +86,9 @@ export default function PostCard({ post }) {
       <PostCardGallery postId={post.postId} images={images} title={post.title} badgeLabel={openingLabel} />
 
       <Link to={`/posts/${post.postId}`} className="pcard__link">
-        {post.categories?.length > 0 && (
+        {categories.length > 0 && (
           <ul className="pcard__cats">
-            {post.categories.map((c) => (
+            {categories.map((c) => (
               <li key={c.categoryId} className="pcard__cat">
                 {c.name}
               </li>
