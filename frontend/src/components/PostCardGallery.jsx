@@ -38,7 +38,11 @@ export default function PostCardGallery({ postId, images, title, badgeLabel = ''
   if (total === 0) {
     return (
       <div className="pcard__media">
-        <ImageFallback className="imgfallback--card" />
+        {/* 사진이 있을 때와 똑같이 상세로 가는 링크로 감싼다.
+            여기만 클릭이 죽으면 사진 없는 카드는 썸네일 자리가 통째로 안 눌리는 셈이 된다 */}
+        <Link to={`/posts/${postId}`} className="pcard__viewport" aria-label={title}>
+          <ImageFallback className="imgfallback--card" />
+        </Link>
         {badgeLabel && (
           <span className="pcard__dday">
             <span className="pcard__dday-dot" aria-hidden="true" />
