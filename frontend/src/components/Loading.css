@@ -27,3 +27,8 @@
 .state.loading.npanel__loading {
   padding: 26px 16px;
 }
+
+/* 사이드바 "비슷한 상품" 자리. 카드 두 줄이 들어올 높이만큼만 잡아둔다 */
+.state.loading.dsim__loading {
+  padding: 30px 16px;
+}

@@ -36,6 +36,12 @@ import './PostDetailPage.css'
 const SIMILAR_SHOWN = 4
 
 /**
+ * "비슷한 상품"이 이 시간을 넘겨도 안 오면 그때 마스코트를 띄운다.
+ * 대개는 금방 오는데 곧바로 띄우면 마스코트가 깜빡 나타났다 사라져 더 어수선하다.
+ */
+const SIMILAR_SLOW_MS = 400
+
+/**
  * 이벤트는 서버에서 자유 문장 한 덩어리(eventNote)로 내려온다.
  * 정해진 구조가 없어서, 실제로 들어오는 세 가지 모양을 순서대로 시도한다.
  *
@@ -125,6 +131,8 @@ export default function PostDetailPage() {
   const [brokenImages, setBrokenImages] = useState(() => new Set())
   const [activeImage, setActiveImage] = useState(0)
   const [related, setRelated] = useState([])
+  // 비슷한 상품이 늦게 올 때만 켜진다 (응답이 오거나 화면을 뜨면 다시 꺼진다)
+  const [relatedSlow, setRelatedSlow] = useState(false)
   // 응답이 올 때까지 같은 동작을 다시 실행하지 못하게 막는다.
   const [saveBusy, runSave] = useBusy()
   const [alertBusy, runAlert] = useBusy()
@@ -162,15 +170,30 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!currentPostId) {
       setRelated([])
+      setRelatedSlow(false)
       return undefined
     }
     let alive = true
+    // 다른 글로 옮겼으면 이전 글의 추천을 잠깐이라도 새 글 것처럼 보여주지 않는다.
+    setRelated([])
+    setRelatedSlow(false)
+    const slowTimer = setTimeout(() => alive && setRelatedSlow(true), SIMILAR_SLOW_MS)
+
+    function settled() {
+      if (!alive) return
+      clearTimeout(slowTimer)
+      setRelatedSlow(false)
+    }
+
     postApi
       .similar(currentPostId)
       .then((list) => alive && setRelated(list ?? []))
       .catch(() => alive && setRelated([]))
+      .finally(settled)
+
     return () => {
       alive = false
+      clearTimeout(slowTimer)
     }
   }, [currentPostId])
 
@@ -513,6 +536,19 @@ export default function PostDetailPage() {
               </>
             )}
           </div>
+
+          {/*
+            응답이 늦으면 자리를 미리 만들어 마스코트를 돌린다.
+            결과가 없을 수도 있는 자리라(일반글은 빈 배열) 제목만 먼저 세우고 목록은 나중에 채운다.
+          */}
+          {relatedSlow && (
+            <section className="dsim">
+              <div className="dsim__head">
+                <h2 className="dsim__title">비슷한 상품</h2>
+              </div>
+              <Loading size={64} message="비슷한 상품을 찾는 중…" className="dsim__loading" />
+            </section>
+          )}
 
           {/* 서버가 골라준 결과가 있을 때만 이 자리를 만든다 */}
           {canShowRelated && (
