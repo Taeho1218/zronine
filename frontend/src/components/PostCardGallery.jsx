@@ -64,14 +64,22 @@ export default function PostCardGallery({ postId, images, title, badgeLabel = ''
       <Link to={`/posts/${postId}`} className="pcard__viewport" aria-label={title}>
         <div className="pcard__track" style={{ transform: `translateX(-${current * 100}%)` }}>
           {slides.map((url, i) => (
-            <img
-              key={url}
-              className="pcard__img"
-              src={url}
-              alt=""
-              loading={i === 0 ? 'lazy' : undefined}
-              onError={() => setBroken((prev) => new Set(prev).add(url))}
-            />
+            /*
+             * 사진은 원본 비율대로 넣어서 위아래(또는 좌우)에 빈 자리가 남는다.
+             * 그 자리를 회색으로 두면 카드마다 색이 따로 놀아, 같은 사진을 흐리게 깔아 채운다.
+             * 색을 뽑아 계산하지 않고 사진 자체를 쓰는 이유: 다른 도메인 이미지는 canvas 로 픽셀을
+             * 읽을 수 없어(CORS) 색 추출이 실패하는데, 이 방법은 어떤 사진이든 그냥 된다.
+             */
+            <div key={url} className="pcard__slide">
+              <img className="pcard__backdrop" src={url} alt="" aria-hidden="true" loading="lazy" />
+              <img
+                className="pcard__img"
+                src={url}
+                alt=""
+                loading={i === 0 ? 'lazy' : undefined}
+                onError={() => setBroken((prev) => new Set(prev).add(url))}
+              />
+            </div>
           ))}
         </div>
       </Link>
