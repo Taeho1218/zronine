@@ -5,11 +5,14 @@ import { formatPeriod } from '../lib/format'
 import ImageFallback from './ImageFallback'
 import './HomeHero.css'
 
-/** 자동으로 다음 묶음으로 넘어가는 간격 */
-const AUTOPLAY_MS = 2500
+/**
+ * 자동으로 다음 묶음으로 넘어가는 간격.
+ * 넘어가는 데 SLIDE_MS 를 쓰므로, 실제로 멈춰 있는 시간은 이 값에서 그만큼을 뺀 만큼이다.
+ */
+const AUTOPLAY_MS = 3200
 
-/** CSS 의 transform transition 시간과 맞춘다 */
-const SLIDE_MS = 450
+/** CSS(.hero__track)의 transform transition 시간과 맞춘다 */
+const SLIDE_MS = 1200
 
 /**
  * 한 번에 보이는 장 수에 맞춘 한 장의 비율.
