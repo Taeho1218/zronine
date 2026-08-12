@@ -517,9 +517,18 @@ export default function PostDetailPage() {
 
             {post.categories?.length > 0 && (
               <dl className="dbuy__sub">
-                <div className="dbuy__row">
+                <div className="dbuy__row dbuy__row--cats">
                   <dt>카테고리</dt>
-                  <dd>{post.categories.map((c) => c.name).join(' > ')}</dd>
+                  <dd>
+                    {/* 여러 개를 ' > ' 로 이으면 상하위 분류처럼 읽힌다. 홈 카드와 같은 알약으로 늘어놓는다 */}
+                    <ul className="dbuy__cats">
+                      {post.categories.map((c) => (
+                        <li key={c.categoryId} className="dbuy__cat">
+                          {c.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
                 </div>
               </dl>
             )}
