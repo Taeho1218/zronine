@@ -27,7 +27,8 @@
   max-width: var(--page-max);
   margin: 0 auto;
   padding: 0 24px;
-  min-height: 76px;
+  /* 시안보다 한 줄이 두꺼워 보여 1mm 줄인다 */
+  min-height: calc(76px - 1mm);
   /* 좁은 화면에서 항목이 넘치면 이 줄만 옆으로 밀어서 본다 */
   overflow-x: auto;
   scrollbar-width: none;
