@@ -1,6 +1,17 @@
 .home {
+  position: relative;
+  isolation: isolate;
   padding-top: 0;
   padding-bottom: 80px;
+}
+
+/* Keep the home feed bright without changing the background of other pages. */
+.home::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background: var(--white);
 }
 
 .home__category-nav {
