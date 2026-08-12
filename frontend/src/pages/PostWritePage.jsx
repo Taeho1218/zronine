@@ -359,9 +359,17 @@ export default function PostWritePage() {
                     className="input"
                     value={form.productName}
                     onChange={(e) => set({ productName: e.target.value })}
-                    placeholder="예가체프 G1 원두 1kg"
+                    placeholder="예가체프 원두"
                     maxLength={100}
                   />
+                  {/*
+                    상세 페이지의 "비슷한 상품"은 이 값이 글자 그대로 같은 글을 먼저 찾는다.
+                    등급·용량까지 적으면 같은 물건인데도 표기가 갈려 서로 묶이지 않으므로,
+                    적는 사람에게 미리 알려 이름을 좁혀 적도록 한다. (예시도 같은 기준으로 맞췄다)
+                  */}
+                  <span className="field__help">
+                    메이커나 수량을 빼고 상품이름만 적어주세요. 비슷한 상품에 올라갈 확률이 높아집니다.
+                  </span>
                 </label>
               </div>
 
