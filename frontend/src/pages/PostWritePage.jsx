@@ -33,7 +33,13 @@ export default function PostWritePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
-  const initialType = searchParams.get('type') === 'GENERAL' ? 'GENERAL' : 'SELLER'
+  /*
+   * 글 종류를 주소에 싣고 들어온 경우에만 값이 잡힌다 (오른쪽 아래 글쓰기 버튼에서 고르고 온 경우).
+   * 헤더·푸터의 "글쓰기" 처럼 종류 없이 들어오면 null 이고, 그때는 임시저장에 적힌 종류를 따른다.
+   */
+  const typeParam = searchParams.get('type')
+  const requestedType = typeParam === 'SELLER' || typeParam === 'GENERAL' ? typeParam : null
+  const initialType = requestedType ?? 'SELLER'
 
   const [form, setForm] = useState({ ...EMPTY, postType: initialType })
   const [categories, setCategories] = useState([])
@@ -83,7 +89,15 @@ export default function PostWritePage() {
 
     try {
       const raw = localStorage.getItem(DRAFT_KEY)
-      if (raw) setForm({ ...EMPTY, ...JSON.parse(raw) })
+      if (raw) {
+        /*
+         * 쓰던 내용은 되살리되, 글 종류만은 방금 고르고 들어온 값이 이긴다.
+         * "셀러로 글쓰기" 를 고른 사람에게 지난번 유저글 임시저장의 종류가 씌워지면
+         * 고른 게 무시된 것처럼 보이기 때문이다.
+         */
+        const draft = JSON.parse(raw)
+        setForm({ ...EMPTY, ...draft, postType: requestedType ?? draft.postType ?? EMPTY.postType })
+      }
     } catch {
       /* 손상된 임시저장은 무시한다 */
     }
