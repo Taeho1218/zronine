@@ -116,89 +116,94 @@ export default function HomePage() {
   }
 
   return (
-    <div className="home page">
-      <nav className="home__category-nav" aria-label="상품 카테고리">
-        <button
-          type="button"
-          aria-current={!categoryId ? 'page' : undefined}
-          className={`home__category-link ${!categoryId ? 'home__category-link--active' : ''}`}
-          onClick={() => selectCategory(null)}
-        >
-          전체
-        </button>
-        {categories.map((category) => (
+    /* 카테고리 줄의 흰 띠는 창 끝까지 깔려야 해서 본문(.page) 바깥에 둔다 */
+    <>
+      <div className="home__category-bar">
+        <nav className="home__category-nav" aria-label="상품 카테고리">
           <button
-            key={category.categoryId}
             type="button"
-            aria-current={String(category.categoryId) === categoryId ? 'page' : undefined}
-            className={`home__category-link ${
-              String(category.categoryId) === categoryId ? 'home__category-link--active' : ''
-            }`}
-            onClick={() => selectCategory(category.categoryId)}
+            aria-current={!categoryId ? 'page' : undefined}
+            className={`home__category-link ${!categoryId ? 'home__category-link--active' : ''}`}
+            onClick={() => selectCategory(null)}
           >
-            {category.name}
+            전체
           </button>
-        ))}
-      </nav>
+          {categories.map((category) => (
+            <button
+              key={category.categoryId}
+              type="button"
+              aria-current={String(category.categoryId) === categoryId ? 'page' : undefined}
+              className={`home__category-link ${
+                String(category.categoryId) === categoryId ? 'home__category-link--active' : ''
+              }`}
+              onClick={() => selectCategory(category.categoryId)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
-      <HomeHero />
+      <div className="home page">
+        {/* 좋아요 → 댓글 → 최신 순으로 뽑은 인기 공구. 모집이 끝난 글은 올라오지 않는다. */}
+        <HomeHero />
 
-      <section className="home__feed-heading" aria-labelledby="home-feed-title">
-        <h2 id="home-feed-title" className="home__feed-title">
-          지금 공구
-        </h2>
-        <div className="home__quick-filters" aria-label="게시글 필터">
-          {QUICK_FILTERS.map((filter) => {
-            const isActive = searchParams.get(filter.key) === filter.value
-            return (
-              <button
-                key={filter.label}
-                type="button"
-                aria-pressed={isActive}
-                className={`home__quick-filter ${isActive ? 'home__quick-filter--active' : ''}`}
-                onClick={() => changeFilter(filter.key, filter.value)}
-              >
-                {filter.label}
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      {keyword && (
-        <p className="home__searched">
-          <strong>‘{keyword}’</strong> 검색 결과 {totalElements}건
-        </p>
-      )}
-
-      {loading && <Loading message="공구를 불러오는 중…" />}
-
-      {!loading && error && (
-        <div className="state">
-          <p className="state__title">목록을 불러오지 못했어요.</p>
-          <p>{error}</p>
-        </div>
-      )}
-
-      {!loading && !error && posts.length === 0 && (
-        <div className="state">
-          <p className="state__title">아직 등록된 공구가 없어요.</p>
-          <p>첫 번째 공구를 열어보세요.</p>
-        </div>
-      )}
-
-      {!loading && !error && posts.length > 0 && (
-        <>
-          <div className="home__grid">
-            {posts.map((post) => (
-              <PostCard key={post.postId} post={post} />
-            ))}
+        <section className="home__feed-heading" aria-labelledby="home-feed-title">
+          <h2 id="home-feed-title" className="home__feed-title">
+            지금 공구
+          </h2>
+          <div className="home__quick-filters" aria-label="게시글 필터">
+            {QUICK_FILTERS.map((filter) => {
+              const isActive = searchParams.get(filter.key) === filter.value
+              return (
+                <button
+                  key={filter.label}
+                  type="button"
+                  aria-pressed={isActive}
+                  className={`home__quick-filter ${isActive ? 'home__quick-filter--active' : ''}`}
+                  onClick={() => changeFilter(filter.key, filter.value)}
+                >
+                  {filter.label}
+                </button>
+              )
+            })}
           </div>
+        </section>
 
-          <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
-        </>
-      )}
-    </div>
+        {keyword && (
+          <p className="home__searched">
+            <strong>‘{keyword}’</strong> 검색 결과 {totalElements}건
+          </p>
+        )}
+
+        {loading && <Loading message="공구를 불러오는 중…" />}
+
+        {!loading && error && (
+          <div className="state">
+            <p className="state__title">목록을 불러오지 못했어요.</p>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && posts.length === 0 && (
+          <div className="state">
+            <p className="state__title">아직 등록된 공구가 없어요.</p>
+            <p>첫 번째 공구를 열어보세요.</p>
+          </div>
+        )}
+
+        {!loading && !error && posts.length > 0 && (
+          <>
+            <div className="home__grid">
+              {posts.map((post) => (
+                <PostCard key={post.postId} post={post} />
+              ))}
+            </div>
+
+            <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
+          </>
+        )}
+      </div>
+    </>
   )
 }

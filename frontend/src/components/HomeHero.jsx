@@ -12,6 +12,16 @@ const AUTOPLAY_MS = 2500
 const SLIDE_MS = 450
 
 /**
+ * 한 번에 보이는 장 수에 맞춘 한 장의 비율.
+ *
+ * 배너 띠의 높이는 "한 장의 폭 x 비율" 이라, 비율을 그대로 두고 장 수만 줄이면
+ * 화면이 좁을수록 배너가 급격히 높아진다(1200 에서 384px 이던 띠가 640 에서 640px 이 된다).
+ * 그래서 3장·2장일 때 띠 높이가 모두 폭의 1/3 이 되도록 비율을 함께 바꾼다.
+ * 한 장만 보이는 폭에서는 1/3 이 너무 납작해서 4:3 으로 조금 높인다.
+ */
+const SLIDE_RATIO = { 1: '4 / 3', 2: '3 / 2', 3: '1 / 1' }
+
+/**
  * 화면 폭에 따라 한 번에 몇 장을 보여줄지.
  *
  * 이 값을 CSS 미디어쿼리로만 정하면 슬라이드를 미는 계산(JS)과 어긋나 화면이 중간에서 멈춘다.
@@ -127,7 +137,7 @@ export default function HomeHero() {
                 key={`${post.postId}-${i}`}
                 to={`/posts/${post.postId}`}
                 className="hero__slide"
-                style={{ flexBasis: `${100 / perView}%` }}
+                style={{ flexBasis: `${100 / perView}%`, aspectRatio: SLIDE_RATIO[perView] ?? '1 / 1' }}
               >
                 {image ? (
                   <img className="hero__img" src={image} alt="" />
