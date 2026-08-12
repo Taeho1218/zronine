@@ -65,10 +65,10 @@
   height: 100%;
   object-fit: cover;
   /* 흐림은 가장자리를 투명하게 만든다. 그만큼 키워서 빈 테두리가 안 보이게 한다 */
-  transform: scale(1.35);
-  filter: blur(28px) saturate(0.82) brightness(1.08);
+  transform: scale(1.45);
+  filter: blur(34px) saturate(0.9) brightness(1.14);
   /* 원본 그대로면 앞의 사진과 대비가 약해져 한 톤 눌러둔다 */
-  opacity: 0.22;
+  opacity: 0.58;
 }
 
 /* 위아래로 옅게 깔리는 그라데이션. 사진 색이 밝든 어둡든 D-day 배지와 점이 읽힌다 */
@@ -76,7 +76,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.42), transparent 30%, transparent 70%, rgba(255, 255, 255, 0.42));
+  background: rgba(255, 255, 255, 0.08);
   pointer-events: none;
 }
 
