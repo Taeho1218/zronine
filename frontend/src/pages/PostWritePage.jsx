@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categoryApi, postApi, uploadApi } from '../api'
 import Loading from '../components/Loading'
+import ScreenBlocker from '../components/ScreenBlocker'
 import { CheckIcon, CloseIcon, PlusIcon } from '../components/icons'
 import { sortCategories } from '../lib/categories'
 import { parsePrice } from '../lib/format'
@@ -269,6 +270,13 @@ export default function PostWritePage() {
 
   return (
     <div className={`write page ${isSeller ? '' : 'write--narrow'}`}>
+      {/*
+        등록은 사진이 여러 장이면 몇 초씩 걸리는데, 그동안 화면이 그대로라 눌린 건지 알기 어렵다.
+        버튼 글씨만 바꾸는 대신 화면을 덮어, 진행 중이라는 걸 알리면서 다시 누르거나
+        다른 곳으로 넘어가는 것도 함께 막는다. (로그인·로그아웃과 같은 표시)
+      */}
+      {submitting && <ScreenBlocker message={editId ? '글을 수정하는 중…' : '글을 등록하는 중…'} />}
+
       <form onSubmit={submit}>
         <div className="write__top">
           <h1 className="write__title">{isSeller ? '공구 열기' : '글쓰기'}</h1>
