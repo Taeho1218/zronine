@@ -65,6 +65,16 @@ export default function MyPage() {
     reloadDrafts()
   }
 
+  /**
+   * 카드 메뉴에서 글을 지웠을 때. 삭제는 이미 끝난 상태로 불린다.
+   * 목록을 다시 부르지 않고 그 카드만 빼서, 보던 자리와 스크롤이 그대로 남게 한다.
+   */
+  function postDeleted(postId) {
+    setItems((list) => list.filter((p) => p.postId !== postId))
+    // 탭 옆 개수도 같이 줄여야 목록과 숫자가 어긋나 보이지 않는다
+    setProfile((p) => (p ? { ...p, postCount: Math.max(0, (p.postCount ?? 1) - 1) } : p))
+  }
+
   useEffect(() => {
     let alive = true
     setError(null)
@@ -219,7 +229,7 @@ export default function MyPage() {
         {!loading && !error && items.length > 0 && tab !== 'alerts' && tab !== 'drafts' && (
           <div className="mypage__grid">
             {items.map((post) => (
-              <PostCard key={post.postId} post={post} />
+              <PostCard key={post.postId} post={post} onDeleted={postDeleted} />
             ))}
           </div>
         )}

@@ -128,6 +128,12 @@ export default function HomePage() {
     })
   }
 
+  /** 카드 메뉴에서 내 글을 지웠을 때. 삭제는 이미 끝났고, 목록에서 그 카드만 걷어낸다. */
+  function postDeleted(postId) {
+    setPosts((list) => list.filter((p) => p.postId !== postId))
+    setTotalElements((n) => Math.max(0, n - 1))
+  }
+
   function goToPage(nextPage) {
     const next = new URLSearchParams(searchParams)
     if (nextPage <= 0) next.delete('page')
@@ -217,7 +223,7 @@ export default function HomePage() {
           <>
             <div className="home__grid">
               {posts.map((post) => (
-                <PostCard key={post.postId} post={post} />
+                <PostCard key={post.postId} post={post} onDeleted={postDeleted} />
               ))}
             </div>
 

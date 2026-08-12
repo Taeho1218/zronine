@@ -95,9 +95,22 @@
   white-space: nowrap;
 }
 
-/* 손가락으로 쓰는 화면에는 hover 가 없으므로 항상 보여준다 */
+/* 삭제를 기다리는 동안. 옆에 "삭제 중…" 이 떠 있으므로 여기서는 다시 눌리지만 않으면 된다 */
+.pcardmenu__trigger:disabled {
+  cursor: default;
+}
+
+/* 손가락으로 쓰는 화면에는 hover 가 없으므로 항상 보여주고, 손끝만큼 키운다 */
 @media (hover: none) {
   .pcardmenu__trigger {
     opacity: 1;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* 메뉴 항목도 스쳐 눌리지 않을 만큼 높이를 준다 */
+  .pcardmenu__item {
+    padding: 12px 14px;
+    font-size: 15px;
   }
 }

@@ -15,9 +15,12 @@ import './PostCard.css'
  *
  * 추천/저장은 서버 응답을 기다리지 않고 먼저 화면을 바꾼 뒤(낙관적 갱신)
  * 실패하면 직전 값으로 되돌린다. 목록에서 연타했을 때 버튼이 늦게 반응하는 느낌을 없애기 위함이다.
+ *
+ * onDeleted 를 넘기면 점 3개 메뉴에 "삭제하기"가 생긴다(내 글일 때만).
+ * 지운 카드를 목록에서 빼는 건 목록을 쥐고 있는 화면의 몫이라 그쪽으로 넘긴다.
  */
-export default function PostCard({ post }) {
-  const { isLoggedIn } = useAuth()
+export default function PostCard({ post, onDeleted }) {
+  const { isLoggedIn, user } = useAuth()
   const navigate = useNavigate()
   const [liked, setLiked] = useState(post.liked)
   const [likeCount, setLikeCount] = useState(post.likeCount)
@@ -71,6 +74,8 @@ export default function PostCard({ post }) {
   // 전체가 비어 있는 옛 응답도 있을 수 있어 썸네일 하나라도 있으면 그것으로 채운다.
   const images = post.imageUrls?.length ? post.imageUrls : post.thumbnailUrl ? [post.thumbnailUrl] : []
   const isSeller = post.postType === 'SELLER'
+  // 내 글인지는 서버가 mine 으로 알려준다. 그 필드가 없던 시절의 응답만 글쓴이 번호로 직접 맞춰본다.
+  const mine = post.mine ?? (user?.userId != null && post.author?.userId === user.userId)
   // 카테고리는 서버가 담아준 순서대로 오므로, 화면에서 정한 차례로 다시 세운다
   const categories = sortCategories(post.categories)
   const period = formatPeriod(post.startDate, post.endDate)
@@ -80,7 +85,7 @@ export default function PostCard({ post }) {
   return (
     <article className="pcard">
       {/* 카드 링크 바깥에 두어야 눌렀을 때 상세로 이동하지 않는다 */}
-      <PostCardMenu postId={post.postId} />
+      <PostCardMenu postId={post.postId} mine={mine} onDeleted={onDeleted} />
 
       {/* 사진이 여러 장이면 넘겨볼 수 있고, 없으면 마스코트가 자리를 채운다 */}
       <PostCardGallery postId={post.postId} images={images} title={post.title} badgeLabel={openingLabel} />

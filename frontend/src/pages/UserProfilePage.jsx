@@ -57,6 +57,12 @@ export default function UserProfilePage() {
    * "인기순"은 받아온 목록 안에서 다시 세우는 것이라, 글이 한 페이지를 넘으면
    * 그 페이지 안에서의 인기순이다. (서버에 정렬 파라미터가 생기면 그때 넘기면 된다)
    */
+  /** 내 프로필을 이 화면으로 들어와 볼 수도 있어, 지운 글은 여기서도 목록에서 걷어낸다. */
+  function postDeleted(postId) {
+    setPosts((list) => list.filter((p) => p.postId !== postId))
+    setProfile((p) => (p ? { ...p, postCount: Math.max(0, (p.postCount ?? 1) - 1) } : p))
+  }
+
   const shown = useMemo(() => {
     if (sort !== 'popular') return posts
     return [...posts].sort(
@@ -168,7 +174,7 @@ export default function UserProfilePage() {
         ) : (
           <div className={`mypage__grid ${view === 'list' ? 'mypage__grid--list' : ''}`}>
             {shown.map((post) => (
-              <PostCard key={post.postId} post={post} />
+              <PostCard key={post.postId} post={post} onDeleted={postDeleted} />
             ))}
           </div>
         )}
