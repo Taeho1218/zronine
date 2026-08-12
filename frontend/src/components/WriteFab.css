@@ -1,0 +1,125 @@
+.writefab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+
+  /*
+   * 헤더(50)보다 낮게 둔다 — 헤더는 스크롤을 따라다니므로 그 위로 올라오면 메뉴를 가린다.
+   * 모달(FollowListModal 100, WithdrawDialog 120)보다도 낮아야 창이 떴을 때 뒤로 물러난다.
+   */
+  z-index: 40;
+
+  /* 메뉴가 트리거 위쪽으로 자라도록. bottom 고정이라 늘어나는 방향이 위가 된다 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.writefab__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--white);
+  /* 본문 위에 떠 있는 물건이라 카드(--shadow-card)보다 확실히 더 띄운다 */
+  box-shadow: 0 8px 20px rgba(20, 174, 92, 0.32);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.writefab__trigger:hover {
+  background: var(--brand-hover);
+  box-shadow: 0 10px 24px rgba(20, 174, 92, 0.4);
+}
+
+.writefab__trigger:active {
+  background: var(--brand-press);
+}
+
+.writefab__trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--focus), 0 8px 20px rgba(20, 174, 92, 0.32);
+}
+
+/* 열려 있는 동안에는 초록을 빼서 "지금은 닫기"라는 걸 색으로도 알린다 */
+.writefab__trigger.is-open {
+  background: var(--ink-2);
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.24);
+}
+
+/* + 를 45도 돌리면 × 가 된다. 아이콘을 하나 더 두지 않아도 되고 열리는 게 눈에 남는다 */
+.writefab__trigger svg {
+  transition: transform 0.18s ease;
+}
+
+.writefab__trigger.is-open svg {
+  transform: rotate(45deg);
+}
+
+.writefab__menu {
+  width: 240px;
+  padding: 6px;
+  background: var(--white);
+  border: 1px solid var(--gray-150);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  animation: writefab-in 0.12s ease-out;
+}
+
+@keyframes writefab-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.writefab__item {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  text-align: left;
+}
+
+.writefab__item:hover {
+  background: var(--brand-softer);
+}
+
+.writefab__item:focus-visible {
+  outline: none;
+  background: var(--brand-soft);
+}
+
+.writefab__item-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.writefab__item-desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+/* 좁은 화면에서는 화면 가장자리에 더 붙이고 버튼도 살짝 줄인다 */
+@media (max-width: 520px) {
+  .writefab {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .writefab__trigger {
+    width: 52px;
+    height: 52px;
+  }
+
+  .writefab__menu {
+    width: 216px;
+  }
+}
