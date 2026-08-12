@@ -1,0 +1,62 @@
+/*
+ * 헤더(50)·알림 패널·모달(120)보다 위에 덮여야 한다. 로그인/로그아웃 중에는
+ * 열려 있던 메뉴나 창까지 전부 잠겨야 하기 때문이다.
+ */
+.blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 뒤 화면을 살짝 흐리게. 글자를 못 읽을 만큼 뭉개면 어디였는지 감이 사라진다 */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.55);
+  animation: blocker-in 0.16s ease-out;
+}
+
+@keyframes blocker-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 흐린 배경 위에서 글씨가 묻히지 않도록 가운데만 흰 판으로 띄운다 */
+.blocker__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 26px 34px 22px;
+  border-radius: var(--r-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-pop);
+}
+
+.blocker__mascot {
+  width: 92px;
+  height: auto;
+  /* viewBox 여백만큼 아래 글씨와 벌어져 보여서 당겨 붙인다 (Loading 과 같은 값) */
+  margin-bottom: -10px;
+}
+
+.blocker__text {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--gray-600);
+}
+
+/* 흐림을 지원하지 않는 브라우저에서는 불투명도를 올려 뒤가 비쳐 보이지 않게 한다 */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .blocker {
+    background: rgba(255, 255, 255, 0.88);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blocker {
+    animation: none;
+  }
+}

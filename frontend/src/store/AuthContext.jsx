@@ -7,6 +7,12 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => tokenStore.getUser())
   const [ready, setReady] = useState(false)
+  /*
+   * 로그인/로그아웃이 도는 동안 화면 전체를 덮어 알리기 위한 값. null | 'login' | 'logout'.
+   * 화면마다 따로 두지 않고 여기서 관리하는 이유: 로그아웃 입구가 헤더 메뉴·환경설정 두 군데라
+   * 어느 쪽으로 눌러도 같게 보여야 하고, 처리 중에는 어차피 앱 전체가 잠겨야 하기 때문이다.
+   */
+  const [pending, setPending] = useState(null)
 
   // 토큰 저장소가 바뀌면(재발급, 다른 탭 로그아웃) 화면 상태도 따라간다.
   useEffect(() => tokenStore.subscribe(() => setUser(tokenStore.getUser())), [])
@@ -53,10 +59,19 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = useCallback(async (email, password) => {
-    // 응답 바디에는 액세스 토큰만 온다. 리프레시 토큰은 Set-Cookie 로 브라우저가 직접 받는다.
-    const token = await authApi.login(email, password)
-    tokenStore.set({ accessToken: token.accessToken, user: token.user })
-    return token.user
+    setPending('login')
+    try {
+      // 응답 바디에는 액세스 토큰만 온다. 리프레시 토큰은 Set-Cookie 로 브라우저가 직접 받는다.
+      const token = await authApi.login(email, password)
+      tokenStore.set({ accessToken: token.accessToken, user: token.user })
+      return token.user
+    } finally {
+      /*
+       * 성공했을 때도 여기서 내린다. 부르는 쪽의 navigate 와 같은 처리 묶음에서 일어나므로
+       * 화면은 한 번에 바뀌고, 덮개가 걷힌 옛 화면이 잠깐 보이는 일은 없다.
+       */
+      setPending(null)
+    }
   }, [])
 
   /**
@@ -70,19 +85,22 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(async () => {
+    setPending('logout')
     try {
       // 리프레시 쿠키는 httpOnly 라 자바스크립트로 못 지운다.
       // 서버가 만료된 쿠키를 내려줘야 브라우저가 폐기하므로 이 호출은 건너뛰면 안 된다.
       await authApi.logout()
     } catch {
       // 네트워크가 끊겨 실패해도 최소한 로컬 상태는 비워 로그아웃된 것처럼 동작하게 한다.
+    } finally {
+      tokenStore.clear()
+      setPending(null)
     }
-    tokenStore.clear()
   }, [])
 
   const value = useMemo(
-    () => ({ user, isLoggedIn: !!user, ready, login, logout, updateUser }),
-    [user, ready, login, logout, updateUser],
+    () => ({ user, isLoggedIn: !!user, ready, pending, login, logout, updateUser }),
+    [user, ready, pending, login, logout, updateUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
